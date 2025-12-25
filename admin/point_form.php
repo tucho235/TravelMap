@@ -276,6 +276,26 @@ $point_types = Point::getTypes();
                         </div>
                     </div>
 
+                    <!-- Mapa Interactivo -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt me-1" viewBox="0 0 16 16">
+                                <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
+                                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                            </svg>
+                            Ubicación en el Mapa
+                        </label>
+                        <div id="pointMap" style="height: 400px; width: 100%; border: 1px solid #ddd; border-radius: 4px;"></div>
+                        <small class="form-text text-muted mt-1 d-block">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533z"/>
+                                <path d="M9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                            </svg>
+                            Haz clic en el mapa para seleccionar la ubicación o arrastra el marcador
+                        </small>
+                    </div>
+
                     <!-- Imagen -->
                     <div class="mb-3">
                         <label for="image" class="form-label">Imagen</label>
@@ -344,14 +364,31 @@ $point_types = Point::getTypes();
                 </ul>
 
                 <h6 class="mt-3">Obtener coordenadas</h6>
-                <p class="small">Puedes obtener coordenadas desde:</p>
+                <p class="small">Usa el mapa interactivo del formulario:</p>
                 <ul class="small">
-                    <li><a href="https://www.google.com/maps" target="_blank">Google Maps</a></li>
-                    <li>Clic derecho en el mapa → Copiar coordenadas</li>
+                    <li>🖱️ Haz clic en el mapa para colocar el marcador</li>
+                    <li>🔄 Arrastra el marcador para ajustar la posición</li>
+                    <li>✏️ Las coordenadas se actualizan automáticamente</li>
                 </ul>
+                <p class="small mt-2">También puedes usar <a href="https://www.google.com/maps" target="_blank">Google Maps</a> y copiar las coordenadas manualmente.</p>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/css/leaflet.css">
+
+<!-- Leaflet JS -->
+<script src="<?= ASSETS_URL ?>/vendor/leaflet/js/leaflet.js"></script>
+
+<script>
+// Pasar datos PHP a JavaScript
+const initialLat = <?= !empty($form_data['latitude']) ? $form_data['latitude'] : 'null' ?>;
+const initialLng = <?= !empty($form_data['longitude']) ? $form_data['longitude'] : 'null' ?>;
+</script>
+
+<!-- Script del mapa de puntos -->
+<script src="<?= ASSETS_URL ?>/js/point_map.js"></script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
