@@ -7,6 +7,7 @@
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../src/models/User.php';
 
 /**
  * Inicia sesión de forma segura
@@ -28,12 +29,10 @@ function login($username, $password) {
     start_session();
     
     try {
-        $db = getDB();
-        $stmt = $db->prepare('SELECT id, username, password_hash FROM users WHERE username = ?');
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
+        $userModel = new User();
+        $user = $userModel->verifyLogin($username, $password);
         
-        if ($user && password_verify($password, $user['password_hash'])) {
+        if ($user) {
             // Regenerar ID de sesión para prevenir session fixation
             session_regenerate_id(true);
             
@@ -47,7 +46,7 @@ function login($username, $password) {
         }
         
         return false;
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         error_log('Error en login: ' . $e->getMessage());
         return false;
     }
