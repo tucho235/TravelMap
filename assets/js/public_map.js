@@ -11,6 +11,7 @@
     let map;
     let tripsData = [];
     let routesLayers = {}; // { tripId: [layers] }
+    let flightRoutesLayers = {}; // { tripId: [flightLayers] } - Rutas en avión separadas
     let pointsClusters = {}; // { tripId: clusterGroup }
     let allPointsCluster; // Cluster global para todos los puntos
 
@@ -164,6 +165,7 @@
 
         // Inicializar arrays de layers
         routesLayers[tripId] = [];
+        flightRoutesLayers[tripId] = []; // Inicializar array para rutas en avión
         pointsClusters[tripId] = L.markerClusterGroup({
             showCoverageOnHover: false,
             maxClusterRadius: 60
@@ -221,8 +223,18 @@
             }
         });
 
-        layer.addTo(map);
-        routesLayers[trip.id].push(layer);
+        // Separar rutas en avión de las demás
+        const isFlightRoute = transportType === 'plane';
+        
+        if (isFlightRoute) {
+            // No agregar al mapa por defecto (toggle está desmarcado)
+            // Solo almacenar en el array
+            flightRoutesLayers[trip.id].push(layer);
+        } else {
+            // Rutas normales se agregan al mapa
+            layer.addTo(map);
+            routesLayers[trip.id].push(layer);
+        }
     }
 
     /**
@@ -363,9 +375,18 @@
      * Muestra un viaje en el mapa
      */
     function showTrip(tripId) {
-        // Mostrar rutas
-        if (routesLayers[tripId]) {
+        // Mostrar rutas (excepto avión si el toggle está desactivado)
+        if (routesLayers[tripId] && $('#toggleRoutes').is(':checked')) {
             routesLayers[tripId].forEach(function(layer) {
+                if (!map.hasLayer(layer)) {
+                    layer.addTo(map);
+                }
+            });
+        }
+
+        // Mostrar rutas en avión solo si el toggle está activado
+        if (flightRoutesLayers[tripId] && $('#toggleFlightRoutes').is(':checked')) {
+            flightRoutesLayers[tripId].forEach(function(layer) {
                 if (!map.hasLayer(layer)) {
                     layer.addTo(map);
                 }
@@ -389,6 +410,15 @@
         // Ocultar rutas
         if (routesLayers[tripId]) {
             routesLayers[tripId].forEach(function(layer) {
+                if (map.hasLayer(layer)) {
+                    map.removeLayer(layer);
+                }
+            });
+        }
+
+        // Ocultar rutas en avión
+        if (flightRoutesLayers[tripId]) {
+            flightRoutesLayers[tripId].forEach(function(layer) {
                 if (map.hasLayer(layer)) {
                     map.removeLayer(layer);
                 }
@@ -482,6 +512,23 @@
                 const tripId = parseInt($(this).val());
                 if (routesLayers[tripId]) {
                     routesLayers[tripId].forEach(function(layer) {
+                        if (show) {
+                            if (!map.hasLayer(layer)) layer.addTo(map);
+                        } else {
+                            if (map.hasLayer(layer)) map.removeLayer(layer);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Toggle de rutas en avión
+        $('#toggleFlightRoutes').on('change', function() {
+            const show = $(this).is(':checked');
+            $('.trip-checkbox:checked').each(function() {
+                const tripId = parseInt($(this).val());
+                if (flightRoutesLayers[tripId]) {
+                    flightRoutesLayers[tripId].forEach(function(layer) {
                         if (show) {
                             if (!map.hasLayer(layer)) layer.addTo(map);
                         } else {
