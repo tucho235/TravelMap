@@ -16,17 +16,29 @@ class Trip {
      * Obtener todos los viajes
      * 
      * @param string $order_by Campo por el que ordenar
+     * @param string|null $status Filtrar por estado: 'public', 'draft' o null para todos
      * @return array Lista de viajes
      */
-    public function getAll($order_by = 'created_at DESC') {
+    public function getAll($order_by = 'created_at DESC', $status = null) {
         try {
-            $stmt = $this->db->prepare("
-                SELECT 
-                    id, title, description, start_date, end_date, 
-                    color_hex, status, created_at, updated_at
-                FROM trips 
-                ORDER BY {$order_by}
-            ");
+            $sql = "SELECT 
+                        id, title, description, start_date, end_date, 
+                        color_hex, status, created_at, updated_at
+                    FROM trips";
+            
+            // Agregar filtro de status si se especifica
+            if ($status !== null) {
+                $sql .= " WHERE status = :status";
+            }
+            
+            $sql .= " ORDER BY {$order_by}";
+            
+            $stmt = $this->db->prepare($sql);
+            
+            if ($status !== null) {
+                $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+            }
+            
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (PDOException $e) {

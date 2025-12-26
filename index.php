@@ -147,10 +147,12 @@ require_once __DIR__ . '/config/config.php';
     <script src="<?= ASSETS_URL ?>/vendor/leaflet/js/leaflet.js"></script>
     <script src="<?= ASSETS_URL ?>/vendor/leaflet/plugins/leaflet.markercluster.js"></script>
     
-    <!-- Public Map JS -->
+    <!-- API URL Config -->
     <script>
-       html>
-<?php
-// Cargar configuración para las constantes
-require_once __DIR__ . '/config/config.php';
-?>
+        const API_URL = '<?= BASE_URL ?>/api/get_all_data.php';
+    </script>
+    
+    <!-- Public Map JS -->
+    <script src="<?= ASSETS_URL ?>/js/public_map.js"></script>
+</body>
+</html>
