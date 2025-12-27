@@ -18,7 +18,7 @@ require_once __DIR__ . '/config/config.php';
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/plugins/MarkerCluster.Default.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css">
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?a=1">
 </head>
 <body>
     <!-- Mapa a pantalla completa -->
