@@ -11,13 +11,19 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
 - **Sistema de Autenticación**: Login seguro con sesiones, protección de rutas y gestión de usuarios
 - **Mapas Interactivos**: Selección de coordenadas mediante click o arrastrar marcadores
 - **Gestión Multimedia**: Subida y validación de imágenes con almacenamiento organizado
+- **Panel de Configuración**: Sistema centralizado para personalizar opciones globales
+  - Tamaño máximo de carga de archivos
+  - Tiempo de vida de sesiones
+  - Zona horaria del sistema
+  - Opciones de clustering de puntos en el mapa
+  - Colores personalizados por tipo de transporte
 
 ### Visualizador Público
 - **Mapa a Pantalla Completa**: Interfaz responsive con todos los viajes y puntos publicados
-- **Clustering Inteligente**: Agrupación automática de puntos cercanos con Leaflet.markercluster
+- **Clustering Inteligente Configurable**: Agrupación automática de puntos cercanos con Leaflet.markercluster, con opciones personalizables desde el panel de administración
 - **Filtrado por Viaje**: Panel lateral con lista de viajes y filtros en tiempo real
 - **Popups Detallados**: Información completa de cada punto con imágenes y descripción
-- **Rutas Coloreadas**: Visualización de trayectos diferenciados por viaje y tipo de transporte
+- **Rutas Coloreadas Personalizables**: Visualización de trayectos diferenciados por viaje y tipo de transporte con colores configurables
 - **API REST**: Endpoint JSON público para obtener todos los datos geográficos
 
 ## 🚀 Especificaciones Técnicas
@@ -44,10 +50,11 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
 
 ### Arquitectura
 - Patrón MVC simplificado
-- Modelos: Trip, Point, Route con métodos CRUD
+- Modelos: Trip, Point, Route, Settings con métodos CRUD
 - Helpers: FileHelper para gestión de uploads
-- Configuración centralizada
+- Configuración centralizada y dinámica desde base de datos
 - Separación de código público/administrativo
+- Sistema de configuraciones persistentes en base de datos
 
 ## 📋 Requisitos del Sistema
 
@@ -112,11 +119,17 @@ Esto creará el usuario administrador:
 ## 📖 Guía de Uso
 
 1. Inicia sesión en el panel de administración con las credenciales creadas
-2. Crea un nuevo viaje definiendo título, descripción, fechas y color identificador
-3. Agrega rutas dibujándolas directamente en el mapa y especificando el tipo de transporte
-4. Añade puntos de interés con coordenadas (click en el mapa), descripción y fotos
-5. Marca el viaje como "publicado" para que aparezca en el mapa público
-6. Visualiza todos tus viajes en el mapa público con clustering y filtros
+2. (Opcional) Personaliza la configuración global desde el menú "Configuración"
+   - Ajusta el tamaño máximo de carga de imágenes
+   - Configura el tiempo de vida de sesiones
+   - Establece tu zona horaria
+   - Personaliza los colores de las rutas por tipo de transporte
+   - Configura el comportamiento del clustering de puntos
+3. Crea un nuevo viaje definiendo título, descripción, fechas y color identificador
+4. Agrega rutas dibujándolas directamente en el mapa y especificando el tipo de transporte
+5. Añade puntos de interés con coordenadas (click en el mapa), descripción y fotos
+6. Marca el viaje como "publicado" para que aparezca en el mapa público
+7. Visualiza todos tus viajes en el mapa público con clustering y filtros
 
 ## 🔐 Seguridad
 

@@ -13,15 +13,91 @@
     let drawControl;
     let pointMarkers = L.layerGroup();
     let routesData = [];
+    let appConfig = null; // Configuración cargada desde el servidor
 
-    // Colores por tipo de transporte
-    const transportColors = {
+    // Colores por tipo de transporte (valores por defecto)
+    let transportColors = {
         'plane': '#FF4444',
         'car': '#4444FF',
         'train': '#FF8800',
         'ship': '#00AAAA',
         'walk': '#44FF44'
     };
+
+    /**
+     * Carga la configuración desde el servidor
+     */
+    function loadConfig() {
+        return $.ajax({
+            url: BASE_URL + '/api/get_config.php',
+            method: 'GET',
+            dataType: 'json'
+        }).done(function(response) {
+            console.log('Respuesta de configuración (trip_map):', response);
+            
+            if (response.success && response.data) {
+                appConfig = response.data;
+                
+                // Actualizar colores de transporte con la configuración del servidor
+                if (appConfig.transportColors) {
+                    console.log('Colores recibidos (trip_map):', appConfig.transportColors);
+                    
+                    transportColors = {
+                        'plane': appConfig.transportColors.plane || transportColors.plane,
+                        'ship': appConfig.transportColors.ship || transportColors.ship,
+                        'car': appConfig.transportColors.car || transportColors.car,
+                        'train': appConfig.transportColors.train || transportColors.train,
+                        'walk': appConfig.transportColors.walk || transportColors.walk
+                    };
+                    
+                    console.log('transportColors actualizado (trip_map):', transportColors);
+                }
+                
+                console.log('Configuración cargada en trip map:', appConfig);
+            }
+        }).fail(function(xhr, status, error) {
+            console.error('Error al cargar configuración (trip_map):', error, xhr.responseText);
+            console.warn('No se pudo cargar la configuración, usando valores por defecto');
+        });
+    }
+
+    /**
+     * Renderiza la leyenda de transporte con los colores configurados
+     */
+    function renderLegend() {
+        const legendContainer = $('#transportLegend');
+        
+        if (legendContainer.length === 0) {
+            console.warn('No se encontró el contenedor #transportLegend');
+            return;
+        }
+        
+        legendContainer.empty();
+        
+        // Orden de los tipos de transporte
+        const transportOrder = [
+            { type: 'plane', icon: '✈️', label: 'Avión' },
+            { type: 'car', icon: '🚗', label: 'Auto' },
+            { type: 'train', icon: '🚂', label: 'Tren' },
+            { type: 'ship', icon: '🚢', label: 'Barco' },
+            { type: 'walk', icon: '🚶', label: 'Caminata' }
+        ];
+        
+        transportOrder.forEach(function(item) {
+            const color = transportColors[item.type];
+            
+            const legendItem = $(`
+                <div class="d-flex align-items-center mb-2">
+                    <div style="width: 30px; height: 4px; background-color: ${color}; margin-right: 10px;"></div>
+                    <small>${item.icon} ${item.label}</small>
+                </div>
+            `);
+            
+            legendContainer.append(legendItem);
+        });
+        
+        console.log('Leyenda de trip editor renderizada');
+    }
 
     /**
      * Inicializa el mapa
@@ -60,12 +136,15 @@
      * Inicializa los controles de dibujo
      */
     function initDrawControls() {
+        // Usar el color de 'car' de la configuración como color por defecto para dibujar
+        const defaultDrawColor = transportColors['car'] || '#4444FF';
+        
         drawControl = new L.Control.Draw({
             position: 'topright',
             draw: {
                 polyline: {
                     shapeOptions: {
-                        color: '#4444FF',
+                        color: defaultDrawColor,
                         weight: 4,
                         opacity: 0.8
                     },
@@ -209,9 +288,14 @@
 
         existingRoutes.forEach(function (route) {
             const geojson = route.geojson;
+            const transportType = route.transport_type || 'car';
+            
+            // Priorizar color de configuración sobre color guardado en BD
+            const color = transportColors[transportType] || route.color;
+            
             const layer = L.geoJSON(geojson, {
                 style: {
-                    color: route.color,
+                    color: color,
                     weight: 4,
                     opacity: 0.8
                 }
@@ -219,8 +303,8 @@
 
             // Agregar metadata
             layer.eachLayer(function (l) {
-                l.transportType = route.transport_type;
-                l.color = route.color;
+                l.transportType = transportType;
+                l.color = color;
                 drawnItems.addLayer(l);
             });
         });
@@ -431,9 +515,23 @@
      * Inicialización cuando el DOM está listo
      */
     $(document).ready(function () {
-        // Inicializar mapa
-        initMap();
+        // Cargar configuración primero, luego inicializar el mapa
+        loadConfig().always(function() {
+            // Inicializar mapa con la configuración cargada
+            initMap();
+            
+            // Renderizar leyenda con colores configurados
+            renderLegend();
 
+            // Configurar event handlers
+            setupEventHandlers();
+        });
+    });
+
+    /**
+     * Configuración de event handlers
+     */
+    function setupEventHandlers() {
         // Evento para limpiar todas las rutas
         $('#clearAllRoutes').on('click', clearAllRoutes);
 
@@ -462,6 +560,6 @@
         });
 
         console.log('Trip Map Editor inicializado');
-    });
+    }
 
 })();

@@ -5,9 +5,6 @@
  * Define constantes para rutas y URLs utilizadas en toda la aplicación
  */
 
-// Zona horaria
-date_default_timezone_set('America/Argentina/Buenos_Aires');
-
 // Configuración de errores (en producción cambiar a 0)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -34,10 +31,42 @@ define('SRC_PATH', ROOT_PATH . '/src');
 define('ASSETS_URL', BASE_URL . '/assets');
 define('UPLOADS_URL', BASE_URL . '/uploads');
 
+// Valores por defecto para configuraciones
+$defaultTimezone = 'America/Argentina/Buenos_Aires';
+$defaultMaxUploadSize = 8 * 1024 * 1024; // 8MB
+$defaultSessionLifetime = 3600 * 24; // 24 horas
+
+// Intentar cargar configuraciones dinámicas desde la base de datos
+try {
+    require_once CONFIG_PATH . '/db.php';
+    require_once SRC_PATH . '/models/Settings.php';
+    
+    // Obtener conexión a la base de datos
+    $conn = getDB();
+    
+    // Inicializar el modelo de configuraciones
+    $settingsModel = new Settings($conn);
+    
+    // Obtener configuraciones de la base de datos
+    $timezone = $settingsModel->get('timezone', $defaultTimezone);
+    $maxUploadSize = $settingsModel->get('max_upload_size', $defaultMaxUploadSize);
+    $sessionLifetime = $settingsModel->get('session_lifetime', $defaultSessionLifetime);
+} catch (Exception $e) {
+    // Si hay algún error al cargar configuraciones, usar valores por defecto
+    error_log('Error al cargar configuraciones: ' . $e->getMessage());
+    $timezone = $defaultTimezone;
+    $maxUploadSize = $defaultMaxUploadSize;
+    $sessionLifetime = $defaultSessionLifetime;
+}
+
+// Aplicar configuraciones
+date_default_timezone_set($timezone);
+
 // Configuración de archivos
-define('MAX_UPLOAD_SIZE', 8 * 1024 * 1024); // 5MB
+define('MAX_UPLOAD_SIZE', $maxUploadSize);
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/jpg']);
 define('ALLOWED_IMAGE_EXTENSIONS', ['jpg', 'jpeg', 'png']);
 
 // Configuración de sesión
-define('SESSION_LIFETIME', 3600 * 24); // 24 horas
+define('SESSION_LIFETIME', $sessionLifetime);
+

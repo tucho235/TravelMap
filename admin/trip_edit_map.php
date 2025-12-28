@@ -232,13 +232,8 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="card-header bg-light">
                 <h6 class="mb-0">Tipos de Transporte</h6>
             </div>
-            <div class="card-body">
-                <?php foreach ($transport_types as $type => $label): ?>
-                    <div class="d-flex align-items-center mb-2">
-                        <div style="width: 30px; height: 4px; background-color: <?= Route::getColorByTransport($type) ?>; margin-right: 10px;"></div>
-                        <small><?= Route::getIconByTransport($type) ?> <?= htmlspecialchars($label) ?></small>
-                    </div>
-                <?php endforeach; ?>
+            <div class="card-body" id="transportLegend">
+                <!-- La leyenda se renderiza dinámicamente con JavaScript -->
             </div>
         </div>
 
@@ -274,6 +269,9 @@ require_once __DIR__ . '/../includes/header.php';
 <script src="<?= ASSETS_URL ?>/vendor/leaflet/plugins/leaflet.draw.js"></script>
 
 <script>
+// Configuración base
+const BASE_URL = '<?= BASE_URL ?>';
+
 // Datos del viaje
 const tripId = <?= $trip_id ?>;
 const tripColor = '<?= htmlspecialchars($trip['color_hex']) ?>';

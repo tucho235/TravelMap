@@ -148,25 +148,8 @@ require_once __DIR__ . '/config/config.php';
     <div class="legend-card card shadow-sm">
         <div class="card-body p-2">
             <h6 class="small mb-2 fw-bold">Leyenda de Transporte</h6>
-            <div class="legend-item">
-                <div class="legend-line" style="background-color: #FF4444;"></div>
-                <small>✈️ Avión</small>
-            </div>
-            <div class="legend-item">
-                <div class="legend-line" style="background-color: #4444FF;"></div>
-                <small>🚗 Auto</small>
-            </div>
-            <div class="legend-item">
-                <div class="legend-line" style="background-color: #FF8800;"></div>
-                <small>🚂 Tren</small>
-            </div>
-            <div class="legend-item">
-                <div class="legend-line" style="background-color: #00AAAA;"></div>
-                <small>🚢 Barco</small>
-            </div>
-            <div class="legend-item">
-                <div class="legend-line" style="background-color: #44FF44;"></div>
-                <small>🚶 Caminata</small>
+            <div id="legendItems">
+                <!-- Se llenará dinámicamente con JavaScript -->
             </div>
         </div>
     </div>
@@ -183,6 +166,7 @@ require_once __DIR__ . '/config/config.php';
     
     <!-- API URL Config -->
     <script>
+        const BASE_URL = '<?= BASE_URL ?>';
         const API_URL = '<?= BASE_URL ?>/api/get_all_data.php';
     </script>
     

@@ -14,9 +14,10 @@
     let flightRoutesLayers = {}; // { tripId: [flightLayers] } - Rutas en avión separadas
     let pointsClusters = {}; // { tripId: clusterGroup }
     let allPointsCluster; // Cluster global para todos los puntos
+    let appConfig = null; // Configuración cargada desde el servidor
 
-    // Colores y configuraciones por tipo de transporte
-    const transportConfig = {
+    // Colores y configuraciones por tipo de transporte (valores por defecto)
+    let transportConfig = {
         'plane': { color: '#FF4444', icon: '✈️', dashArray: '10, 5' },
         'ship': { color: '#00AAAA', icon: '🚢', dashArray: '10, 5' },
         'car': { color: '#4444FF', icon: '🚗', dashArray: null },
@@ -32,9 +33,50 @@
     };
 
     /**
+     * Carga la configuración desde el servidor
+     */
+    function loadConfig() {
+        return $.ajax({
+            url: BASE_URL + '/api/get_config.php',
+            method: 'GET',
+            dataType: 'json'
+        }).done(function(response) {
+            console.log('Respuesta de configuración:', response);
+            
+            if (response.success && response.data) {
+                appConfig = response.data;
+                
+                // Actualizar colores de transporte con la configuración del servidor
+                if (appConfig.transportColors) {
+                    console.log('Colores recibidos:', appConfig.transportColors);
+                    
+                    transportConfig.plane.color = appConfig.transportColors.plane || transportConfig.plane.color;
+                    transportConfig.ship.color = appConfig.transportColors.ship || transportConfig.ship.color;
+                    transportConfig.car.color = appConfig.transportColors.car || transportConfig.car.color;
+                    transportConfig.train.color = appConfig.transportColors.train || transportConfig.train.color;
+                    transportConfig.walk.color = appConfig.transportColors.walk || transportConfig.walk.color;
+                    
+                    console.log('transportConfig actualizado:', transportConfig);
+                }
+                
+                console.log('Configuración cargada:', appConfig);
+            }
+        }).fail(function(xhr, status, error) {
+            console.error('Error al cargar configuración:', error, xhr.responseText);
+            console.warn('No se pudo cargar la configuración, usando valores por defecto');
+        });
+    }
+
+    /**
      * Inicializa el mapa
      */
     function initMap() {
+        // Obtener configuración del mapa
+        const mapConfig = appConfig?.map || {};
+        const clusterEnabled = mapConfig.clusterEnabled !== false; // Por defecto true
+        const maxClusterRadius = mapConfig.maxClusterRadius || 30;
+        const disableClusteringAtZoom = mapConfig.disableClusteringAtZoom || 15;
+        
         // Crear mapa centrado en vista global
         map = L.map('map', {
             center: [20, 0],
@@ -50,29 +92,76 @@
             maxZoom: 19
         }).addTo(map);
 
-        // Cluster global para todos los puntos
-        allPointsCluster = L.markerClusterGroup({
-            showCoverageOnHover: false,
-            zoomToBoundsOnClick: true,
-            spiderfyOnMaxZoom: true,
-            maxClusterRadius: 30,
-            disableClusteringAtZoom: 15,
-            removeOutsideVisibleBounds: true,
-            chunkedLoading: true,
-            chunkInterval: 200,
-            iconCreateFunction: function(cluster) {
-                const count = cluster.getChildCount();
-                return L.divIcon({
-                    html: `<div class="marker-cluster-custom"><span>${count}</span></div>`,
-                    className: 'custom-cluster-icon',
-                    iconSize: L.point(40, 40)
-                });
+        // Cluster global para todos los puntos (solo si está habilitado)
+        if (clusterEnabled) {
+            allPointsCluster = L.markerClusterGroup({
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true,
+                spiderfyOnMaxZoom: true,
+                maxClusterRadius: maxClusterRadius,
+                disableClusteringAtZoom: disableClusteringAtZoom,
+                removeOutsideVisibleBounds: true,
+                chunkedLoading: true,
+                chunkInterval: 200,
+                iconCreateFunction: function(cluster) {
+                    const count = cluster.getChildCount();
+                    return L.divIcon({
+                        html: `<div class="marker-cluster-custom"><span>${count}</span></div>`,
+                        className: 'custom-cluster-icon',
+                        iconSize: L.point(40, 40)
+                    });
+                }
+            });
+
+            map.addLayer(allPointsCluster);
+        } else {
+            // Si el clustering está deshabilitado, usar un LayerGroup normal
+            allPointsCluster = L.layerGroup();
+            map.addLayer(allPointsCluster);
+        }
+
+        console.log('Mapa público inicializado con clustering:', clusterEnabled);
+    }
+
+    /**
+     * Renderiza la leyenda de transporte con los colores configurados
+     */
+    function renderLegend() {
+        console.log('Renderizando leyenda...');
+        const legendItems = $('#legendItems');
+        
+        if (legendItems.length === 0) {
+            console.error('No se encontró el elemento #legendItems');
+            return;
+        }
+        
+        legendItems.empty();
+        
+        // Definir el orden y labels de los tipos de transporte
+        const transportOrder = [
+            { type: 'plane', icon: '✈️', label: 'Avión' },
+            { type: 'car', icon: '🚗', label: 'Auto' },
+            { type: 'train', icon: '🚂', label: 'Tren' },
+            { type: 'ship', icon: '🚢', label: 'Barco' },
+            { type: 'walk', icon: '🚶', label: 'Caminata' }
+        ];
+        
+        transportOrder.forEach(function(item) {
+            const config = transportConfig[item.type];
+            console.log(`Leyenda ${item.type}:`, config);
+            
+            if (config) {
+                const legendItem = $(`
+                    <div class="legend-item">
+                        <div class="legend-line" style="background-color: ${config.color};"></div>
+                        <small>${item.icon} ${item.label}</small>
+                    </div>
+                `);
+                legendItems.append(legendItem);
             }
         });
-
-        map.addLayer(allPointsCluster);
-
-        console.log('Mapa público inicializado');
+        
+        console.log('Leyenda renderizada con colores configurados');
     }
 
     /**
@@ -206,8 +295,9 @@
         const transportType = route.transport_type || 'car';
         const config = transportConfig[transportType] || transportConfig['car'];
         
+        // Priorizar colores de configuración sobre los guardados en BD
         // Si el viaje está planificado, usar color gris independientemente del tipo de transporte
-        const color = trip.status === 'planned' ? '#999999' : (route.color || config.color);
+        const color = trip.status === 'planned' ? '#999999' : (config.color || route.color);
         const dashArray = config.dashArray;
 
         const layer = L.geoJSON(route.geojson, {
@@ -586,15 +676,9 @@
     }
 
     /**
-     * Inicialización cuando el DOM está listo
+     * Configuración de event handlers
      */
-    $(document).ready(function () {
-        // Inicializar mapa
-        initMap();
-
-        // Cargar datos
-        loadData();
-
+    function setupEventHandlers() {
         // Búsqueda de lugares
         $('#publicSearchBtn').on('click', function() {
             const query = $('#publicPlaceSearch').val();
@@ -678,6 +762,17 @@
         
         // Inicializar lightbox
         initLightbox();
+    }
+
+    // Inicialización principal: cargar configuración primero, luego inicializar el mapa
+    $(document).ready(function() {
+        loadConfig().always(function() {
+            // Inicializar el mapa después de cargar la configuración
+            initMap();
+            renderLegend(); // Renderizar leyenda con colores configurados
+            loadData();
+            setupEventHandlers();
+        });
     });
 
     /**
