@@ -24,7 +24,7 @@ require_once __DIR__ . '/config/config.php';
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/plugins/MarkerCluster.Default.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?a=1">
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?a=3">
     
     <?php 
     // Insertar código de analytics u otros scripts personalizados
@@ -39,10 +39,10 @@ require_once __DIR__ . '/config/config.php';
 
     <!-- Botón para abrir el panel lateral -->
     <button class="btn btn-primary floating-menu-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#tripsPanel" aria-controls="tripsPanel">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
         </svg>
-        <span class="ms-2">Mis Viajes</span>
+        <span>Mis Viajes</span>
     </button>
 
     <!-- Panel lateral con filtros (Offcanvas) -->
@@ -185,7 +185,7 @@ require_once __DIR__ . '/config/config.php';
     </script>
     
     <!-- Public Map JS -->
-    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=2"></script>
+    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=3"></script>
     
     <!-- Lightbox para imágenes -->
     <div id="imageLightbox" class="lightbox" style="display: none;">
