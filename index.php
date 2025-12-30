@@ -24,7 +24,7 @@ require_once __DIR__ . '/config/config.php';
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/plugins/MarkerCluster.Default.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?a=3">
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?v=8">
     
     <?php 
     // Insertar código de analytics u otros scripts personalizados
@@ -185,7 +185,7 @@ require_once __DIR__ . '/config/config.php';
     </script>
     
     <!-- Public Map JS -->
-    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=3"></script>
+    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=6"></script>
     
     <!-- Lightbox para imágenes -->
     <div id="imageLightbox" class="lightbox" style="display: none;">
