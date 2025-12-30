@@ -29,6 +29,7 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
     - Meta descripción para optimización en buscadores
     - Favicon personalizable
     - Integración de Google Analytics u otros scripts de análisis
+-- **Importador Flight Radar**: FlightRadar CSV import por Xyborg
 
 ### Visualizador Público
 - **Mapa a Pantalla Completa**: Interfaz responsive con todos los viajes y puntos publicados
