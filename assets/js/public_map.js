@@ -15,6 +15,147 @@
     let pointsClusters = {}; // { tripId: clusterGroup }
     let allPointsCluster; // Cluster global para todos los puntos
     let appConfig = null; // Configuración cargada desde el servidor
+    
+    // LocalStorage key for user preferences
+    const STORAGE_KEY = 'travelmap_preferences';
+
+    /**
+     * Load user preferences from localStorage
+     */
+    function loadPreferences() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.warn('Error loading preferences from localStorage:', e);
+        }
+        // Default preferences
+        return {
+            showRoutes: true,
+            showPoints: true,
+            showFlightRoutes: false,
+            selectedTrips: null // null means all selected (first load)
+        };
+    }
+
+    /**
+     * Save user preferences to localStorage
+     */
+    function savePreferences() {
+        try {
+            const prefs = {
+                showRoutes: $('#toggleRoutes').is(':checked'),
+                showPoints: $('#togglePoints').is(':checked'),
+                showFlightRoutes: $('#toggleFlightRoutes').is(':checked'),
+                selectedTrips: getSelectedTripIds()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+            console.log('Preferences saved:', prefs);
+        } catch (e) {
+            console.warn('Error saving preferences to localStorage:', e);
+        }
+    }
+
+    /**
+     * Get array of selected trip IDs
+     */
+    function getSelectedTripIds() {
+        const selected = [];
+        $('.trip-checkbox:checked').each(function() {
+            selected.push(parseInt($(this).val()));
+        });
+        return selected;
+    }
+
+    /**
+     * Apply loaded preferences to controls
+     */
+    function applyPreferencesToControls() {
+        const prefs = loadPreferences();
+        
+        // Apply toggle states
+        $('#toggleRoutes').prop('checked', prefs.showRoutes);
+        $('#togglePoints').prop('checked', prefs.showPoints);
+        $('#toggleFlightRoutes').prop('checked', prefs.showFlightRoutes);
+        
+        console.log('Preferences applied to controls:', prefs);
+    }
+
+    /**
+     * Apply trip selection preferences after trips are loaded
+     */
+    function applyTripSelectionPreferences() {
+        const prefs = loadPreferences();
+        
+        // If selectedTrips is null (first visit) or empty array, leave all checked (default)
+        if (prefs.selectedTrips === null) {
+            return;
+        }
+        
+        // Apply saved trip selections
+        $('.trip-checkbox').each(function() {
+            const tripId = parseInt($(this).val());
+            const shouldBeChecked = prefs.selectedTrips.includes(tripId);
+            $(this).prop('checked', shouldBeChecked);
+        });
+        
+        // Update map visibility based on selections
+        $('.trip-checkbox').each(function() {
+            const tripId = parseInt($(this).val());
+            const isChecked = $(this).is(':checked');
+            if (isChecked) {
+                showTrip(tripId);
+            } else {
+                hideTrip(tripId);
+            }
+        });
+        
+        console.log('Trip selection preferences applied');
+    }
+
+    /**
+     * Apply initial toggle states after trips are rendered
+     * This ensures flight routes are shown if the user has that preference saved
+     */
+    function applyInitialToggleStates() {
+        const prefs = loadPreferences();
+        
+        // Handle flight routes visibility based on saved preference
+        if (prefs.showFlightRoutes) {
+            $('.trip-checkbox:checked').each(function() {
+                const tripId = parseInt($(this).val());
+                if (flightRoutesLayers[tripId]) {
+                    flightRoutesLayers[tripId].forEach(function(layer) {
+                        if (!map.hasLayer(layer)) {
+                            layer.addTo(map);
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Handle points visibility based on saved preference
+        if (!prefs.showPoints) {
+            if (map.hasLayer(allPointsCluster)) {
+                map.removeLayer(allPointsCluster);
+            }
+        }
+        
+        // Handle routes visibility based on saved preference
+        if (!prefs.showRoutes) {
+            Object.values(routesLayers).forEach(function(layers) {
+                layers.forEach(function(layer) {
+                    if (map.hasLayer(layer)) {
+                        map.removeLayer(layer);
+                    }
+                });
+            });
+        }
+        
+        console.log('Initial toggle states applied:', prefs);
+    }
 
     // Colores y configuraciones por tipo de transporte (valores por defecto)
     let transportConfig = {
@@ -177,8 +318,11 @@
                     tripsData = response.data.trips;
                     console.log('Datos cargados:', tripsData.length, 'viajes');
                     
-                    renderTripsPanel();
+                    // Order is important: render trips first (populates layers), 
+                    // then panel (applies saved selections)
                     renderAllTrips();
+                    renderTripsPanel();
+                    applyInitialToggleStates();
                     fitMapToContent();
                 } else {
                     showError('No se encontraron viajes para mostrar');
@@ -238,7 +382,13 @@
         });
 
         // Eventos de los checkboxes
-        $('.trip-checkbox').on('change', onTripToggle);
+        $('.trip-checkbox').on('change', function() {
+            onTripToggle.call(this);
+            savePreferences(); // Save after each trip toggle
+        });
+        
+        // Apply saved trip selections after rendering
+        applyTripSelectionPreferences();
     }
 
     /**
@@ -761,6 +911,7 @@
                     });
                 }
             });
+            savePreferences();
         });
 
         // Toggle de rutas en avión
@@ -778,6 +929,7 @@
                     });
                 }
             });
+            savePreferences();
         });
 
         // Toggle de puntos
@@ -792,16 +944,19 @@
                     map.removeLayer(allPointsCluster);
                 }
             }
+            savePreferences();
         });
 
         // Seleccionar todos los viajes
         $('#selectAllTrips').on('click', function() {
             $('.trip-checkbox').prop('checked', true).trigger('change');
+            savePreferences();
         });
 
         // Deseleccionar todos los viajes
         $('#deselectAllTrips').on('click', function() {
             $('.trip-checkbox').prop('checked', false).trigger('change');
+            savePreferences();
         });
 
         console.log('Public Map inicializado completamente');
@@ -812,6 +967,9 @@
 
     // Inicialización principal: cargar configuración primero, luego inicializar el mapa
     $(document).ready(function() {
+        // Apply saved preferences to controls before anything else
+        applyPreferencesToControls();
+        
         loadConfig().always(function() {
             // Inicializar el mapa después de cargar la configuración
             initMap();
