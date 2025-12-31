@@ -17,7 +17,14 @@
          */
         init: function(callback) {
             this.detectLanguage();
-            this.loadTranslations(callback);
+            
+            // Use PHP_TRANSLATIONS if available (instant, no async loading needed)
+            if (typeof PHP_TRANSLATIONS !== 'undefined' && PHP_TRANSLATIONS) {
+                this.translations = PHP_TRANSLATIONS;
+                if (callback) callback();
+            } else {
+                this.loadTranslations(callback);
+            }
         },
         
         /**

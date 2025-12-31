@@ -3,7 +3,8 @@
     "name": "TravelMap",
     "title": "Travel Map - Mis Viajes por el Mundo",
     "description": "Explora mis viajes por el mundo con mapas interactivos, rutas y fotografías",
-    "admin_panel": "Panel de Administración"
+    "admin_panel": "Panel de Administración",
+    "footer_created_by": "Creado por"
   },
   "navigation": {
     "home": "Inicio",
@@ -25,10 +26,30 @@
     "search_placeholder": "Ingresa una ciudad, país o lugar...",
     "search_button": "Buscar",
     "loading": "Cargando...",
+    "loading_trips": "Cargando viajes...",
     "no_results": "No se encontraron resultados",
     "filter_trips": "Filtrar Viajes",
     "select_all": "Seleccionar Todos",
-    "deselect_all": "Deseleccionar Todos"
+    "deselect_all": "Deseleccionar Todos",
+    "trips": "Viajes",
+    "filter_all": "Todos",
+    "filter_all_title": "Mostrar todos",
+    "filter_past": "Pasados",
+    "filter_past_title": "Solo viajes pasados",
+    "filter_none": "Ninguno",
+    "filter_none_title": "Ocultar todos",
+    "transport_legend": "Leyenda de Transporte",
+    "no_date": "Sin fecha",
+    "no_dates": "Sin fechas",
+    "no_trips_available": "No hay viajes disponibles",
+    "no_trips_found": "No se encontraron viajes para mostrar",
+    "upcoming_trips": "Próximos viajes",
+    "upcoming": "Próximo",
+    "transport": "Transporte",
+    "searching": "Buscando...",
+    "search_min_chars": "Por favor, ingresa al menos 3 caracteres para buscar",
+    "search_error": "Error al buscar. Intenta nuevamente.",
+    "click_fullsize": "Click para ver en tamaño completo"
   },
   "trips": {
     "title": "Viajes",
@@ -61,9 +82,9 @@
     "type": "Tipo",
     "types": {
       "stay": "Alojamiento",
-      "visit": "Visita",
+      "visit": "Punto de Visita",
       "activity": "Actividad",
-      "food": "Comida",
+      "food": "Restaurante",
       "transport": "Transporte",
       "other": "Otro"
     },
@@ -91,7 +112,8 @@
       "car": "Auto",
       "train": "Tren",
       "walk": "Caminata"
-    }
+    },
+    "next_trip": "Próximo viaje"
   },
   "users": {
     "title": "Usuarios",

@@ -117,20 +117,20 @@ require_once __DIR__ . '/config/config.php';
             <!-- Lista de viajes -->
             <div>
                 <div class="trips-header">
-                    <h6 class="text-muted text-uppercase small mb-0">Viajes</h6>
+                    <h6 class="text-muted text-uppercase small mb-0"><?= __('map.trips') ?></h6>
                     <div class="trips-filters">
-                        <button type="button" class="filter-btn active" id="filterAll" title="Mostrar todos">Todos</button>
-                        <button type="button" class="filter-btn" id="filterPast" title="Solo viajes pasados">Pasados</button>
-                        <button type="button" class="filter-btn" id="filterNone" title="Ocultar todos">Ninguno</button>
+                        <button type="button" class="filter-btn active" id="filterAll" title="<?= __('map.filter_all_title') ?>"><?= __('map.filter_all') ?></button>
+                        <button type="button" class="filter-btn" id="filterPast" title="<?= __('map.filter_past_title') ?>"><?= __('map.filter_past') ?></button>
+                        <button type="button" class="filter-btn" id="filterNone" title="<?= __('map.filter_none_title') ?>"><?= __('map.filter_none') ?></button>
                     </div>
                 </div>
                 <div id="tripsList">
                     <!-- Se llenará dinámicamente con JavaScript -->
                     <div class="text-center text-muted py-4">
                         <div class="spinner-border spinner-border-sm" role="status">
-                            <span class="visually-hidden">Cargando...</span>
+                            <span class="visually-hidden"><?= __('map.loading') ?></span>
                         </div>
-                        <p class="small mt-2">Cargando viajes...</p>
+                        <p class="small mt-2"><?= __('map.loading_trips') ?></p>
                     </div>
                 </div>
             </div>
@@ -164,7 +164,7 @@ require_once __DIR__ . '/config/config.php';
     <!-- Leyenda flotante -->
     <div class="legend-card card shadow-sm">
         <div class="card-body p-2">
-            <h6 class="small mb-2 fw-bold">Leyenda de Transporte</h6>
+            <h6 class="small mb-2 fw-bold"><?= __('map.transport_legend') ?></h6>
             <div id="legendItems">
                 <!-- Se llenará dinámicamente con JavaScript -->
             </div>
@@ -244,7 +244,7 @@ require_once __DIR__ . '/config/config.php';
     </script>
     
     <!-- Public Map JS -->
-    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=14"></script>
+    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=15"></script>
     
     <!-- Lightbox para imágenes -->
     <div id="imageLightbox" class="lightbox" style="display: none;">
@@ -255,8 +255,8 @@ require_once __DIR__ . '/config/config.php';
     
     <!-- Footer -->
     <footer class="map-footer">
-        <span>TravelMap - Creado por Fabio Baccaglioni</span>
-        <a href="https://github.com/fabiomb/TravelMap" target="_blank" rel="noopener noreferrer" class="github-link" title="Ver en GitHub">
+        <span>TravelMap - <?= __('app.footer_created_by') ?> Fabio Baccaglioni</span>
+        <a href="https://github.com/fabiomb/TravelMap" target="_blank" rel="noopener noreferrer" class="github-link" title="GitHub">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
             </svg>

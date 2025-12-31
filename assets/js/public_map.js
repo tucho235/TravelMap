@@ -195,23 +195,27 @@
     };
 
     // Iconos por tipo de punto
-    const pointTypeConfig = {
-        'stay': { 
-            emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4V20C3 20.9428 3 21.4142 3.29289 21.7071C3.58579 22 4.05719 22 5 22H19C19.9428 22 20.4142 22 20.7071 21.7071C21 21.4142 21 20.9428 21 20V4"/><path d="M10.5 8V9.5M10.5 11V9.5M13.5 8V9.5M13.5 11V9.5M10.5 9.5H13.5"/><path d="M14 22L14 17.9999C14 16.8954 13.1046 15.9999 12 15.9999C10.8954 15.9999 10 16.8954 10 17.9999V22"/><path d="M2 4H8C8.6399 2.82727 10.1897 2 12 2C13.8103 2 15.3601 2.82727 16 4H22"/><path d="M6 8H7M6 12H7M6 16H7"/><path d="M17 8H18M17 12H18M17 16H18"/></svg>', 
-            label: 'Alojamiento', 
-            color: '#FF6B6B' 
-        },
-        'visit': { 
-            emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.31253 4.7812L7.6885 4.36517V4.36517L8.31253 4.7812ZM7.5 6V6.75C7.75076 6.75 7.98494 6.62467 8.12404 6.41603L7.5 6ZM2.17224 8.83886L1.45453 8.62115L2.17224 8.83886ZM4.83886 6.17224L4.62115 5.45453H4.62115L4.83886 6.17224ZM3.46243 20.092L3.93822 19.5123L3.93822 19.5123L3.46243 20.092ZM2.90796 19.5376L3.48772 19.0618L3.48772 19.0618L2.90796 19.5376ZM21.092 19.5376L20.5123 19.0618L20.5123 19.0618L21.092 19.5376ZM20.5376 20.092L20.0618 19.5123L20.0618 19.5123L20.5376 20.092ZM14.0195 3.89791C14.3847 4.09336 14.8392 3.95575 15.0346 3.59054C15.2301 3.22534 15.0924 2.77084 14.7272 2.57539L14.0195 3.89791ZM22.5455 8.62115C22.4252 8.22477 22.0064 8.00092 21.61 8.12116C21.2137 8.2414 20.9898 8.6602 21.1101 9.05658L22.5455 8.62115ZM21.25 11.5V13.5H22.75V11.5H21.25ZM14.5 20.25H9.5V21.75H14.5V20.25ZM2.75 13.5V11.5H1.25V13.5H2.75ZM12.3593 2.25H11.6407V3.75H12.3593V2.25ZM7.6885 4.36517L6.87596 5.58397L8.12404 6.41603L8.93657 5.19722L7.6885 4.36517ZM11.6407 2.25C11.1305 2.25 10.6969 2.24925 10.3369 2.28282C9.96142 2.31783 9.61234 2.39366 9.27276 2.57539L9.98055 3.89791C10.0831 3.84299 10.2171 3.80049 10.4762 3.77634C10.7506 3.75075 11.1031 3.75 11.6407 3.75V2.25ZM8.93657 5.19722C9.23482 4.74985 9.43093 4.45704 9.60448 4.24286C9.76825 4.04074 9.87794 3.95282 9.98055 3.89791L9.27276 2.57539C8.93318 2.75713 8.67645 3.00553 8.43904 3.29853C8.2114 3.57947 7.97154 3.94062 7.6885 4.36517L8.93657 5.19722ZM2.75 11.5C2.75 10.0499 2.75814 9.49107 2.88994 9.05657L1.45453 8.62115C1.24186 9.32224 1.25 10.159 1.25 11.5H2.75ZM7.5 5.25C6.159 5.25 5.32224 5.24186 4.62115 5.45453L5.05657 6.88994C5.49107 6.75814 6.04987 6.75 7.5 6.75V5.25ZM2.88994 9.05657C3.20503 8.01787 4.01787 7.20503 5.05657 6.88994L4.62115 5.45453C3.10304 5.91505 1.91505 7.10304 1.45453 8.62115L2.88994 9.05657ZM9.5 20.25C7.83789 20.25 6.65724 20.2488 5.75133 20.1417C4.86197 20.0366 4.33563 19.8384 3.93822 19.5123L2.98663 20.6718C3.69558 21.2536 4.54428 21.5095 5.57525 21.6313C6.58966 21.7512 7.87463 21.75 9.5 21.75V20.25ZM1.25 13.5C1.25 15.1254 1.24877 16.4103 1.36868 17.4248C1.49054 18.4557 1.74638 19.3044 2.3282 20.0134L3.48772 19.0618C3.16158 18.6644 2.96343 18.138 2.85831 17.2487C2.75123 16.3428 2.75 15.1621 2.75 13.5H1.25ZM3.93822 19.5123C3.77366 19.3772 3.62277 19.2263 3.48772 19.0618L2.3282 20.0134C2.52558 20.2539 2.74612 20.4744 2.98663 20.6718L3.93822 19.5123ZM21.25 13.5C21.25 15.1621 21.2488 16.3428 21.1417 17.2487C21.0366 18.138 20.8384 18.6644 20.5123 19.0618L21.6718 20.0134C22.2536 19.3044 22.5095 18.4557 22.6313 17.4248C22.7512 16.4103 22.75 15.1254 22.75 13.5H21.25ZM14.5 21.75C16.1254 21.75 17.4103 21.7512 18.4248 21.6313C19.4557 21.5095 20.3044 21.2536 21.0134 20.6718L20.0618 19.5123C19.6644 19.8384 19.138 20.0366 18.2487 20.1417C17.3428 20.2488 16.1621 20.25 14.5 20.25V21.75ZM20.5123 19.0618C20.3772 19.2263 20.2263 19.3772 20.0618 19.5123L21.0134 20.6718C21.2539 20.4744 21.4744 20.2539 21.6718 20.0134L20.5123 19.0618ZM12.3593 3.75C12.8969 3.75 13.2494 3.75075 13.5238 3.77634C13.7829 3.80049 13.9169 3.84299 14.0195 3.89791L14.7272 2.57539C14.3877 2.39366 14.0386 2.31783 13.6631 2.28282C13.3031 2.24925 12.8695 2.25 12.3593 2.25V3.75ZM22.75 11.5C22.75 10.159 22.7581 9.32224 22.5455 8.62115L21.1101 9.05658C21.2419 9.49107 21.25 10.0499 21.25 11.5H22.75Z" fill="currentColor" stroke="none"/><circle cx="12" cy="13" r="4" stroke="currentColor" fill="none"/><path d="M17.9737 3.02148C17.9795 2.99284 18.0205 2.99284 18.0263 3.02148C18.3302 4.50808 19.4919 5.66984 20.9785 5.97368C21.0072 5.97954 21.0072 6.02046 20.9785 6.02632C19.4919 6.33016 18.3302 7.49192 18.0263 8.97852C18.0205 9.00716 17.9795 9.00716 17.9737 8.97852C17.6698 7.49192 16.5081 6.33016 15.0215 6.02632C14.9928 6.02046 14.9928 5.97954 15.0215 5.97368C16.5081 5.66984 17.6698 4.50808 17.9737 3.02148Z" fill="currentColor" stroke="none"/></svg>', 
-            label: 'Punto de Visita', 
-            color: '#4ECDC4' 
-        },
-        'food': { 
-            emoji: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 17C18.2386 17 16 14.7614 16 12C16 9.23858 18.2386 7 21 7"/><path d="M21 21C16.0294 21 12 16.9706 12 12C12 7.02944 16.0294 3 21 3"/><path d="M6 3L6 8M6 21L6 11"/><path d="M3.5 8H8.5"/><path d="M9 3L9 7.35224C9 12.216 3 12.2159 3 7.35207L3 3"/></svg>', 
-            label: 'Restaurante', 
-            color: '#FFE66D' 
-        }
+    const pointTypeIcons = {
+        'stay': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4V20C3 20.9428 3 21.4142 3.29289 21.7071C3.58579 22 4.05719 22 5 22H19C19.9428 22 20.4142 22 20.7071 21.7071C21 21.4142 21 20.9428 21 20V4"/><path d="M10.5 8V9.5M10.5 11V9.5M13.5 8V9.5M13.5 11V9.5M10.5 9.5H13.5"/><path d="M14 22L14 17.9999C14 16.8954 13.1046 15.9999 12 15.9999C10.8954 15.9999 10 16.8954 10 17.9999V22"/><path d="M2 4H8C8.6399 2.82727 10.1897 2 12 2C13.8103 2 15.3601 2.82727 16 4H22"/><path d="M6 8H7M6 12H7M6 16H7"/><path d="M17 8H18M17 12H18M17 16H18"/></svg>',
+        'visit': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.31253 4.7812L7.6885 4.36517V4.36517L8.31253 4.7812ZM7.5 6V6.75C7.75076 6.75 7.98494 6.62467 8.12404 6.41603L7.5 6ZM2.17224 8.83886L1.45453 8.62115L2.17224 8.83886ZM4.83886 6.17224L4.62115 5.45453H4.62115L4.83886 6.17224ZM3.46243 20.092L3.93822 19.5123L3.93822 19.5123L3.46243 20.092ZM2.90796 19.5376L3.48772 19.0618L3.48772 19.0618L2.90796 19.5376ZM21.092 19.5376L20.5123 19.0618L20.5123 19.0618L21.092 19.5376ZM20.5376 20.092L20.0618 19.5123L20.0618 19.5123L20.5376 20.092ZM14.0195 3.89791C14.3847 4.09336 14.8392 3.95575 15.0346 3.59054C15.2301 3.22534 15.0924 2.77084 14.7272 2.57539L14.0195 3.89791ZM22.5455 8.62115C22.4252 8.22477 22.0064 8.00092 21.61 8.12116C21.2137 8.2414 20.9898 8.6602 21.1101 9.05658L22.5455 8.62115ZM21.25 11.5V13.5H22.75V11.5H21.25ZM14.5 20.25H9.5V21.75H14.5V20.25ZM2.75 13.5V11.5H1.25V13.5H2.75ZM12.3593 2.25H11.6407V3.75H12.3593V2.25ZM7.6885 4.36517L6.87596 5.58397L8.12404 6.41603L8.93657 5.19722L7.6885 4.36517ZM11.6407 2.25C11.1305 2.25 10.6969 2.24925 10.3369 2.28282C9.96142 2.31783 9.61234 2.39366 9.27276 2.57539L9.98055 3.89791C10.0831 3.84299 10.2171 3.80049 10.4762 3.77634C10.7506 3.75075 11.1031 3.75 11.6407 3.75V2.25ZM8.93657 5.19722C9.23482 4.74985 9.43093 4.45704 9.60448 4.24286C9.76825 4.04074 9.87794 3.95282 9.98055 3.89791L9.27276 2.57539C8.93318 2.75713 8.67645 3.00553 8.43904 3.29853C8.2114 3.57947 7.97154 3.94062 7.6885 4.36517L8.93657 5.19722ZM2.75 11.5C2.75 10.0499 2.75814 9.49107 2.88994 9.05657L1.45453 8.62115C1.24186 9.32224 1.25 10.159 1.25 11.5H2.75ZM7.5 5.25C6.159 5.25 5.32224 5.24186 4.62115 5.45453L5.05657 6.88994C5.49107 6.75814 6.04987 6.75 7.5 6.75V5.25ZM2.88994 9.05657C3.20503 8.01787 4.01787 7.20503 5.05657 6.88994L4.62115 5.45453C3.10304 5.91505 1.91505 7.10304 1.45453 8.62115L2.88994 9.05657ZM9.5 20.25C7.83789 20.25 6.65724 20.2488 5.75133 20.1417C4.86197 20.0366 4.33563 19.8384 3.93822 19.5123L2.98663 20.6718C3.69558 21.2536 4.54428 21.5095 5.57525 21.6313C6.58966 21.7512 7.87463 21.75 9.5 21.75V20.25ZM1.25 13.5C1.25 15.1254 1.24877 16.4103 1.36868 17.4248C1.49054 18.4557 1.74638 19.3044 2.3282 20.0134L3.48772 19.0618C3.16158 18.6644 2.96343 18.138 2.85831 17.2487C2.75123 16.3428 2.75 15.1621 2.75 13.5H1.25ZM3.93822 19.5123C3.77366 19.3772 3.62277 19.2263 3.48772 19.0618L2.3282 20.0134C2.52558 20.2539 2.74612 20.4744 2.98663 20.6718L3.93822 19.5123ZM21.25 13.5C21.25 15.1621 21.2488 16.3428 21.1417 17.2487C21.0366 18.138 20.8384 18.6644 20.5123 19.0618L21.6718 20.0134C22.2536 19.3044 22.5095 18.4557 22.6313 17.4248C22.7512 16.4103 22.75 15.1254 22.75 13.5H21.25ZM14.5 21.75C16.1254 21.75 17.4103 21.7512 18.4248 21.6313C19.4557 21.5095 20.3044 21.2536 21.0134 20.6718L20.0618 19.5123C19.6644 19.8384 19.138 20.0366 18.2487 20.1417C17.3428 20.2488 16.1621 20.25 14.5 20.25V21.75ZM20.5123 19.0618C20.3772 19.2263 20.2263 19.3772 20.0618 19.5123L21.0134 20.6718C21.2539 20.4744 21.4744 20.2539 21.6718 20.0134L20.5123 19.0618ZM12.3593 3.75C12.8969 3.75 13.2494 3.75075 13.5238 3.77634C13.7829 3.80049 13.9169 3.84299 14.0195 3.89791L14.7272 2.57539C14.3877 2.39366 14.0386 2.31783 13.6631 2.28282C13.3031 2.24925 12.8695 2.25 12.3593 2.25V3.75ZM22.75 11.5C22.75 10.159 22.7581 9.32224 22.5455 8.62115L21.1101 9.05658C21.2419 9.49107 21.25 10.0499 21.25 11.5H22.75Z" fill="currentColor" stroke="none"/><circle cx="12" cy="13" r="4" stroke="currentColor" fill="none"/><path d="M17.9737 3.02148C17.9795 2.99284 18.0205 2.99284 18.0263 3.02148C18.3302 4.50808 19.4919 5.66984 20.9785 5.97368C21.0072 5.97954 21.0072 6.02046 20.9785 6.02632C19.4919 6.33016 18.3302 7.49192 18.0263 8.97852C18.0205 9.00716 17.9795 9.00716 17.9737 8.97852C17.6698 7.49192 16.5081 6.33016 15.0215 6.02632C14.9928 6.02046 14.9928 5.97954 15.0215 5.97368C16.5081 5.66984 17.6698 4.50808 17.9737 3.02148Z" fill="currentColor" stroke="none"/></svg>',
+        'food': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 17C18.2386 17 16 14.7614 16 12C16 9.23858 18.2386 7 21 7"/><path d="M21 21C16.0294 21 12 16.9706 12 12C12 7.02944 16.0294 3 21 3"/><path d="M6 3L6 8M6 21L6 11"/><path d="M3.5 8H8.5"/><path d="M9 3L9 7.35224C9 12.216 3 12.2159 3 7.35207L3 3"/></svg>'
     };
+    
+    const pointTypeColors = {
+        'stay': '#FF6B6B',
+        'visit': '#4ECDC4',
+        'food': '#FFE66D'
+    };
+    
+    /**
+     * Gets point type config with translated labels
+     */
+    function getPointTypeConfig(type) {
+        const icon = pointTypeIcons[type] || pointTypeIcons['visit'];
+        const color = pointTypeColors[type] || pointTypeColors['visit'];
+        const label = i18n.t('points.types.' + type) || type;
+        return { emoji: icon, label: label, color: color };
+    }
 
     /**
      * Carga la configuración desde el servidor
@@ -303,22 +307,23 @@
         
         legendItems.empty();
         
-        // Definir el orden y labels de los tipos de transporte
+        // Definir el orden de los tipos de transporte (labels come from i18n)
         const transportOrder = [
-            { type: 'plane', icon: transportIcons.plane, label: 'Avión' },
-            { type: 'car', icon: transportIcons.car, label: 'Auto' },
-            { type: 'train', icon: transportIcons.train, label: 'Tren' },
-            { type: 'ship', icon: transportIcons.ship, label: 'Barco' },
-            { type: 'walk', icon: transportIcons.walk, label: 'Caminata' }
+            { type: 'plane', icon: transportIcons.plane },
+            { type: 'car', icon: transportIcons.car },
+            { type: 'train', icon: transportIcons.train },
+            { type: 'ship', icon: transportIcons.ship },
+            { type: 'walk', icon: transportIcons.walk }
         ];
         
         transportOrder.forEach(function(item) {
             const config = transportConfig[item.type];
             if (config) {
+                const label = i18n.t('routes.transport_types.' + item.type);
                 const legendItem = $(`
                     <div class="legend-item">
                         <div class="legend-line" style="background-color: ${config.color};"></div>
-                        <small>${item.icon} ${item.label}</small>
+                        <small>${item.icon} ${label}</small>
                     </div>
                 `);
                 legendItems.append(legendItem);
@@ -330,7 +335,7 @@
         const futureLegendItem = $(`
             <div class="legend-item legend-future-separator">
                 <div class="legend-line legend-future" style="background: repeating-linear-gradient(90deg, #6B6B6B, #6B6B6B 2px, transparent 2px, transparent 8px);"></div>
-                <small>${futureLegendIcon} Próximo viaje</small>
+                <small>${futureLegendIcon} ${i18n.t('routes.next_trip')}</small>
             </div>
         `);
         legendItems.append(futureLegendItem);
@@ -355,7 +360,7 @@
                     applyInitialToggleStates();
                     fitMapToContent();
                 } else {
-                    showError('No se encontraron viajes para mostrar');
+                    showError(i18n.t('map.no_trips_found'));
                 }
             },
             error: function(xhr, status, error) {
@@ -379,7 +384,7 @@
             } else if (trip.start_date) {
                 year = new Date(trip.start_date + 'T00:00:00').getFullYear().toString();
             } else {
-                year = 'Sin fecha';
+                year = 'no_date';
             }
             
             if (!grouped[year]) {
@@ -399,8 +404,8 @@
         return keys.sort(function(a, b) {
             if (a === 'future') return -1;
             if (b === 'future') return 1;
-            if (a === 'Sin fecha') return 1;
-            if (b === 'Sin fecha') return -1;
+            if (a === 'no_date') return 1;
+            if (b === 'no_date') return -1;
             return parseInt(b) - parseInt(a); // Descending order
         });
     }
@@ -431,7 +436,7 @@
             // Find the most recent year with trips (excluding 'future' and 'Sin fecha')
             for (let i = 0; i < sortedYears.length; i++) {
                 const year = sortedYears[i];
-                if (year !== 'future' && year !== 'Sin fecha') {
+                if (year !== 'future' && year !== 'no_date') {
                     expanded.push(year);
                     break;
                 }
@@ -465,7 +470,7 @@
         $tripsList.empty();
 
         if (tripsData.length === 0) {
-            $tripsList.html('<p class="text-muted small text-center">No hay viajes disponibles</p>');
+            $tripsList.html('<p class="text-muted small text-center">' + i18n.t('map.no_trips_available') + '</p>');
             return;
         }
 
@@ -498,7 +503,7 @@
             const yearId = 'year-' + year.replace(/\s/g, '-');
             const isCollapsed = collapsedStates[year] === true;
             const isFutureGroup = year === 'future';
-            const yearLabel = isFutureGroup ? 'Próximos viajes' : year;
+            const yearLabel = isFutureGroup ? i18n.t('map.upcoming_trips') : (year === 'no_date' ? i18n.t('map.no_date') : year);
             const yearClass = isFutureGroup ? 'year-group year-future' : 'year-group';
             
             // Calculate totals for the year
@@ -526,8 +531,8 @@
                             </button>
                         </div>
                         <div class="year-stats">
-                            <span title="Rutas">${routeIcon} ${totalRoutes}</span>
-                            <span title="Puntos">${pointIcon} ${totalPoints}</span>
+                            <span title="${i18n.t('map.routes')}">${routeIcon} ${totalRoutes}</span>
+                            <span title="${i18n.t('map.points')}">${pointIcon} ${totalPoints}</span>
                         </div>
                     </div>
                     <div class="year-trips ${isCollapsed ? 'collapsed' : ''}" id="${yearId}">
@@ -542,7 +547,7 @@
                 const routesCount = trip.routes ? trip.routes.length : 0;
                 const pointsCount = trip.points ? trip.points.length : 0;
                 const isFuture = isFutureTrip(trip);
-                const futureBadge = isFuture ? `<span class="badge bg-light text-secondary border ms-2" style="font-size: 0.65rem;">${futureIcon} Próximo</span>` : '';
+                const futureBadge = isFuture ? `<span class="badge bg-light text-secondary border ms-2" style="font-size: 0.65rem;">${futureIcon} ${i18n.t('map.upcoming')}</span>` : '';
                 const itemClass = isFuture ? 'trip-filter-item trip-future' : 'trip-filter-item';
                 const colorIndicator = isFuture ? '#6B6B6B' : trip.color;
                 
@@ -561,8 +566,8 @@
                                 <span class="trip-details">
                                     ${formatDateRange(trip.start_date, trip.end_date)}
                                     <span class="trip-counts">
-                                        <span title="Rutas">${routeIcon} ${routesCount}</span>
-                                        <span title="Puntos">${pointIcon} ${pointsCount}</span>
+                                        <span title="${i18n.t('map.routes')}">${routeIcon} ${routesCount}</span>
+                                        <span title="${i18n.t('map.points')}">${pointIcon} ${pointsCount}</span>
                                     </span>
                                 </span>
                             </label>
@@ -728,11 +733,11 @@
             },
             onEachFeature: function(feature, lyr) {
                 const futureIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2V6M8 2V6"/><path d="M21 15V12C21 8.22876 21 6.34315 19.8284 5.17157C18.6569 4 16.7712 4 13 4H11C7.22876 4 5.34315 4 4.17157 5.17157C3 6.34315 3 8.22876 3 12V14C3 17.7712 3 19.6569 4.17157 20.8284C5.34315 22 7.22876 22 11 22H12"/><path d="M3 10H21"/><path d="M18.5 22C19.0057 21.5085 21 20.2002 21 19.5C21 18.7998 19.0057 17.4915 18.5 17M20.5 19.5H14"/></svg>';
-                const futureLabel = isFuture ? ` <span class="badge bg-secondary">${futureIconSvg} Próximo</span>` : '';
+                const futureLabel = isFuture ? ` <span class="badge bg-secondary">${futureIconSvg} ${i18n.t('map.upcoming')}</span>` : '';
                 lyr.bindPopup(`
                     <div class="route-popup">
                         <strong>${config.icon} ${escapeHtml(trip.title)}</strong>${futureLabel}<br>
-                        <small class="text-muted">Transporte: ${transportType}</small>
+                        <small class="text-muted">${i18n.t('map.transport')}: ${i18n.t('routes.transport_types.' + transportType)}</small>
                     </div>
                 `);
             }
@@ -825,11 +830,11 @@
         
         // Popup
         const futureIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2V6M8 2V6"/><path d="M21 15V12C21 8.22876 21 6.34315 19.8284 5.17157C18.6569 4 16.7712 4 13 4H11C7.22876 4 5.34315 4 4.17157 5.17157C3 6.34315 3 8.22876 3 12V14C3 17.7712 3 19.6569 4.17157 20.8284C5.34315 22 7.22876 22 11 22H12"/><path d="M3 10H21"/><path d="M18.5 22C19.0057 21.5085 21 20.2002 21 19.5C21 18.7998 19.0057 17.4915 18.5 17M20.5 19.5H14"/></svg>';
-        const futureLabel = isFuture ? ` <span class="badge bg-secondary">${futureIconSvg} Próximo</span>` : '';
+        const futureLabel = isFuture ? ` <span class="badge bg-secondary">${futureIconSvg} ${i18n.t('map.upcoming')}</span>` : '';
         layer.bindPopup(`
             <div class="route-popup">
                 <strong>${config.icon} ${escapeHtml(trip.title)}</strong>${futureLabel}<br>
-                <small class="text-muted">Transporte: plane</small>
+                <small class="text-muted">${i18n.t('map.transport')}: ${i18n.t('routes.transport_types.plane')}</small>
             </div>
         `);
         
@@ -840,7 +845,7 @@
      * Renderiza un punto de interés
      */
     function renderPoint(point, trip) {
-        const typeConfig = pointTypeConfig[point.type] || pointTypeConfig['visit'];
+        const typeConfig = getPointTypeConfig(point.type);
         
         // Icono personalizado
         const icon = L.divIcon({
@@ -878,7 +883,7 @@
         
         // Imagen si existe (clicable para abrir lightbox)
         if (point.image_url) {
-            html += `<img src="${point.image_url}" alt="${escapeHtml(point.title)}" class="popup-image" onclick="openLightbox('${point.image_url}', '${escapeHtml(point.title)}')" title="Click para ver en tamaño completo">`;
+            html += `<img src="${point.image_url}" alt="${escapeHtml(point.title)}" class="popup-image" onclick="openLightbox('${point.image_url}', '${escapeHtml(point.title)}')" title="${i18n.t('map.click_fullsize')}">`;
         }
         
         // Contenido
@@ -1077,7 +1082,7 @@
      */
     function formatDateRange(startDate, endDate) {
         if (!startDate && !endDate) {
-            return 'Sin fechas';
+            return i18n.t('map.no_dates');
         }
         
         const start = startDate ? formatDate(startDate) : '';
@@ -1096,7 +1101,8 @@
         if (!dateString) return '';
         
         const date = new Date(dateString + 'T00:00:00');
-        return date.toLocaleDateString('es-ES', { 
+        const locale = i18n.getCurrentLanguage() === 'es' ? 'es-ES' : 'en-US';
+        return date.toLocaleDateString(locale, { 
             year: 'numeric', 
             month: 'short', 
             day: 'numeric' 
@@ -1122,12 +1128,12 @@
      */
     function searchPublicPlace(query) {
         if (!query || query.trim().length < 3) {
-            alert('Por favor, ingresa al menos 3 caracteres para buscar');
+            alert(i18n.t('map.search_min_chars'));
             return;
         }
 
         const searchResults = $('#publicSearchResults');
-        searchResults.html('<div class="list-group-item small"><div class="spinner-border spinner-border-sm me-2"></div>Buscando...</div>');
+        searchResults.html('<div class="list-group-item small"><div class="spinner-border spinner-border-sm me-2"></div>' + i18n.t('map.searching') + '</div>');
         searchResults.show();
 
         // Usar proxy local para evitar problemas de CORS
@@ -1141,7 +1147,7 @@
                 searchResults.empty();
 
                 if (!results || results.length === 0) {
-                    searchResults.html('<div class="list-group-item small text-muted">No se encontraron resultados</div>');
+                    searchResults.html('<div class="list-group-item small text-muted">' + i18n.t('map.no_results') + '</div>');
                     return;
                 }
 
@@ -1178,7 +1184,7 @@
             },
             error: function(xhr, status, error) {
                 console.error('Error en búsqueda:', error);
-                let errorMsg = 'Error al buscar. Intenta nuevamente.';
+                let errorMsg = i18n.t('map.search_error');
                 
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     errorMsg = xhr.responseJSON.error;

@@ -3,7 +3,8 @@
     "name": "TravelMap",
     "title": "Travel Map - My Travels Around the World",
     "description": "Explore my travels around the world with interactive maps, routes and photographs",
-    "admin_panel": "Administration Panel"
+    "admin_panel": "Administration Panel",
+    "footer_created_by": "Created by"
   },
   "navigation": {
     "home": "Home",
@@ -25,10 +26,30 @@
     "search_placeholder": "Enter a city, country or place...",
     "search_button": "Search",
     "loading": "Loading...",
+    "loading_trips": "Loading trips...",
     "no_results": "No results found",
     "filter_trips": "Filter Trips",
     "select_all": "Select All",
-    "deselect_all": "Deselect All"
+    "deselect_all": "Deselect All",
+    "trips": "Trips",
+    "filter_all": "All",
+    "filter_all_title": "Show all",
+    "filter_past": "Past",
+    "filter_past_title": "Past trips only",
+    "filter_none": "None",
+    "filter_none_title": "Hide all",
+    "transport_legend": "Transport Legend",
+    "no_date": "No date",
+    "no_dates": "No dates",
+    "no_trips_available": "No trips available",
+    "no_trips_found": "No trips found to display",
+    "upcoming_trips": "Upcoming trips",
+    "upcoming": "Upcoming",
+    "transport": "Transport",
+    "searching": "Searching...",
+    "search_min_chars": "Please enter at least 3 characters to search",
+    "search_error": "Search error. Try again.",
+    "click_fullsize": "Click to view full size"
   },
   "trips": {
     "title": "Trips",
@@ -60,10 +81,10 @@
     "description": "Description",
     "type": "Type",
     "types": {
-      "stay": "Stay",
-      "visit": "Visit",
+      "stay": "Accommodation",
+      "visit": "Point of Interest",
       "activity": "Activity",
-      "food": "Food",
+      "food": "Restaurant",
       "transport": "Transport",
       "other": "Other"
     },
@@ -91,7 +112,8 @@
       "car": "Car",
       "train": "Train",
       "walk": "Walk"
-    }
+    },
+    "next_trip": "Next trip"
   },
   "users": {
     "title": "Users",
