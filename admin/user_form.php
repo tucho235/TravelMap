@@ -58,21 +58,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($is_edit) {
             // Actualizar
             if ($userModel->update($user_id, $saveData)) {
-                $_SESSION['success_message'] = 'Usuario actualizado correctamente';
+                $_SESSION['success_message'] = __('users.updated_success');
                 header("Location: users.php");
                 exit;
             } else {
-                $errors['general'] = 'Error al actualizar el usuario';
+                $errors['general'] = __('users.error_saving');
             }
         } else {
             // Crear
             $new_id = $userModel->create($saveData);
             if ($new_id) {
-                $_SESSION['success_message'] = 'Usuario creado correctamente';
+                $_SESSION['success_message'] = __('users.created_success');
                 header("Location: users.php");
                 exit;
             } else {
-                $errors['general'] = 'Error al crear el usuario';
+                $errors['general'] = __('users.error_saving');
             }
         }
     }
@@ -98,7 +98,7 @@ $form_data = [
                     <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
                 <?php endif; ?>
             </svg>
-            <?= $is_edit ? 'Editar Usuario' : 'Nuevo Usuario' ?>
+            <?= $is_edit ? __('users.edit_user') : __('users.new_user') ?>
         </h1>
     </div>
     <div class="col-md-4 text-end">
@@ -106,7 +106,7 @@ $form_data = [
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
             </svg>
-            Volver al listado
+            <?= __('common.back_to_list') ?>
         </a>
     </div>
 </div>
@@ -129,7 +129,7 @@ $form_data = [
                 <form method="POST" action="">
                     <!-- Nombre de usuario -->
                     <div class="mb-3">
-                        <label for="username" class="form-label">Nombre de Usuario <span class="text-danger">*</span></label>
+                        <label for="username" class="form-label"><?= __('users.username') ?> <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
@@ -143,12 +143,12 @@ $form_data = [
                                    value="<?= htmlspecialchars($form_data['username']) ?>" 
                                    required 
                                    maxlength="50"
-                                   placeholder="Ej: usuario123"
+                                   placeholder="<?= __('forms.example') ?>: usuario123"
                                    autocomplete="username">
                             <?php if (isset($errors['username'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['username']) ?></div>
                             <?php else: ?>
-                                <div class="form-text">Solo letras, números y guiones bajos. Mínimo 3 caracteres.</div>
+                                <div class="form-text"><?= __('forms.only_letters_numbers') ?>. <?= __('forms.minimum') ?> 3 <?= __('forms.characters') ?>.</div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -156,11 +156,11 @@ $form_data = [
                     <!-- Contraseña -->
                     <div class="mb-3">
                         <label for="password" class="form-label">
-                            Contraseña 
+                            <?= __('users.password') ?> 
                             <?php if (!$is_edit): ?>
                                 <span class="text-danger">*</span>
                             <?php else: ?>
-                                <span class="text-muted small">(dejar vacío para mantener la actual)</span>
+                                <span class="text-muted small">(<?= __('forms.leave_blank_keep_password') ?>)</span>
                             <?php endif; ?>
                         </label>
                         <div class="input-group">
@@ -175,12 +175,12 @@ $form_data = [
                                    name="password" 
                                    <?= !$is_edit ? 'required' : '' ?>
                                    minlength="6"
-                                   placeholder="<?= $is_edit ? 'Nueva contraseña (opcional)' : 'Mínimo 6 caracteres' ?>"
+                                   placeholder="<?= $is_edit ? __('forms.new_password_optional') : __('forms.minimum') . ' 6 ' . __('forms.characters') ?>"
                                    autocomplete="new-password">
                             <?php if (isset($errors['password'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['password']) ?></div>
                             <?php else: ?>
-                                <div class="form-text">Mínimo 6 caracteres.</div>
+                                <div class="form-text"><?= __('forms.minimum') ?> 6 <?= __('forms.characters') ?>.</div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -188,7 +188,7 @@ $form_data = [
                     <!-- Confirmar contraseña -->
                     <div class="mb-3">
                         <label for="password_confirm" class="form-label">
-                            Confirmar Contraseña 
+                            <?= __('users.confirm_password') ?> 
                             <?php if (!$is_edit): ?>
                                 <span class="text-danger">*</span>
                             <?php endif; ?>
@@ -205,7 +205,7 @@ $form_data = [
                                    name="password_confirm" 
                                    <?= !$is_edit ? 'required' : '' ?>
                                    minlength="6"
-                                   placeholder="Repetir contraseña"
+                                   placeholder="<?= __('forms.repeat_password') ?>"
                                    autocomplete="new-password">
                             <?php if (isset($errors['password_confirm'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['password_confirm']) ?></div>
@@ -216,12 +216,12 @@ $form_data = [
                     <hr class="my-4">
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="users.php" class="btn btn-secondary">Cancelar</a>
+                        <a href="users.php" class="btn btn-secondary"><?= __('common.cancel') ?></a>
                         <button type="submit" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save me-1" viewBox="0 0 16 16">
                                 <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"/>
                             </svg>
-                            <?= $is_edit ? 'Guardar Cambios' : 'Crear Usuario' ?>
+                            <?= $is_edit ? __('forms.save_changes') : __('users.new_user') ?>
                         </button>
                     </div>
                 </form>
@@ -238,31 +238,31 @@ $form_data = [
                         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533z"/>
                         <path d="M9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                     </svg>
-                    Información
+                    <?= __('forms.information') ?>
                 </h5>
             </div>
             <div class="card-body">
-                <h6>Campos obligatorios</h6>
+                <h6><?= __('forms.required_fields') ?></h6>
                 <ul>
-                    <li><strong>Nombre de Usuario:</strong> Identificador único del usuario</li>
-                    <li><strong>Contraseña:</strong> 
-                        <?= $is_edit ? 'Solo si deseas cambiarla' : 'Requerida para nuevos usuarios' ?>
+                    <li><strong><?= __('users.username') ?>:</strong> <?= __('forms.unique_identifier') ?></li>
+                    <li><strong><?= __('users.password') ?>:</strong> 
+                        <?= $is_edit ? __('forms.only_if_change') : __('forms.required_for_new') ?>
                     </li>
                 </ul>
 
-                <h6 class="mt-3">Requisitos de contraseña</h6>
+                <h6 class="mt-3"><?= __('forms.password_requirements') ?></h6>
                 <ul>
-                    <li>Mínimo 6 caracteres</li>
-                    <li>Las contraseñas se almacenan encriptadas</li>
-                    <li>No se puede recuperar una contraseña, solo cambiarla</li>
+                    <li><?= __('forms.minimum') ?> 6 <?= __('forms.characters') ?></li>
+                    <li><?= __('forms.passwords_encrypted') ?></li>
+                    <li><?= __('forms.cannot_recover_password') ?></li>
                 </ul>
 
-                <h6 class="mt-3">Nombre de usuario</h6>
+                <h6 class="mt-3"><?= __('forms.username_requirements') ?></h6>
                 <ul>
-                    <li>Solo letras (a-z, A-Z), números (0-9) y guiones bajos (_)</li>
-                    <li>Mínimo 3 caracteres, máximo 50</li>
-                    <li>Debe ser único en el sistema</li>
-                    <li>Se usa para iniciar sesión</li>
+                    <li><?= __('forms.only_letters_numbers') ?></li>
+                    <li><?= __('forms.minimum') ?> 3 <?= __('forms.characters') ?>, <?= __('forms.maximum') ?> 50</li>
+                    <li><?= __('forms.must_be_unique') ?></li>
+                    <li><?= __('forms.used_for_login') ?></li>
                 </ul>
 
                 <?php if ($is_edit): ?>
@@ -271,7 +271,7 @@ $form_data = [
                             <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
                             <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
                         </svg>
-                        <strong>Nota:</strong> Si estás editando tu propio usuario y cambias la contraseña, deberás iniciar sesión nuevamente con la nueva contraseña.
+                        <strong><?= __('common.note') ?>:</strong> <?= __('forms.note_own_user_warning') ?>
                     </div>
                 <?php endif; ?>
             </div>

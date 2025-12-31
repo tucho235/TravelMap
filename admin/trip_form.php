@@ -52,21 +52,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($tripModel->update($trip_id, $data)) {
                 $success = true;
                 $trip = $tripModel->getById($trip_id); // Recargar datos
-                $message = 'Viaje actualizado correctamente';
+                $message = __('common.updated_success');
             } else {
-                $errors['general'] = 'Error al actualizar el viaje';
+                $errors['general'] = __('common.error_updating');
             }
         } else {
             // Crear
             $new_id = $tripModel->create($data);
             if ($new_id) {
                 $success = true;
-                $message = 'Viaje creado correctamente';
+                $message = __('common.created_success');
                 // Redirigir a edición del nuevo viaje
                 header("Location: trip_form.php?id={$new_id}&success=1");
                 exit;
             } else {
-                $errors['general'] = 'Error al crear el viaje';
+                $errors['general'] = __('common.error_creating');
             }
         }
     }
@@ -97,7 +97,7 @@ $form_data = $trip ?? [
                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
                 <?php endif; ?>
             </svg>
-            <?= $is_edit ? 'Editar Viaje' : 'Nuevo Viaje' ?>
+            <?= $is_edit ? __('trips.edit_trip') : __('trips.new_trip') ?>
         </h1>
     </div>
     <div class="col-md-4 text-end">
@@ -105,7 +105,7 @@ $form_data = $trip ?? [
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
             </svg>
-            Volver al listado
+            <?= __('common.back_to_list') ?>
         </a>
     </div>
 </div>
@@ -123,7 +123,7 @@ $form_data = $trip ?? [
 
 <?php if (isset($_GET['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        Viaje creado correctamente
+        <?= __('trips.saved_success') ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
@@ -142,7 +142,7 @@ $form_data = $trip ?? [
                 <form method="POST" action="">
                     <!-- Título -->
                     <div class="mb-3">
-                        <label for="title" class="form-label">Título del Viaje <span class="text-danger">*</span></label>
+                        <label for="title" class="form-label"><?= __('trips.title_field') ?> <span class="text-danger">*</span></label>
                         <input type="text" 
                                class="form-control <?= isset($errors['title']) ? 'is-invalid' : '' ?>" 
                                id="title" 
@@ -150,7 +150,7 @@ $form_data = $trip ?? [
                                value="<?= htmlspecialchars($form_data['title']) ?>" 
                                required 
                                maxlength="200"
-                               placeholder="Ej: Viaje a Europa 2025">
+                               placeholder="<?= __('forms.example') ?>: Viaje a Europa 2025">
                         <?php if (isset($errors['title'])): ?>
                             <div class="invalid-feedback"><?= htmlspecialchars($errors['title']) ?></div>
                         <?php endif; ?>
@@ -158,19 +158,19 @@ $form_data = $trip ?? [
 
                     <!-- Descripción -->
                     <div class="mb-3">
-                        <label for="description" class="form-label">Descripción</label>
+                        <label for="description" class="form-label"><?= __('trips.description') ?></label>
                         <textarea class="form-control" 
                                   id="description" 
                                   name="description" 
                                   rows="4"
-                                  placeholder="Describe tu viaje..."><?= htmlspecialchars($form_data['description'] ?? '') ?></textarea>
-                        <small class="form-text text-muted">Opcional: Agrega detalles sobre tu viaje</small>
+                                  placeholder="<?= __('forms.describe_trip') ?>"><?= htmlspecialchars($form_data['description'] ?? '') ?></textarea>
+                        <small class="form-text text-muted"><?= __('forms.optional_add_details') ?></small>
                     </div>
 
                     <div class="row">
                         <!-- Fecha de Inicio -->
                         <div class="col-md-6 mb-3">
-                            <label for="start_date" class="form-label">Fecha de Inicio</label>
+                            <label for="start_date" class="form-label"><?= __('trips.start_date') ?></label>
                             <input type="date" 
                                    class="form-control <?= isset($errors['dates']) ? 'is-invalid' : '' ?>" 
                                    id="start_date" 
@@ -183,7 +183,7 @@ $form_data = $trip ?? [
 
                         <!-- Fecha de Fin -->
                         <div class="col-md-6 mb-3">
-                            <label for="end_date" class="form-label">Fecha de Fin</label>
+                            <label for="end_date" class="form-label"><?= __('trips.end_date') ?></label>
                             <input type="date" 
                                    class="form-control" 
                                    id="end_date" 
@@ -195,14 +195,14 @@ $form_data = $trip ?? [
                     <div class="row">
                         <!-- Color -->
                         <div class="col-md-6 mb-3">
-                            <label for="color_hex" class="form-label">Color del Viaje</label>
+                            <label for="color_hex" class="form-label"><?= __('trips.color') ?></label>
                             <div class="input-group">
                                 <input type="color" 
                                        class="form-control form-control-color <?= isset($errors['color_hex']) ? 'is-invalid' : '' ?>" 
                                        id="color_hex" 
                                        name="color_hex" 
                                        value="<?= htmlspecialchars($form_data['color_hex']) ?>"
-                                       title="Selecciona un color">
+                                       title="<?= __('forms.select_color') ?>">
                                 <input type="text" 
                                        class="form-control" 
                                        id="color_hex_text" 
@@ -212,33 +212,33 @@ $form_data = $trip ?? [
                             <?php if (isset($errors['color_hex'])): ?>
                                 <div class="invalid-feedback d-block"><?= htmlspecialchars($errors['color_hex']) ?></div>
                             <?php endif; ?>
-                            <small class="form-text text-muted">Este color se usará para diferenciar el viaje en el mapa</small>
+                            <small class="form-text text-muted"><?= __('forms.color_for_map') ?></small>
                         </div>
 
                         <!-- Estado -->
                         <div class="col-md-6 mb-3">
-                            <label for="status" class="form-label">Estado</label>
+                            <label for="status" class="form-label"><?= __('trips.status') ?></label>
                             <select class="form-select <?= isset($errors['status']) ? 'is-invalid' : '' ?>" 
                                     id="status" 
                                     name="status">
-                                <option value="draft" <?= $form_data['status'] === 'draft' ? 'selected' : '' ?>>Borrador</option>
-                                <option value="public" <?= $form_data['status'] === 'public' ? 'selected' : '' ?>>Público</option>
-                                <option value="planned" <?= $form_data['status'] === 'planned' ? 'selected' : '' ?>>Planificado</option>
+                                <option value="draft" <?= $form_data['status'] === 'draft' ? 'selected' : '' ?>><?= __('trips.draft') ?></option>
+                                <option value="public" <?= $form_data['status'] === 'public' ? 'selected' : '' ?>><?= __('trips.public') ?></option>
+                                <option value="planned" <?= $form_data['status'] === 'planned' ? 'selected' : '' ?>><?= __('forms.planned') ?></option>
                             </select>
                             <?php if (isset($errors['status'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['status']) ?></div>
                             <?php endif; ?>
-                            <small class="form-text text-muted">Públicos y planificados se muestran en el mapa (planificados en gris)</small>
+                            <small class="form-text text-muted"><?= __('forms.public_and_planned_shown') ?></small>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="trips.php" class="btn btn-secondary">Cancelar</a>
+                        <a href="trips.php" class="btn btn-secondary"><?= __('common.cancel') ?></a>
                         <button type="submit" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save me-1" viewBox="0 0 16 16">
                                 <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"/>
                             </svg>
-                            <?= $is_edit ? 'Guardar Cambios' : 'Crear Viaje' ?>
+                            <?= $is_edit ? __('forms.save_changes') : __('forms.create') ?>
                         </button>
                     </div>
                 </form>
@@ -255,29 +255,29 @@ $form_data = $trip ?? [
                         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533z"/>
                         <path d="M9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                     </svg>
-                    Ayuda
+                    <?= __('forms.help') ?>
                 </h5>
             </div>
             <div class="card-body">
-                <h6>Campos obligatorios</h6>
+                <h6><?= __('forms.required_fields') ?></h6>
                 <ul>
-                    <li><strong>Título:</strong> Nombre identificativo del viaje</li>
+                    <li><strong><?= __('trips.title_field') ?>:</strong> <?= __('trips.name') ?> <?= __('trips.identify_name') ?></li>
                 </ul>
 
-                <h6 class="mt-3">Campos opcionales</h6>
+                <h6 class="mt-3"><?= __('forms.optional_fields') ?></h6>
                 <ul>
-                    <li><strong>Descripción:</strong> Detalles adicionales</li>
-                    <li><strong>Fechas:</strong> Período del viaje</li>
-                    <li><strong>Color:</strong> Para visualización en el mapa</li>
-                    <li><strong>Estado:</strong> Borrador o Público</li>
+                    <li><strong><?= __('trips.description') ?>:</strong> <?= __('trips.additional_details') ?></li>
+                    <li><strong><?= __('common.date') ?>:</strong> <?= __('trips.travel_period') ?></li>
+                    <li><strong><?= __('trips.color') ?>:</strong> <?= __('trips.map_visualization') ?></li>
+                    <li><strong><?= __('trips.status') ?>:</strong> <?= __('trips.draft') ?> o <?= __('trips.public') ?></li>
                 </ul>
 
                 <?php if ($is_edit): ?>
                     <hr>
-                    <h6>Estadísticas</h6>
+                    <h6><?= __('forms.statistics') ?></h6>
                     <ul class="list-unstyled">
-                        <li><strong>Puntos de interés:</strong> <?= $tripModel->countPoints($trip['id']) ?></li>
-                        <li><strong>Rutas:</strong> <?= $tripModel->countRoutes($trip['id']) ?></li>
+                        <li><strong><?= __('trips.points') ?>:</strong> <?= $tripModel->countPoints($trip['id']) ?></li>
+                        <li><strong><?= __('trips.routes') ?>:</strong> <?= $tripModel->countRoutes($trip['id']) ?></li>
                     </ul>
                 <?php endif; ?>
             </div>

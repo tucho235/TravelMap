@@ -76,21 +76,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($pointModel->update($point_id, $data)) {
                 $success = true;
                 $point = $pointModel->getById($point_id); // Recargar datos
-                $message = 'Punto de interés actualizado correctamente';
+                $message = __('points.updated_success');
             } else {
-                $errors['general'] = 'Error al actualizar el punto de interés';
+                $errors['general'] = __('points.error_saving');
             }
         } else {
             // Crear
             $new_id = $pointModel->create($data);
             if ($new_id) {
                 $success = true;
-                $message = 'Punto de interés creado correctamente';
+                $message = __('points.saved_success');
                 // Redirigir a edición del nuevo punto
                 header("Location: point_form.php?id={$new_id}&success=1");
                 exit;
             } else {
-                $errors['general'] = 'Error al crear el punto de interés';
+                $errors['general'] = __('points.error_saving');
             }
         }
     }
@@ -126,7 +126,7 @@ $point_types = Point::getTypes();
                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
                 <?php endif; ?>
             </svg>
-            <?= $is_edit ? 'Editar Punto de Interés' : 'Nuevo Punto de Interés' ?>
+            <?= $is_edit ? __('points.edit_point') : __('points.new_point') ?>
         </h1>
     </div>
     <div class="col-md-4 text-end">
@@ -134,7 +134,7 @@ $point_types = Point::getTypes();
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
             </svg>
-            Volver al listado
+            <?= __('common.back_to_list') ?>
         </a>
     </div>
 </div>
@@ -171,12 +171,12 @@ $point_types = Point::getTypes();
                 <form method="POST" action="" enctype="multipart/form-data">
                     <!-- Viaje -->
                     <div class="mb-3">
-                        <label for="trip_id" class="form-label">Viaje <span class="text-danger">*</span></label>
+                        <label for="trip_id" class="form-label"><?= __('points.trip') ?> <span class="text-danger">*</span></label>
                         <select class="form-select <?= isset($errors['trip_id']) ? 'is-invalid' : '' ?>" 
                                 id="trip_id" 
                                 name="trip_id" 
                                 required>
-                            <option value="">Selecciona un viaje...</option>
+                            <option value=""><?= __('forms.select_trip') ?></option>
                             <?php foreach ($trips as $trip): ?>
                                 <option value="<?= $trip['id'] ?>" <?= $form_data['trip_id'] == $trip['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($trip['title']) ?>
@@ -190,7 +190,7 @@ $point_types = Point::getTypes();
 
                     <!-- Título -->
                     <div class="mb-3">
-                        <label for="title" class="form-label">Título <span class="text-danger">*</span></label>
+                        <label for="title" class="form-label"><?= __('points.title_field') ?> <span class="text-danger">*</span></label>
                         <input type="text" 
                                class="form-control <?= isset($errors['title']) ? 'is-invalid' : '' ?>" 
                                id="title" 
@@ -198,7 +198,7 @@ $point_types = Point::getTypes();
                                value="<?= htmlspecialchars($form_data['title']) ?>" 
                                required 
                                maxlength="200"
-                               placeholder="Ej: Torre Eiffel">
+                               placeholder="<?= __('forms.example') ?>: Torre Eiffel">
                         <?php if (isset($errors['title'])): ?>
                             <div class="invalid-feedback"><?= htmlspecialchars($errors['title']) ?></div>
                         <?php endif; ?>
@@ -206,18 +206,18 @@ $point_types = Point::getTypes();
 
                     <!-- Descripción -->
                     <div class="mb-3">
-                        <label for="description" class="form-label">Descripción</label>
+                        <label for="description" class="form-label"><?= __('points.description') ?></label>
                         <textarea class="form-control" 
                                   id="description" 
                                   name="description" 
                                   rows="3"
-                                  placeholder="Describe el lugar..."><?= htmlspecialchars($form_data['description'] ?? '') ?></textarea>
+                                  placeholder="<?= __('forms.describe_place') ?>"><?= htmlspecialchars($form_data['description'] ?? '') ?></textarea>
                     </div>
 
                     <div class="row">
                         <!-- Tipo -->
                         <div class="col-md-6 mb-3">
-                            <label for="type" class="form-label">Tipo <span class="text-danger">*</span></label>
+                            <label for="type" class="form-label"><?= __('points.type') ?> <span class="text-danger">*</span></label>
                             <select class="form-select <?= isset($errors['type']) ? 'is-invalid' : '' ?>" 
                                     id="type" 
                                     name="type" 
@@ -235,7 +235,7 @@ $point_types = Point::getTypes();
 
                         <!-- Fecha -->
                         <div class="col-md-6 mb-3">
-                            <label for="visit_date" class="form-label">Fecha de Visita</label>
+                            <label for="visit_date" class="form-label"><?= __('points.visit_date') ?></label>
                             <input type="date" 
                                    class="form-control" 
                                    id="visit_date" 
@@ -247,7 +247,7 @@ $point_types = Point::getTypes();
                     <!-- Coordenadas -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="latitude" class="form-label">Latitud <span class="text-danger">*</span></label>
+                            <label for="latitude" class="form-label"><?= __('points.latitude') ?> <span class="text-danger">*</span></label>
                             <input type="number" 
                                    class="form-control <?= isset($errors['latitude']) ? 'is-invalid' : '' ?>" 
                                    id="latitude" 
@@ -261,12 +261,12 @@ $point_types = Point::getTypes();
                             <?php if (isset($errors['latitude'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['latitude']) ?></div>
                             <?php else: ?>
-                                <small class="form-text text-muted">Rango: -90 a 90</small>
+                                <small class="form-text text-muted"><?= __('forms.range') ?>: -90 a 90</small>
                             <?php endif; ?>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="longitude" class="form-label">Longitud <span class="text-danger">*</span></label>
+                            <label for="longitude" class="form-label"><?= __('points.longitude') ?> <span class="text-danger">*</span></label>
                             <input type="number" 
                                    class="form-control <?= isset($errors['longitude']) ? 'is-invalid' : '' ?>" 
                                    id="longitude" 
@@ -280,7 +280,7 @@ $point_types = Point::getTypes();
                             <?php if (isset($errors['longitude'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['longitude']) ?></div>
                             <?php else: ?>
-                                <small class="form-text text-muted">Rango: -180 a 180</small>
+                                <small class="form-text text-muted"><?= __('forms.range') ?>: -180 a 180</small>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -292,7 +292,7 @@ $point_types = Point::getTypes();
                                 <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
                                 <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
                             </svg>
-                            Ubicación en el Mapa
+                            <?= __('forms.map_location') ?>
                         </label>
                         
                         <!-- Buscador de lugares -->
@@ -305,10 +305,10 @@ $point_types = Point::getTypes();
                             <input type="text" 
                                    class="form-control" 
                                    id="placeSearch" 
-                                   placeholder="Buscar ciudad, lugar o dirección..."
+                                   placeholder="<?= __('points.search_place') ?>"
                                    autocomplete="off">
                             <button class="btn btn-outline-secondary" type="button" id="searchBtn">
-                                Buscar
+                                <?= __('points.search') ?>
                             </button>
                         </div>
                         <div id="searchResults" class="list-group mb-2" style="display: none; max-height: 200px; overflow-y: auto;"></div>
@@ -320,13 +320,13 @@ $point_types = Point::getTypes();
                                 <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533z"/>
                                 <path d="M9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                             </svg>
-                            Busca un lugar o haz clic en el mapa para seleccionar la ubicación
+                            <?= __('points.click_map_to_select') ?>
                         </small>
                     </div>
 
                     <!-- Imagen con Drag & Drop -->
                     <div class="mb-3">
-                        <label for="image" class="form-label">Imagen</label>
+                        <label for="image" class="form-label"><?= __('points.image') ?></label>
                         
                         <!-- Área de Drag & Drop -->
                         <div id="dropArea" class="border rounded p-4 text-center <?= isset($errors['image']) ? 'border-danger' : 'border-secondary' ?>" 
@@ -336,15 +336,15 @@ $point_types = Point::getTypes();
                                     <path fill-rule="evenodd" d="M4.406 1.342A5.53 5.53 0 0 1 8 0c2.69 0 4.923 2 5.166 4.579C14.758 4.804 16 6.137 16 7.773 16 9.569 14.502 11 12.687 11H10a.5.5 0 0 1 0-1h2.688C13.979 10 15 8.988 15 7.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 2.825 10.328 1 8 1a4.53 4.53 0 0 0-2.941 1.1c-.757.652-1.153 1.438-1.153 2.055v.448l-.445.049C2.064 4.805 1 5.952 1 7.318 1 8.785 2.23 10 3.781 10H6a.5.5 0 0 1 0 1H3.781C1.708 11 0 9.366 0 7.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383"/>
                                     <path fill-rule="evenodd" d="M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708z"/>
                                 </svg>
-                                <p class="mb-2 fw-bold">Arrastra y suelta tu imagen aquí</p>
-                                <p class="mb-2 text-muted">o</p>
+                                <p class="mb-2 fw-bold"><?= __('points.drag_drop_image') ?></p>
+                                <p class="mb-2 text-muted"><?= __('points.or') ?></p>
                                 <button type="button" class="btn btn-outline-primary btn-sm" id="selectFileBtn">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder2-open me-1" viewBox="0 0 16 16">
                                         <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v.64c.57.265.94.876.856 1.546l-.64 5.124A2.5 2.5 0 0 1 12.733 15H3.266a2.5 2.5 0 0 1-2.481-2.19l-.64-5.124A1.5 1.5 0 0 1 1 6.14zM2 6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5a.5.5 0 0 0-.5.5zm-.367 1a.5.5 0 0 0-.496.562l.64 5.124A1.5 1.5 0 0 0 3.266 14h9.468a1.5 1.5 0 0 0 1.489-1.314l.64-5.124A.5.5 0 0 0 14.367 7z"/>
                                     </svg>
-                                    Seleccionar archivo
+                                    <?= __('points.select_file') ?>
                                 </button>
-                                <p class="small text-muted mt-2 mb-0">JPG, JPEG, PNG - Máximo <?php echo round(MAX_UPLOAD_SIZE / 1024 / 1024, 2); ?>MB</p>
+                                <p class="small text-muted mt-2 mb-0"><?= __('points.max_upload_note') ?> <?php echo round(MAX_UPLOAD_SIZE / 1024 / 1024, 2); ?>MB</p>
                             </div>
                             <div id="previewArea" style="display: none;">
                                 <img id="imagePreview" src="" alt="Vista previa" class="img-thumbnail mb-2" style="max-width: 100%; max-height: 300px;">
@@ -354,7 +354,7 @@ $point_types = Point::getTypes();
                                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
                                         <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
                                     </svg>
-                                    Quitar imagen
+                                    <?= __('common.remove') ?>
                                 </button>
                             </div>
                         </div>
@@ -372,23 +372,23 @@ $point_types = Point::getTypes();
 
                         <?php if ($is_edit && !empty($point['image_path'])): ?>
                             <div class="mt-3">
-                                <label class="form-label">Imagen actual:</label><br>
+                                <label class="form-label"><?= __('points.current_image') ?>:</label><br>
                                 <img src="<?= BASE_URL ?>/<?= htmlspecialchars($point['image_path']) ?>" 
                                      alt="Imagen actual" 
                                      class="img-thumbnail" 
                                      style="max-width: 200px;">
-                                <p class="small text-muted mt-1">Sube una nueva imagen para reemplazarla</p>
+                                <p class="small text-muted mt-1"><?= __('points.upload_new_replace') ?></p>
                             </div>
                         <?php endif; ?>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="points.php<?= isset($_GET['trip_id']) ? '?trip_id=' . $_GET['trip_id'] : '' ?>" class="btn btn-secondary">Cancelar</a>
+                        <a href="points.php<?= isset($_GET['trip_id']) ? '?trip_id=' . $_GET['trip_id'] : '' ?>" class="btn btn-secondary"><?= __('common.cancel') ?></a>
                         <button type="submit" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save me-1" viewBox="0 0 16 16">
                                 <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"/>
                             </svg>
-                            <?= $is_edit ? 'Guardar Cambios' : 'Crear Punto' ?>
+                            <?= $is_edit ? __('forms.save_changes') : __('points.create_point') ?>
                         </button>
                     </div>
                 </form>
@@ -405,33 +405,33 @@ $point_types = Point::getTypes();
                         <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533z"/>
                         <path d="M9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
                     </svg>
-                    Ayuda
+                    <?= __('forms.help') ?>
                 </h5>
             </div>
             <div class="card-body">
-                <h6>Campos obligatorios</h6>
+                <h6><?= __('forms.required_fields') ?></h6>
                 <ul>
-                    <li><strong>Viaje:</strong> A qué viaje pertenece</li>
-                    <li><strong>Título:</strong> Nombre del lugar</li>
-                    <li><strong>Tipo:</strong> Categoría del punto</li>
-                    <li><strong>Coordenadas:</strong> Ubicación exacta</li>
+                    <li><strong><?= __('points.trip') ?>:</strong> <?= __('points.belongs_to_trip') ?></li>
+                    <li><strong><?= __('points.title_field') ?>:</strong> <?= __('points.place_name') ?></li>
+                    <li><strong><?= __('points.type') ?>:</strong> <?= __('points.point_category') ?></li>
+                    <li><strong><?= __('points.coordinates') ?>:</strong> <?= __('points.exact_location') ?></li>
                 </ul>
 
-                <h6 class="mt-3">Tipos de puntos</h6>
+                <h6 class="mt-3"><?= __('points.point_types_title') ?></h6>
                 <ul class="list-unstyled point-types-list">
-                    <li><?= Point::getSvgIcon('stay', 16) ?> <strong>Alojamiento:</strong> Hoteles, hostales</li>
-                    <li><?= Point::getSvgIcon('visit', 16) ?> <strong>Punto de Visita:</strong> Atracciones turísticas</li>
-                    <li><?= Point::getSvgIcon('food', 16) ?> <strong>Restaurante:</strong> Lugares de comida</li>
+                    <li><?= Point::getSvgIcon('stay', 16) ?> <strong><?= __('points.types.stay') ?>:</strong> <?= __('points.hotels_hostels') ?></li>
+                    <li><?= Point::getSvgIcon('visit', 16) ?> <strong><?= __('points.types.visit') ?>:</strong> <?= __('points.tourist_attractions') ?></li>
+                    <li><?= Point::getSvgIcon('food', 16) ?> <strong><?= __('points.types.food') ?>:</strong> <?= __('points.food_places') ?></li>
                 </ul>
 
-                <h6 class="mt-3">Obtener coordenadas</h6>
-                <p class="small">Usa el mapa interactivo del formulario:</p>
+                <h6 class="mt-3"><?= __('points.get_coordinates') ?></h6>
+                <p class="small"><?= __('points.use_interactive_map') ?></p>
                 <ul class="small">
-                    <li>🖱️ Haz clic en el mapa para colocar el marcador</li>
-                    <li>🔄 Arrastra el marcador para ajustar la posición</li>
-                    <li>✏️ Las coordenadas se actualizan automáticamente</li>
+                    <li>🗿️ <?= __('points.click_map_place_marker') ?></li>
+                    <li>🔄 <?= __('points.drag_marker_adjust') ?></li>
+                    <li>✏️ <?= __('points.coordinates_auto_update') ?></li>
                 </ul>
-                <p class="small mt-2">También puedes usar <a href="https://www.google.com/maps" target="_blank">Google Maps</a> y copiar las coordenadas manualmente.</p>
+                <p class="small mt-2"><?= __('points.also_use_google_maps') ?> <a href="https://www.google.com/maps" target="_blank">Google Maps</a> <?= __('points.copy_coordinates_manually') ?></p>
             </div>
         </div>
     </div>
@@ -538,7 +538,7 @@ $(document).ready(function() {
         // Validar tipo de archivo
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
         if (!validTypes.includes(file.type)) {
-            alert('Por favor, selecciona una imagen válida (JPG, JPEG, PNG o GIF)');
+            alert('<?= __('points.invalid_image_format') ?>');
             return;
         }
 
@@ -546,7 +546,7 @@ $(document).ready(function() {
         const maxSize = <?php echo MAX_UPLOAD_SIZE; ?>; // Tomado de config.php
         if (file.size > maxSize) {
             const maxMB = (maxSize / 1024 / 1024).toFixed(2);
-            alert(`El archivo es demasiado grande. El tamaño máximo es ${maxMB}MB`);
+            alert(`<?= __('points.file_too_large') ?> ${maxMB}MB`);
             return;
         }
 

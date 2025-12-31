@@ -1,6 +1,7 @@
 <?php
 // Cargar configuración para las constantes
 require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/version.php';
 ?>
 <!DOCTYPE html>
 <html lang="<?= current_lang() ?>">
@@ -24,7 +25,7 @@ require_once __DIR__ . '/config/config.php';
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/plugins/MarkerCluster.Default.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?v=18">
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?v=<?php echo $version; ?>">
     
     <?php 
     // Insertar código de analytics u otros scripts personalizados
@@ -117,11 +118,11 @@ require_once __DIR__ . '/config/config.php';
             <!-- Lista de viajes -->
             <div>
                 <div class="trips-header">
-                    <h6 class="text-muted text-uppercase small mb-0"><?= __('map.trips') ?></h6>
+                    <h6 class="text-muted text-uppercase small mb-0"><?= __('map.trips_section') ?></h6>
                     <div class="trips-filters">
-                        <button type="button" class="filter-btn active" id="filterAll" title="<?= __('map.filter_all_title') ?>"><?= __('map.filter_all') ?></button>
-                        <button type="button" class="filter-btn" id="filterPast" title="<?= __('map.filter_past_title') ?>"><?= __('map.filter_past') ?></button>
-                        <button type="button" class="filter-btn" id="filterNone" title="<?= __('map.filter_none_title') ?>"><?= __('map.filter_none') ?></button>
+                        <button type="button" class="filter-btn active" id="filterAll" title="<?= __('map.show_all_trips') ?>"><?= __('map.filter_all') ?></button>
+                        <button type="button" class="filter-btn" id="filterPast" title="<?= __('map.show_past_trips') ?>"><?= __('map.filter_past') ?></button>
+                        <button type="button" class="filter-btn" id="filterNone" title="<?= __('map.hide_all_trips') ?>"><?= __('map.filter_none') ?></button>
                     </div>
                 </div>
                 <div id="tripsList">
@@ -219,7 +220,7 @@ require_once __DIR__ . '/config/config.php';
     </script>
     
     <!-- i18n JS -->
-    <script src="<?= ASSETS_URL ?>/js/i18n.js"></script>
+    <script src="<?= ASSETS_URL ?>/js/i18n.js?v=<?php echo $version; ?>"></script>
     
     <!-- Inicializar i18n -->
     <script>
@@ -244,7 +245,7 @@ require_once __DIR__ . '/config/config.php';
     </script>
     
     <!-- Public Map JS -->
-    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=15"></script>
+    <script src="<?= ASSETS_URL ?>/js/public_map.js?v=<?php echo $version; ?>"></script>
     
     <!-- Lightbox para imágenes -->
     <div id="imageLightbox" class="lightbox" style="display: none;">

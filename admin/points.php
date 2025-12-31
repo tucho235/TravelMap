@@ -33,10 +33,10 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
             require_once __DIR__ . '/../src/helpers/FileHelper.php';
             FileHelper::deleteFile($point['image_path']);
         }
-        $message = 'Punto de interés eliminado correctamente';
+        $message = __('points.deleted_success');
         $message_type = 'success';
     } else {
-        $message = 'Error al eliminar el punto de interés';
+        $message = __('points.error_deleting');
         $message_type = 'danger';
     }
 }
@@ -64,7 +64,7 @@ $point_types = Point::getTypes();
                 <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
                 <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
             </svg>
-            Puntos de Interés
+            <?= __('points.title') ?>
         </h1>
     </div>
     <div class="col-md-6 text-end">
@@ -73,7 +73,7 @@ $point_types = Point::getTypes();
                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
             </svg>
-            Nuevo Punto
+            <?= __('points.new_point') ?>
         </a>
     </div>
 </div>
@@ -96,12 +96,12 @@ $point_types = Point::getTypes();
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter me-1" viewBox="0 0 16 16">
                                 <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
                             </svg>
-                            Filtrar por viaje:
+                            <?= __('points.filter_by_trip') ?>
                         </label>
                     </div>
                     <div class="col">
                         <select name="trip_id" class="form-select" onchange="this.form.submit()">
-                            <option value="">Todos los viajes</option>
+                            <option value=""><?= __('points.all_trips') ?></option>
                             <?php foreach ($trips as $trip): ?>
                                 <option value="<?= $trip['id'] ?>" <?= $filter_trip_id == $trip['id'] ? 'selected' : '' ?>>
                                     <?= htmlspecialchars($trip['title']) ?>
@@ -111,7 +111,7 @@ $point_types = Point::getTypes();
                     </div>
                     <?php if ($filter_trip_id): ?>
                         <div class="col-auto">
-                            <a href="points.php" class="btn btn-sm btn-outline-secondary">Limpiar filtro</a>
+                            <a href="points.php" class="btn btn-sm btn-outline-secondary"><?= __('points.clear_filter') ?></a>
                         </div>
                     <?php endif; ?>
                 </form>
@@ -129,24 +129,24 @@ $point_types = Point::getTypes();
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="bi bi-geo text-muted mb-3" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M8 1a3 3 0 1 0 0 6 3 3 0 0 0 0-6M4 4a4 4 0 1 1 4.5 3.969V13.5a.5.5 0 0 1-1 0V7.97A4 4 0 0 1 4 4"/>
                         </svg>
-                        <h4 class="text-muted">No hay puntos de interés registrados</h4>
+                        <h4 class="text-muted"><?= __('points.no_points') ?></h4>
                         <p class="text-muted">
-                            <?= $filter_trip_id ? 'Este viaje no tiene puntos de interés' : 'Comienza creando tu primer punto' ?>
+                            <?= $filter_trip_id ? __('common.info') : __('messages.processing') ?>
                         </p>
-                        <a href="point_form.php<?= $filter_trip_id ? '?trip_id=' . $filter_trip_id : '' ?>" class="btn btn-primary">Crear Punto</a>
+                        <a href="point_form.php<?= $filter_trip_id ? '?trip_id=' . $filter_trip_id : '' ?>" class="btn btn-primary"><?= __('points.new_point') ?></a>
                     </div>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 80px;">Imagen</th>
-                                    <th>Título</th>
-                                    <th>Viaje</th>
-                                    <th>Tipo</th>
-                                    <th>Coordenadas</th>
-                                    <th>Fecha</th>
-                                    <th style="width: 150px;" class="text-end">Acciones</th>
+                                    <th style="width: 80px;"><?= __('points.image') ?></th>
+                                    <th><?= __('points.title_field') ?></th>
+                                    <th><?= __('points.trip') ?></th>
+                                    <th><?= __('points.type') ?></th>
+                                    <th><?= __('points.coordinates') ?></th>
+                                    <th><?= __('common.date') ?></th>
+                                    <th style="width: 150px;" class="text-end"><?= __('common.actions') ?></th>
                                 </tr>
                             </thead>
                             <tbody>

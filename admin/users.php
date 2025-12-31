@@ -24,23 +24,23 @@ if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])
     
     // Validar que no se pueda eliminar el último usuario
     if ($totalUsers <= 1) {
-        $_SESSION['error_message'] = 'No se puede eliminar el último usuario del sistema';
+        $_SESSION['error_message'] = __('users.cannot_delete_last');
         header('Location: users.php');
         exit;
     }
     
     // Validar que no se elimine a sí mismo
     if ($userId === $currentUserId) {
-        $_SESSION['error_message'] = 'No puedes eliminar tu propio usuario';
+        $_SESSION['error_message'] = __('users.cannot_delete_self');
         header('Location: users.php');
         exit;
     }
     
     // Eliminar usuario
     if ($userModel->delete($userId)) {
-        $_SESSION['success_message'] = 'Usuario eliminado correctamente';
+        $_SESSION['success_message'] = __('users.deleted_success');
     } else {
-        $_SESSION['error_message'] = 'Error al eliminar el usuario';
+        $_SESSION['error_message'] = __('users.error_deleting');
     }
     
     header('Location: users.php');
@@ -56,9 +56,9 @@ require_once __DIR__ . '/../includes/header.php';
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-people me-2" viewBox="0 0 16 16">
                 <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
             </svg>
-            Gestión de Usuarios
+            <?= __('users.management') ?>
         </h1>
-        <p class="text-muted mb-0">Administra los usuarios del sistema</p>
+        <p class="text-muted mb-0"><?= __('users.manage_users') ?></p>
     </div>
     <div class="col-md-4 text-end">
         <a href="user_form.php" class="btn btn-primary">
@@ -66,7 +66,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
                 <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
             </svg>
-            Nuevo Usuario
+            <?= __('users.new_user') ?>
         </a>
     </div>
 </div>
@@ -105,9 +105,9 @@ require_once __DIR__ . '/../includes/header.php';
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Usuario</th>
-                                    <th>Fecha de Creación</th>
-                                    <th class="text-end">Acciones</th>
+                                    <th><?= __('users.username') ?></th>
+                                    <th><?= __('users.created_at') ?></th>
+                                    <th class="text-end"><?= __('common.actions') ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -121,7 +121,7 @@ require_once __DIR__ . '/../includes/header.php';
                                             </svg>
                                             <strong><?= htmlspecialchars($user['username']) ?></strong>
                                             <?php if ($user['id'] == ($_SESSION['user_id'] ?? null)): ?>
-                                                <span class="badge bg-primary ms-2">Tú</span>
+                                                <span class="badge bg-primary ms-2"><?= __('common.you') ?></span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -132,7 +132,7 @@ require_once __DIR__ . '/../includes/header.php';
                                         <td class="text-end">
                                             <a href="user_form.php?id=<?= $user['id'] ?>" 
                                                class="btn btn-sm btn-outline-primary" 
-                                               title="Editar usuario">
+                                               title="<?= __('users.edit_user') ?>">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
                                                     <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
                                                 </svg>
@@ -142,7 +142,7 @@ require_once __DIR__ . '/../includes/header.php';
                                                 <button type="button" 
                                                         class="btn btn-sm btn-outline-danger" 
                                                         onclick="confirmDelete(<?= $user['id'] ?>, '<?= htmlspecialchars($user['username']) ?>')"
-                                                        title="Eliminar usuario">
+                                                        title="<?= __('users.delete_user') ?>">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                                                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
                                                         <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
@@ -152,7 +152,7 @@ require_once __DIR__ . '/../includes/header.php';
                                                 <button type="button" 
                                                         class="btn btn-sm btn-outline-secondary" 
                                                         disabled
-                                                        title="<?= $totalUsers <= 1 ? 'No se puede eliminar el último usuario' : 'No puedes eliminar tu propio usuario' ?>">
+                                                        title="<?= $totalUsers <= 1 ? __('users.cannot_delete_last') : __('users.cannot_delete_self') ?>">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                                                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
                                                         <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
