@@ -34,7 +34,7 @@
     "GVA": {"lat": 46.2380, "lng": 6.1089, "name": "Geneva"},
     "HND": {"lat": 35.5494, "lng": 139.7798, "name": "Tokyo Haneda"},
     "IST": {"lat": 41.2753, "lng": 28.7519, "name": "Istanbul"},
-    "JFK": {"lat": 40.6413, "lng": -73.7781, "name": "New York JFK"},
+    "JFK": {"lat": 40.6459, "lng": -73.7797, "name": "New York JFK"},
     "JUJ": {"lat": -24.3928, "lng": -65.0978, "name": "Jujuy"},
     "KUL": {"lat": 2.7456, "lng": 101.7099, "name": "Kuala Lumpur"},
     "LCY": {"lat": 51.5048, "lng": 0.0495, "name": "London City"},

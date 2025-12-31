@@ -26,6 +26,27 @@ body {
     z-index: 1;
 }
 
+/* Override MapLibre default grab cursor */
+#map {
+    cursor: default;
+}
+
+#map .maplibregl-canvas-container,
+#map .maplibregl-canvas,
+#map .maplibregl-map {
+    cursor: inherit !important;
+}
+
+/* Markers should always show pointer cursor */
+.maplibregl-marker {
+    cursor: pointer !important;
+}
+
+/* Controls should show pointer cursor */
+.maplibregl-ctrl button {
+    cursor: pointer !important;
+}
+
 /* ========== Botón flotante para abrir panel ========== */
 .floating-menu-toggle {
     position: fixed;
@@ -646,25 +667,64 @@ body {
 }
 
 .point-marker-inner svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
 }
 
-/* ========== Popups personalizados ========== */
-.leaflet-popup-content-wrapper {
+.point-marker-inner .point-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+/* Icons inherit color from .point-icon */
+.point-marker-inner .point-icon svg {
+    stroke: currentColor;
+    fill: none;
+}
+
+/* Stay marker (red background) - white icon */
+.point-marker-inner.point-type-stay .point-icon {
+    color: white;
+}
+
+/* Visit marker (teal background) - white icon, camera body uses fill */
+.point-marker-inner.point-type-visit .point-icon {
+    color: white;
+}
+
+.point-marker-inner.point-type-visit .point-icon svg path[fill="currentColor"] {
+    fill: currentColor;
+}
+
+/* Food marker (yellow background) - dark icon for contrast */
+.point-marker-inner.point-type-food .point-icon {
+    color: #1e293b;
+}
+
+/* ========== MapLibre GL Popups ========== */
+.maplibregl-popup-content {
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
     padding: 0;
     overflow: hidden;
-}
-
-.leaflet-popup-content {
-    margin: 0;
     min-width: 250px;
 }
 
-.custom-popup .leaflet-popup-content-wrapper {
-    padding: 0;
+.maplibregl-popup-close-button {
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+    color: #666;
+    right: 4px;
+    top: 4px;
+}
+
+.maplibregl-popup-close-button:hover {
+    color: #333;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
 }
 
 .point-popup {
@@ -692,6 +752,29 @@ body {
 .badge svg {
     vertical-align: middle;
     margin-right: 4px;
+    width: 14px;
+    height: 14px;
+}
+
+/* Point type badges - ensure icons are visible */
+.popup-content .badge {
+    color: white;
+}
+
+.popup-content .badge svg {
+    stroke: currentColor;
+    fill: none;
+}
+
+/* Visit badge uses fill for camera body */
+.popup-content .badge svg path[fill="currentColor"] {
+    fill: currentColor;
+}
+
+/* Yellow badge needs dark text */
+.popup-content .badge[style*="FFE66D"],
+.popup-content .badge[style*="ffe66d"] {
+    color: #1e293b;
 }
 
 .popup-trip {
@@ -723,78 +806,60 @@ body {
     padding: 8px 12px;
 }
 
-/* ========== Leaflet overrides ========== */
-.leaflet-popup-tip {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.leaflet-popup-close-button {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 24px !important;
-    padding: 0 !important;
-    color: #999 !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-}
-
-.leaflet-popup-close-button:hover {
-    color: #333 !important;
-}
-
-/* ========== Controles del mapa ========== */
-.leaflet-control-zoom {
-    border: none !important;
+/* ========== MapLibre GL Controls ========== */
+.maplibregl-ctrl-group {
     border-radius: 6px !important;
     overflow: hidden;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
     border: 1px solid #e2e8f0 !important;
 }
 
-.leaflet-control-zoom a {
+.maplibregl-ctrl-group button {
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(8px);
     border: none !important;
     border-bottom: 1px solid #e2e8f0 !important;
     width: 32px !important;
     height: 32px !important;
-    line-height: 32px !important;
-    font-size: 16px !important;
-    font-weight: 300 !important;
-    color: #475569 !important;
     transition: all 0.15s ease !important;
 }
 
-.leaflet-control-zoom a:last-child {
+.maplibregl-ctrl-group button:last-child {
     border-bottom: none !important;
 }
 
-.leaflet-control-zoom a:hover {
+.maplibregl-ctrl-group button:hover {
     background-color: #f1f5f9 !important;
-    color: #1e293b !important;
 }
 
-.leaflet-control-zoom a:active {
+.maplibregl-ctrl-group button:active {
     background-color: #e2e8f0 !important;
 }
 
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: brightness(0.4);
+}
+
 /* Attribution */
-.leaflet-control-attribution {
+.maplibregl-ctrl-attrib {
     background: rgba(255, 255, 255, 0.85) !important;
     backdrop-filter: blur(4px);
     font-size: 10px !important;
     color: #94a3b8 !important;
     padding: 2px 6px !important;
-    border-radius: 4px 0 0 0 !important;
 }
 
-.leaflet-control-attribution a {
+.maplibregl-ctrl-attrib a {
     color: #64748b !important;
 }
 
-.leaflet-control-attribution a:hover {
+.maplibregl-ctrl-attrib a:hover {
     color: #1e293b !important;
+}
+
+/* MapLibre popup tip */
+.maplibregl-popup-tip {
+    border-top-color: white !important;
 }
 
 /* ========== Responsive ========== */

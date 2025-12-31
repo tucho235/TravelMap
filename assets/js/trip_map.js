@@ -11,7 +11,7 @@
     let map;
     let drawnItems;
     let drawControl;
-    let pointMarkers = L.layerGroup();
+    let pointMarkers = null; // Se inicializa en initMap()
     let routesData = [];
     let appConfig = null; // Configuración cargada desde el servidor
 
@@ -126,6 +126,7 @@
         map.addLayer(drawnItems);
 
         // Grupo para los marcadores de puntos
+        pointMarkers = L.layerGroup();
         map.addLayer(pointMarkers);
 
         // Configurar controles de dibujo

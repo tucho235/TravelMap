@@ -53,6 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         
         // Configuraciones del mapa
+        if (isset($_POST['map_style'])) {
+            $updates['map_style'] = [
+                'value' => $_POST['map_style'],
+                'type' => 'string'
+            ];
+        }
+        
         // Checkbox: always process (unchecked = not sent in POST)
         $updates['map_cluster_enabled'] = [
             'value' => isset($_POST['map_cluster_enabled']) && $_POST['map_cluster_enabled'] === '1',
@@ -438,8 +445,108 @@ require_once __DIR__ . '/../includes/header.php';
     <div class="tab-content" id="tab-map">
         <div class="admin-card" style="margin-bottom: 24px;">
             <div class="admin-card-header">
-                <h3 class="admin-card-title"><?= __('settings.map_configuration') ?></h3>
+                <h3 class="admin-card-title"><?= __('settings.map_style') ?? 'Map Style' ?></h3>
+            </div>
+            <div class="admin-card-body">
+                <?php
+                $mapStyles = [
+                    'voyager' => [
+                        'name' => __('settings.map_style_voyager') ?? 'Voyager (Colorful)',
+                        'description' => __('settings.map_style_voyager_desc') ?? 'Classic look with green vegetation, brown terrain, blue water'
+                    ],
+                    'positron' => [
+                        'name' => __('settings.map_style_positron') ?? 'Positron (Light)',
+                        'description' => __('settings.map_style_positron_desc') ?? 'Light grey minimal style'
+                    ],
+                    'dark-matter' => [
+                        'name' => __('settings.map_style_dark_matter') ?? 'Dark Matter',
+                        'description' => __('settings.map_style_dark_matter_desc') ?? 'Dark theme for night mode'
+                    ],
+                    'osm-liberty' => [
+                        'name' => __('settings.map_style_osm_liberty') ?? 'OSM Liberty',
+                        'description' => __('settings.map_style_osm_liberty_desc') ?? 'OpenStreetMap classic style'
+                    ]
+                ];
+                $currentMapStyle = $currentSettings['map_style'] ?? 'voyager';
+                ?>
+                <div class="form-group">
+                    <label for="map_style" class="form-label"><?= __('settings.map_basemap_style') ?? 'Basemap Style' ?></label>
+                    <select class="form-control form-select" id="map_style" name="map_style" required>
+                        <?php foreach ($mapStyles as $styleKey => $styleInfo): ?>
+                        <option value="<?= htmlspecialchars($styleKey) ?>" <?= $styleKey === $currentMapStyle ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($styleInfo['name']) ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="form-hint" id="map_style_description">
+                        <?= htmlspecialchars($mapStyles[$currentMapStyle]['description'] ?? '') ?>
+                    </div>
+                </div>
+                
+                <div class="map-style-preview" style="margin-top: 16px;">
+                    <div class="map-style-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                        <?php foreach ($mapStyles as $styleKey => $styleInfo): 
+                            $isActive = $styleKey === $currentMapStyle;
+                        ?>
+                        <label class="map-style-card <?= $isActive ? 'active' : '' ?>" for="style_<?= $styleKey ?>" data-style="<?= $styleKey ?>">
+                            <input type="radio" name="map_style_radio" id="style_<?= $styleKey ?>" value="<?= $styleKey ?>" <?= $isActive ? 'checked' : '' ?> style="display: none;">
+                            <div class="style-preview-box style-<?= $styleKey ?>"></div>
+                            <span class="style-name"><?= htmlspecialchars($styleInfo['name']) ?></span>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <style>
+                    .map-style-card {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        padding: 10px;
+                        border: 2px solid var(--admin-border);
+                        border-radius: 8px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+                    .map-style-card:hover {
+                        border-color: var(--admin-primary);
+                        background: rgba(37, 99, 235, 0.05);
+                    }
+                    .map-style-card.active {
+                        border-color: var(--admin-primary);
+                        background: rgba(37, 99, 235, 0.1);
+                    }
+                    .style-preview-box {
+                        width: 100%;
+                        height: 60px;
+                        border-radius: 4px;
+                        margin-bottom: 8px;
+                    }
+                    .style-voyager {
+                        background: linear-gradient(135deg, #a8d5a2 0%, #f5deb3 50%, #87ceeb 100%);
+                    }
+                    .style-positron {
+                        background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 50%, #ddd 100%);
+                    }
+                    .style-dark-matter {
+                        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f0f 100%);
+                    }
+                    .style-osm-liberty {
+                        background: linear-gradient(135deg, #c5e8b7 0%, #fff2cc 50%, #b3d9ff 100%);
+                    }
+                    .style-name {
+                        font-size: 12px;
+                        font-weight: 500;
+                        text-align: center;
+                    }
+                </style>
+            </div>
         </div>
+        
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title"><?= __('settings.map_configuration') ?></h3>
+            </div>
             <div class="admin-card-body">
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label class="form-check form-switch">
@@ -457,7 +564,7 @@ require_once __DIR__ . '/../includes/header.php';
                                value="<?= htmlspecialchars($currentSettings['map_cluster_max_radius'] ?? 30) ?>"
                                min="10" max="200" required>
                         <div class="form-hint"><?= __('settings.cluster_max_radius_description') ?></div>
-            </div>
+                    </div>
             
                     <div class="form-group">
                         <label for="map_cluster_disable_at_zoom" class="form-label"><?= __('settings.disable_clustering_at_zoom') ?></label>
@@ -467,8 +574,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <div class="form-hint"><?= __('settings.disable_clustering_description') ?></div>
                     </div>
                 </div>
-                </div>
             </div>
+        </div>
             
         <div class="admin-card">
             <div class="admin-card-header">
@@ -840,6 +947,43 @@ document.querySelectorAll('input[type="color"]').forEach(colorInput => {
         textInput.value = this.value.toUpperCase();
     });
     }
+});
+
+// Map style card selection
+const mapStyleDescriptions = {
+    'voyager': '<?= addslashes(__('settings.map_style_voyager_desc') ?? 'Classic look with green vegetation, brown terrain, blue water') ?>',
+    'positron': '<?= addslashes(__('settings.map_style_positron_desc') ?? 'Light grey minimal style') ?>',
+    'dark-matter': '<?= addslashes(__('settings.map_style_dark_matter_desc') ?? 'Dark theme for night mode') ?>',
+    'osm-liberty': '<?= addslashes(__('settings.map_style_osm_liberty_desc') ?? 'OpenStreetMap classic style') ?>'
+};
+
+document.querySelectorAll('.map-style-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const style = this.dataset.style;
+        
+        // Update select
+        document.getElementById('map_style').value = style;
+        
+        // Update description
+        document.getElementById('map_style_description').textContent = mapStyleDescriptions[style] || '';
+        
+        // Update active state on cards
+        document.querySelectorAll('.map-style-card').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+    });
+});
+
+// Sync select with cards
+document.getElementById('map_style').addEventListener('change', function() {
+    const style = this.value;
+    
+    // Update description
+    document.getElementById('map_style_description').textContent = mapStyleDescriptions[style] || '';
+    
+    // Update active state on cards
+    document.querySelectorAll('.map-style-card').forEach(c => {
+        c.classList.toggle('active', c.dataset.style === style);
+    });
 });
 
 // Convert values before submit

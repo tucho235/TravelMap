@@ -19,10 +19,8 @@ require_once __DIR__ . '/version.php';
     <!-- Bootstrap 5 CSS -->
     <link href="<?= ASSETS_URL ?>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/css/leaflet.css">
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/plugins/MarkerCluster.css">
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/leaflet/plugins/MarkerCluster.Default.css">
+    <!-- MapLibre GL CSS -->
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/vendor/maplibre/maplibre-gl.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?v=<?php echo $version; ?>">
@@ -171,10 +169,14 @@ require_once __DIR__ . '/version.php';
     <!-- Bootstrap 5 JS -->
     <script src="<?= ASSETS_URL ?>/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Leaflet JS -->
-    <script src="<?= ASSETS_URL ?>/vendor/leaflet/js/leaflet.js"></script>
-    <script src="<?= ASSETS_URL ?>/vendor/leaflet/plugins/leaflet.markercluster.js"></script>
-    <script src="<?= ASSETS_URL ?>/vendor/leaflet/plugins/leaflet.curve.js"></script>
+    <!-- MapLibre GL JS -->
+    <script src="<?= ASSETS_URL ?>/vendor/maplibre/maplibre-gl.js"></script>
+    
+    <!-- deck.gl for WebGL layers (flight arcs) -->
+    <script src="<?= ASSETS_URL ?>/vendor/deckgl/deck.gl.min.js"></script>
+    
+    <!-- Supercluster for point clustering -->
+    <script src="<?= ASSETS_URL ?>/vendor/supercluster/supercluster.min.js"></script>
     
     <!-- API URL Config -->
     <script>
@@ -207,9 +209,9 @@ require_once __DIR__ . '/version.php';
 :::::::::::::::::' :::::::::::::::::::::::::::::::::::::::::::::::
 ::::::::::::::::::.:::::::::::::::::::::::::::::::::::::::::::::::
 `, 'color: rgb(64, 96, 144); font-family: monospace; font-size: 10px;');
-        console.log('%c✈️ TravelMap', 'color:rgb(64, 96, 144); font-size: 20px; font-weight: bold;');
+        console.log('%cTravelMap', 'color:rgb(64, 96, 144); font-size: 20px; font-weight: bold;');
         console.log('%cWant to contribute? Check out our GitHub! → https://github.com/fabiomb/TravelMap', 'color: #64748b; font-size: 12px;');
-        console.log('%cPRs, issues, and stars are welcome! ⭐', 'color: #64748b; font-size: 12px;');
+        console.log('%cPRs, issues, and stars are welcome!', 'color: #64748b; font-size: 12px;');
     </script>
     
     <!-- i18n JS -->
