@@ -53,12 +53,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         
         // Configuraciones del mapa
-        if (isset($_POST['map_cluster_enabled'])) {
-            $updates['map_cluster_enabled'] = [
-                'value' => $_POST['map_cluster_enabled'] === '1',
-                'type' => 'boolean'
-            ];
-        }
+        // Checkbox: always process (unchecked = not sent in POST)
+        $updates['map_cluster_enabled'] = [
+            'value' => isset($_POST['map_cluster_enabled']) && $_POST['map_cluster_enabled'] === '1',
+            'type' => 'boolean'
+        ];
         
         if (isset($_POST['map_cluster_max_radius'])) {
             $updates['map_cluster_max_radius'] = [
