@@ -172,6 +172,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             ];
         }
         
+        // Footer note toggle (checkbox)
+        $updates['show_footer_note'] = [
+            'value' => isset($_POST['show_footer_note']) && $_POST['show_footer_note'] === '1',
+            'type' => 'boolean'
+        ];
+        
+        if (isset($_POST['footer_note_text'])) {
+            $updates['footer_note_text'] = [
+                'value' => trim($_POST['footer_note_text']),
+                'type' => 'string'
+            ];
+        }
+        
         // Actualizar todas las configuraciones
         if ($settingsModel->updateMultiple($updates)) {
             $_SESSION['success_message'] = __('settings.updated_successfully');
@@ -709,6 +722,23 @@ require_once __DIR__ . '/../includes/header.php';
                               style="font-family: monospace; font-size: 12px;"
                               placeholder="<!-- Google Analytics, Facebook Pixel, etc. -->"><?= htmlspecialchars($currentSettings['site_analytics_code'] ?? '') ?></textarea>
                     <div class="form-hint"><?= __('settings.site_analytics_description') ?></div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 24px;">
+                    <label class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" id="show_footer_note" name="show_footer_note" value="1"
+                               <?= ($currentSettings['show_footer_note'] ?? true) ? 'checked' : '' ?>>
+                        <span class="form-check-label"><?= __('settings.show_footer_note') ?? 'Show footer note' ?></span>
+                    </label>
+                    <div class="form-hint" style="margin-left: 44px;"><?= __('settings.show_footer_note_description') ?? 'Display the footer note on the public map page' ?></div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 16px;">
+                    <label for="footer_note_text" class="form-label"><?= __('settings.footer_note_text') ?? 'Footer text' ?></label>
+                    <textarea class="form-control" id="footer_note_text" name="footer_note_text" rows="2"
+                              style="font-family: monospace; font-size: 12px;"
+                              placeholder="<?= __('settings.footer_note_placeholder') ?? 'Your custom footer text...' ?>"><?= htmlspecialchars($currentSettings['footer_note_text'] ?? '') ?></textarea>
+                    <div class="form-hint"><?= __('settings.footer_note_text_description') ?? 'Supports HTML. Leave empty for default (with GitHub link).' ?></div>
                 </div>
                 
                 <div class="alert alert-info alert-permanent mt-4 mb-0">

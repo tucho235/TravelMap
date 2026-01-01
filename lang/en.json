@@ -410,7 +410,12 @@
     "leaflet_feature_1": "Lightweight DOM rendering",
     "leaflet_feature_2": "Works on all devices",
     "leaflet_feature_3": "Lower memory usage",
-    "leaflet_note": "Straight flight lines only"
+    "leaflet_note": "Straight flight lines only",
+    "show_footer_note": "Show footer note",
+    "show_footer_note_description": "Display the footer note on the public map page",
+    "footer_note_text": "Footer text",
+    "footer_note_text_description": "Supports HTML for links. Leave empty for default with GitHub link.",
+    "footer_note_placeholder": "Example: TravelMap - Created by Fabio Baccaglioni"
   },
   "auth": {
     "login": "Login",

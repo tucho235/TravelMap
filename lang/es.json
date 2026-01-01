@@ -315,7 +315,9 @@
     "max_upload_description": "Tamaño máximo permitido para subir imágenes",
     "session_lifetime_hours": "Duración de Sesión (horas)",
     "session_lifetime_description": "Tiempo que permanecerá activa una sesión de usuario",
+    "timezone": "Zona Horaria",
     "timezone_description": "Zona horaria utilizada para fechas y horas del sistema",
+    "default_language": "Idioma Predeterminado",
     "default_language_description": "Idioma predeterminado del sitio para nuevos visitantes",
     "image_max_width": "Ancho Máximo (píxeles)",
     "image_max_width_description": "Las imágenes más anchas se redimensionarán automáticamente",
@@ -387,7 +389,12 @@
     "leaflet_feature_1": "Renderizado DOM ligero",
     "leaflet_feature_2": "Funciona en todos los dispositivos",
     "leaflet_feature_3": "Menor uso de memoria",
-    "leaflet_note": "Solo líneas de vuelo rectas"
+    "leaflet_note": "Solo líneas de vuelo rectas",
+    "show_footer_note": "Mostrar nota del pie de página",
+    "show_footer_note_description": "Mostrar la nota del pie de página en el mapa público",
+    "footer_note_text": "Texto del pie de página",
+    "footer_note_text_description": "Soporta HTML para enlaces. Dejar vacío para el predeterminado con enlace a GitHub.",
+    "footer_note_placeholder": "Ejemplo: TravelMap - Creado por Fabio Baccaglioni"
   },
   "original_settings": {
     "title": "Configuración del Sistema",
