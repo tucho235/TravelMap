@@ -612,7 +612,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     font-weight: 600;
     color: white;
     font-size: 13px;
@@ -634,7 +633,6 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     transform: rotate(-45deg);
 }
 
