@@ -31,7 +31,7 @@ TravelMap/
 │   ├── user_form.php        # Formulario crear/editar usuario
 │   ├── settings.php         # Configuración del sistema
 │   ├── import_airbnb.php    # Importador de reservas Airbnb
-│   └── import_flights.php   # Importador de vuelos
+│   └── import_flights.php   # Importador de vuelos FlightRadar
 │
 ├── api/                     # Endpoints REST para frontend
 │   ├── get_all_data.php     # API para obtener datos de viajes
@@ -42,21 +42,32 @@ TravelMap/
 ├── assets/                  # Recursos estáticos
 │   ├── css/                 # Estilos CSS personalizados
 │   │   ├── admin.css        # Estilos del panel de administración
-│   │   └── public_map.css   # Estilos del mapa público
+│   │   ├── public_map.css   # Estilos del mapa público
+│   │   └── public_map_leaflet.css  # Estilos para versión Leaflet
 │   ├── js/                  # JavaScript personalizado
 │   │   ├── admin.js         # Scripts del panel de administración
 │   │   ├── i18n.js          # Scripts de internacionalización
 │   │   ├── point_map.js     # Mapa para formulario de puntos
-│   │   ├── public_map.js    # Mapa público principal
+│   │   ├── public_map.js    # Mapa público (MapLibre GL + deck.gl)
+│   │   ├── public_map_leaflet.js  # Mapa público (versión Leaflet)
 │   │   └── trip_map.js      # Mapa para edición de viajes
 │   └── vendor/              # Librerías de terceros (locales)
 │       ├── bootstrap/       # Bootstrap 5 (CSS y JS)
 │       ├── jquery/          # jQuery 3.7.1
+│       ├── maplibre/        # MapLibre GL JS (mapas vectoriales WebGL)
+│       │   ├── maplibre-gl.js
+│       │   ├── maplibre-gl.css
+│       │   ├── maplibre-gl-draw.js
+│       │   └── maplibre-gl-draw.css
+│       ├── deckgl/          # deck.gl (overlays WebGL)
+│       │   └── deck.gl.min.js
+│       ├── supercluster/    # Supercluster (clustering eficiente)
+│       │   └── supercluster.min.js
 │       └── leaflet/         # Leaflet.js y plugins
 │           └── plugins/     # Plugins de Leaflet (MarkerCluster, etc.)
 │
 ├── data/                    # Datos estáticos del sistema
-│   └── airports.json        # Base de datos de aeropuertos
+│   └── airports.json        # Base de datos de aeropuertos (70+)
 │
 ├── docs/                    # Documentación del proyecto
 │   ├── README.md            # Documentación general
@@ -81,11 +92,13 @@ TravelMap/
 │   ├── seed_admin.php       # Crear usuario administrador inicial
 │   ├── generate_thumbnails.php      # Generar miniaturas
 │   ├── migrate_language.php         # Migración de idiomas
+│   ├── migrate_map_style.php        # Migración de estilos de mapa
 │   ├── migrate_site_settings.php    # Migración de configuración
 │   ├── migrate_image_settings.php   # Migración de ajustes de imagen
 │   ├── migrate_thumbnail_settings.php  # Migración de miniaturas
 │   ├── migration_settings.sql       # SQL de configuración
 │   ├── migration_language.sql       # SQL de idiomas
+│   ├── migration_map_style.sql      # SQL de estilos de mapa
 │   ├── migration_site_settings.sql  # SQL del sitio
 │   ├── migration_image_settings.sql # SQL de imágenes
 │   ├── migration_thumbnail_settings.sql  # SQL de miniaturas
@@ -102,7 +115,8 @@ TravelMap/
 ├── index.php                # Página pública (visualizador de mapas)
 ├── login.php                # Página de inicio de sesión
 ├── logout.php               # Cerrar sesión
-├── version.php              # Versión actual del sistema
+├── sw.js                    # Service Worker para caché de tiles
+├── version.php              # Versión actual del sistema (1.0.67)
 ├── database.sql             # Script SQL para crear base de datos
 ├── instructions.md          # Documentación del proyecto
 ├── ESTRUCTURA.md            # Este archivo
@@ -137,6 +151,48 @@ TravelMap/
 | `/api/geocode.php` | GET | Geocodificación de direcciones |
 | `/api/import_airbnb_point.php` | POST | Importa punto desde URL de Airbnb |
 
+## Importadores (admin/)
+
+| Archivo | Descripción |
+|---------|-------------|
+| `import_flights.php` | Importa vuelos desde CSV de FlightRadar/FlightDiary |
+| `import_airbnb.php` | Importa estadías desde CSV de Airbnb |
+
+## Motor de Mapas
+
+TravelMap utiliza dos motores de mapas:
+
+### MapLibre GL + deck.gl (Principal)
+- **MapLibre GL JS**: Renderizado vectorial WebGL de alto rendimiento
+- **deck.gl**: Overlays WebGL para arcos de vuelo animados
+- **Supercluster**: Clustering eficiente del lado del cliente
+- **Estilos disponibles**: Positron, Voyager, Dark Matter, OSM Liberty
+
+### Leaflet (Alternativo/Respaldo)
+- **Leaflet.js**: Motor de mapas raster tradicional
+- **Leaflet.markercluster**: Clustering de marcadores
+- **Leaflet.draw**: Editor de geometrías
+
+## Service Worker (sw.js)
+
+Proporciona caché de tiles del mapa para:
+- Carga más rápida de tiles visitados
+- Soporte offline parcial
+- Actualización en segundo plano
+- Límite de ~100MB / 2000 tiles
+
+### Dominios cacheados:
+- basemaps.cartocdn.com
+- tiles.openfreemap.org
+- api.maptiler.com
+- tile.openstreetmap.org
+
+## Datos Estáticos (data/)
+
+| Archivo | Descripción |
+|---------|-------------|
+| `airports.json` | Base de datos de 70+ aeropuertos con códigos IATA y coordenadas |
+
 ## Seguridad
 
 - **uploads/**: Debe tener permisos de escritura pero NO debe permitir ejecución de PHP
@@ -152,6 +208,14 @@ El sistema soporta múltiples idiomas:
 - `i18n.js` maneja las traducciones en el frontend
 - Idiomas soportados: Español (es), Inglés (en)
 
+## Optimizaciones de Rendimiento
+
+- **WebGL Rendering**: MapLibre GL + deck.gl para renderizado eficiente
+- **Tile Caching**: Service Worker para caché de tiles
+- **Idle Detection**: Reducción de uso GPU cuando no hay interacción
+- **Throttled Updates**: Actualizaciones de clusters limitadas a 100ms
+- **Supercluster**: Clustering del lado del cliente para miles de puntos
+
 ## Notas
 
 - Todas las librerías de terceros están en `assets/vendor/`
@@ -159,3 +223,4 @@ El sistema soporta múltiples idiomas:
 - Las miniaturas se generan automáticamente en `uploads/points/thumbs/`
 - El punto de entrada principal es `index.php` para el público y `admin/` para administradores
 - La versión actual del sistema está definida en `version.php`
+- El Service Worker (`sw.js`) maneja el caché de tiles del mapa

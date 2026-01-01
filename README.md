@@ -1,4 +1,4 @@
-# TravelMap - Diario de Viajes Interactivo V 1.0
+# TravelMap - Diario de Viajes Interactivo V 1.0.67
 
 Aplicación web completa para crear y visualizar mapas interactivos de viajes con puntos de interés, rutas georreferenciadas y gestión multimedia. Sistema desarrollado con tecnologías nativas sin dependencias de frameworks externos.
 
@@ -14,7 +14,7 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
 - **Mapas Interactivos**: Selección de coordenadas mediante click o arrastrar marcadores
 - **Gestión Multimedia**: Subida y validación de imágenes con almacenamiento organizado
 - **Panel de Configuración**: Sistema centralizado para personalizar opciones globales
-  - **Sistema Multi-Idioma (i18n)**: 🌍 **NUEVO**
+  - **Sistema Multi-Idioma (i18n)**: 🌍
     - Soporte completo para múltiples idiomas (PHP y JavaScript)
     - Idiomas disponibles: Inglés (predeterminado) y Español
     - Configuración de idioma por defecto desde el panel de administración
@@ -22,6 +22,11 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
     - Persistencia de preferencia en localStorage
     - Detección automática del idioma del navegador
     - Archivos de traducción independientes y fáciles de editar (JSON)
+  - **Estilos de Mapa Configurables**: 🗺️ **NUEVO**
+    - Positron (claro, minimalista)
+    - Voyager (colorido, detallado)
+    - Dark Matter (modo oscuro)
+    - OSM Liberty (estilo OpenStreetMap libre)
   - Tamaño máximo de carga de archivos
   - Tiempo de vida de sesiones
   - Zona horaria del sistema
@@ -37,13 +42,35 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
     - Meta descripción para optimización en buscadores
     - Favicon personalizable
     - Integración de Google Analytics u otros scripts de análisis
-- **Importador Flight Radar**: FlightRadar CSV import por [@Xyborg](https://github.com/Xyborg)
-- **Importador de Estadías de Airbnb**: Script para exportar viajes pasados, y proceso de importación por [@Xyborg](https://github.com/Xyborg)
+- **Importador de Vuelos FlightRadar**: 🛫 **NUEVO**
+  - Importación desde archivos CSV exportados de FlightRadar/FlightDiary
+  - Agrupación automática de vuelos en viajes según intervalos de tiempo
+  - Vista previa antes de importar con opción de fusionar/separar viajes
+  - Edición de títulos de viajes antes de importar
+  - Movimiento de vuelos entre viajes
+  - Base de datos de 70+ aeropuertos con coordenadas incluida
+  - Creación automática de rutas con GeoJSON
+- **Importador de Estadías de Airbnb**: 🏠 **NUEVO**
+  - Script para exportar viajes pasados desde Airbnb
+  - Importación desde CSV con geocodificación automática
+  - Vinculación automática con viajes existentes por fechas
+  - Creación de puntos tipo "stay" (estadía)
 
 ### Visualizador Público
 - **Mapa a Pantalla Completa**: Interfaz responsive con todos los viajes y puntos publicados
-- **Selector de Idioma**: 🌍 **NUEVO** - Los usuarios pueden cambiar el idioma de la interfaz
-- **Clustering Inteligente Configurable**: Agrupación automática de puntos cercanos con Leaflet.markercluster, con opciones personalizables desde el panel de administración
+- **Renderizado WebGL de Alto Rendimiento**: 🚀 **NUEVO**
+  - Motor MapLibre GL para renderizado vectorial
+  - deck.gl para arcos de vuelo animados con WebGL
+  - Rendimiento optimizado para miles de puntos y rutas
+- **Caché de Tiles Offline**: 📴 **NUEVO**
+  - Service Worker para cacheo automático de tiles del mapa
+  - Soporte para navegación offline de áreas previamente visitadas
+  - Actualización en segundo plano de tiles cacheados
+- **Clustering Inteligente Configurable**: 
+  - Supercluster para agrupación eficiente del lado del cliente
+  - Opciones personalizables desde el panel de administración
+  - Detección de inactividad para reducir uso de GPU
+- **Selector de Idioma**: 🌍 Los usuarios pueden cambiar el idioma de la interfaz
 - **Filtrado por Viaje**: Panel lateral con lista de viajes y filtros en tiempo real
 - **Popups Detallados**: Información completa de cada punto con imágenes y descripción
 - **Rutas Coloreadas Personalizables**: Visualización de trayectos diferenciados por viaje y tipo de transporte con colores configurables
@@ -66,15 +93,20 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
   - jQuery 3.x (manipulación DOM)
   - HTML5 / CSS3
 - **Mapas**: 
-  - Leaflet.js (motor de mapas)
+  - MapLibre GL JS (motor de mapas vectoriales WebGL)
+  - deck.gl (overlays WebGL de alto rendimiento)
+  - Supercluster (clustering eficiente)
+  - Leaflet.js (motor alternativo)
   - Leaflet.draw (editor de geometrías)
-  - Leaflet.markercluster (clustering)
-  - Leaflet.polylineDecorator (decoradores de rutas)
+  - Leaflet.markercluster (clustering Leaflet)
+- **PWA / Offline**:
+  - Service Worker para caché de tiles
+  - Soporte offline parcial
 
 ### Arquitectura
 - Patrón MVC simplificado
 - Modelos: Trip, Point, Route, Settings con métodos CRUD
-- Helpers: FileHelper para gestión de uploads
+- Helpers: FileHelper para gestión de uploads, Language para i18n
 - Configuración centralizada y dinámica desde base de datos
 - Separación de código público/administrativo
 - Sistema de configuraciones persistentes en base de datos
@@ -89,8 +121,9 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
     - `pdo_mysql` - Driver MySQL para PDO (generalmente viene activada)
     - `GD` - Procesamiento de imágenes (redimensionamiento y compresión)
     - `fileinfo` - Detección de tipos MIME (generalmente viene activada)
+    - `curl` - Para geocodificación en importador de Airbnb
 - **Base de Datos**: MySQL 5.7+ o MariaDB 10.3+
-- **Navegador**: Chrome, Firefox, Safari o Edge (versión reciente)
+- **Navegador**: Chrome, Firefox, Safari o Edge (versión reciente con soporte WebGL)
 
 ### Verificar Extensiones PHP
 Para verificar que las extensiones estén habilitadas, edita `php.ini` y asegúrate de que estas líneas estén **sin** punto y coma al inicio:
@@ -116,6 +149,9 @@ Accédelo desde el navegador y busca las secciones "gd", "PDO" y "fileinfo".
 Todas las librerías están incluidas localmente en `assets/vendor/`:
 - Bootstrap 5 (CSS + JS)
 - jQuery 3.7.1
+- MapLibre GL JS
+- deck.gl
+- Supercluster
 - Leaflet.js + plugins
 
 **Nota**: Consulta [LIBRERIAS.md](LIBRERIAS.md) para instrucciones detalladas de descarga si necesitas actualizar las librerías.
@@ -169,6 +205,7 @@ Esto creará el usuario administrador:
 1. Inicia sesión en el panel de administración con las credenciales creadas
 2. (Opcional) Personaliza la configuración global desde el menú "Configuración"
    - **Configura el idioma por defecto del sitio** 🌍
+   - **Selecciona el estilo de mapa preferido** 🗺️
    - Ajusta el tamaño máximo de carga de imágenes
    - Configura el tiempo de vida de sesiones
    - Establece tu zona horaria
@@ -181,6 +218,22 @@ Esto creará el usuario administrador:
 6. Marca el viaje como "publicado" para que aparezca en el mapa público
 7. Visualiza todos tus viajes en el mapa público con clustering y filtros
 8. Los usuarios pueden cambiar el idioma del sitio usando el selector en el panel lateral
+
+### Importar Vuelos desde FlightRadar 🛫
+
+1. Exporta tu historial de vuelos desde [FlightRadar](https://my.flightradar24.com/settings/export)
+2. Ve a **Admin > Importar Vuelos**
+3. Sube el archivo CSV
+4. Revisa la vista previa: fusiona viajes, mueve vuelos o edita títulos según necesites
+5. Confirma la importación
+6. Los viajes se crean como borradores para que puedas revisarlos
+
+### Importar Estadías desde Airbnb 🏠
+
+1. Exporta tus reservas pasadas de Airbnb (ver documentación en admin)
+2. Ve a **Admin > Importar Airbnb**
+3. Sube el archivo CSV
+4. Los puntos se geocodifican automáticamente y se vinculan a viajes por fecha
 
 ## 🌍 Sistema Multi-Idioma (i18n)
 
@@ -213,6 +266,24 @@ El sistema i18n requiere una migración de base de datos. Ver instrucciones comp
 ### Agregar un Nuevo Idioma
 ¿Quieres contribuir traduciendo TravelMap a tu idioma? Ver [docs/I18N.md](docs/I18N.md) para instrucciones detalladas.
 
+## 🚀 Optimizaciones de Rendimiento
+
+### Renderizado WebGL
+- MapLibre GL para renderizado vectorial eficiente
+- deck.gl para arcos de vuelo animados sin impacto en rendimiento
+- Detección de inactividad para reducir uso de GPU cuando no se interactúa
+
+### Caché Inteligente
+- Service Worker para cacheo de tiles del mapa
+- Hasta 2000 tiles cacheados (~100MB)
+- Actualización en segundo plano
+- Soporte offline para áreas previamente visitadas
+
+### Clustering Optimizado
+- Supercluster para agrupación eficiente del lado del cliente
+- Throttling de actualizaciones (100ms) para evitar recálculos excesivos
+- Configuración de radio y zoom de deshabilitación desde admin
+
 ## 🔐 Seguridad
 
 - Contraseñas hasheadas con algoritmo bcrypt (`password_hash()`)
@@ -231,7 +302,11 @@ Ver [ESTRUCTURA.md](ESTRUCTURA.md) para detalles completos de la organización d
 ## A futuro
 
 * ~~Agregar traducciones en archivos de idioma para ampliar la base de usuarios~~ ✅ **IMPLEMENTADO**
-* Traducir completamente el panel de administración
+* ~~Importador de vuelos desde FlightRadar~~ ✅ **IMPLEMENTADO**
+* ~~Importador de estadías desde Airbnb~~ ✅ **IMPLEMENTADO**
+* ~~Renderizado WebGL de alto rendimiento~~ ✅ **IMPLEMENTADO**
+* ~~Caché offline de tiles~~ ✅ **IMPLEMENTADO**
+* ~~Traducir completamente el panel de administración~~ ✅ **IMPLEMENTADO**
 * Agregar más idiomas (Francés, Alemán, Portugués, etc.)
 * Permitir enlazar viajes en particular pasando parámetros
 * Incrustar el mapa en sitios de terceros para compartir
@@ -240,6 +315,10 @@ Ver [ESTRUCTURA.md](ESTRUCTURA.md) para detalles completos de la organización d
 ## 🤝 Contribuciones
 
 Creado por Fabio Baccaglioni <fabiomb@gmail.com>
+
+Contribuciones:
+- [@Xyborg](https://github.com/Xyborg) - Importador FlightRadar CSV e Importador de Estadías Airbnb
+
 Este es un proyecto personal de código abierto. Siéntete libre de hacer fork y adaptarlo a tus necesidades.
 
 ## 📄 Licencia
