@@ -66,6 +66,8 @@
     "transport_car": "Auto",
     "transport_train": "Tren",
     "transport_walk": "Caminata",
+    "transport_bus": "Bus",
+    "transport_aerial": "Aéreo",
     "transport": "Transporte",
     "upcoming_trip": "Próximo viaje",
     "upcoming_trips": "Próximos viajes",
@@ -261,7 +263,9 @@
       "ship": "Barco",
       "car": "Auto",
       "train": "Tren",
-      "walk": "Caminata"
+      "walk": "Caminata",
+      "bus": "Autobús",
+      "aerial": "Aéreo"
     },
     "saved_success": "Rutas guardadas correctamente",
     "deleted_success": "Rutas eliminadas correctamente",
@@ -346,6 +350,8 @@
     "transport_car": "Auto",
     "transport_train": "Tren",
     "transport_walk": "Caminata",
+    "transport_bus": "Autobús",
+    "transport_aerial": "Aéreo",
     "transport_color_description": "Colores usados para dibujar las rutas de cada tipo de transporte en el mapa",
     "updated_successfully": "Configuración actualizada correctamente",
     "error_updating": "Error al actualizar la configuración",
