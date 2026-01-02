@@ -91,13 +91,15 @@
             icon: pointTypeIcons.visit, 
             labelKey: 'map.point_type_visit',
             label: __('map.point_type_visit'),
-            color: '#4ECDC4' 
+            color: '#4ECDC4',
+            darkText: true
         },
         'food': { 
             icon: pointTypeIcons.food, 
             labelKey: 'map.point_type_food',
             label: __('map.point_type_food'),
-            color: '#FFE66D' 
+            color: '#FFE66D',
+            darkText: true
         }
     };
 
@@ -677,12 +679,13 @@
                 // Individual point marker with icon
                 const point = feature.properties;
                 const typeConfig = pointTypeConfig[point.type] || pointTypeConfig['visit'];
+                const iconColor = typeConfig.darkText ? 'color: #000; stroke: #000;' : '';
                 
                 const el = document.createElement('div');
                 el.className = 'custom-point-marker';
                 el.innerHTML = `
                     <div class="point-marker-inner point-type-${point.type}" style="background-color: ${typeConfig.color}; border-color: ${point.tripColor};">
-                        <span class="point-icon">${typeConfig.icon}</span>
+                        <span class="point-icon" style="${iconColor}">${typeConfig.icon}</span>
                     </div>
                 `;
                 
@@ -729,7 +732,8 @@
         html += `<h6 class="popup-title">${escapeHtml(point.title)}</h6>`;
         
         const typeLabel = typeConfig.labelKey ? __(typeConfig.labelKey) : typeConfig.label;
-        html += `<span class="badge mb-2 d-inline-flex align-items-center gap-1" style="background-color: ${typeConfig.color};">${typeConfig.icon} ${typeLabel}</span>`;
+        const textColor = typeConfig.darkText ? 'color: #000; --bs-badge-color: #000;' : '';
+        html += `<span class="badge mb-2 d-inline-flex align-items-center gap-1" style="background-color: ${typeConfig.color}; ${textColor}">${typeConfig.icon} ${typeLabel}</span>`;
         
         html += `<p class="popup-trip mb-1"><span style="color: ${point.tripColor}; font-weight: bold;">${escapeHtml(point.tripTitle)}</span></p>`;
         

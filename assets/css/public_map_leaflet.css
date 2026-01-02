@@ -648,6 +648,10 @@ body {
     height: 20px;
 }
 
+.point-marker-inner span[style*="stroke"] svg {
+    stroke: inherit;
+}
+
 /* ========== MapLibre GL Popups ========== */
 .maplibregl-popup-content {
     border-radius: 8px;
@@ -697,6 +701,11 @@ body {
 .badge svg {
     vertical-align: middle;
     margin-right: 4px;
+}
+
+.badge[style*="--bs-badge-color: #000"] svg {
+    stroke: #000;
+    color: #000;
 }
 
 .popup-trip {
