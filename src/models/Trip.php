@@ -16,7 +16,7 @@ class Trip {
      * Obtener todos los viajes
      * 
      * @param string $order_by Campo por el que ordenar
-     * @param string|null $status Filtrar por estado: 'public', 'draft' o null para todos
+     * @param string|null $status Filtrar por estado: 'published', 'draft' o null para todos
      * @return array Lista de viajes
      */
     public function getAll($order_by = 'created_at DESC', $status = null) {
@@ -210,8 +210,8 @@ class Trip {
         }
 
         // Validar status
-        if (!empty($data['status']) && !in_array($data['status'], ['public', 'draft'])) {
-            $errors['status'] = 'El estado debe ser "public" o "draft"';
+        if (!empty($data['status']) && !in_array($data['status'], ['draft', 'published'])) {
+            $errors['status'] = 'El estado debe ser "draft" o "published"';
         }
 
         return $errors;

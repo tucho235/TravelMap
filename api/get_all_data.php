@@ -19,8 +19,8 @@ try {
     $routeModel = new Route();
     $pointModel = new Point();
     
-    // Obtener todos los viajes públicos
-    $trips = $tripModel->getAll('start_date DESC', 'public');
+    // Obtener todos los viajes publicados
+    $trips = $tripModel->getAll('start_date DESC', 'published');
     
     $response = [
         'success' => true,

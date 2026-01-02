@@ -56,7 +56,7 @@ Actúa como un Arquitecto de Software experto en PHP y MySQL.
 **Tareas a realizar:**
 1.  **Script SQL (`database.sql`):** Genera el código SQL para crear la base de datos y las siguientes tablas (usa `utf8mb4`):
     * `users`: (id, username, password_hash, created_at).
-    * `trips`: (id, title, description, start_date, end_date, color_hex, status [public/draft]).
+    * `trips`: (id, title, description, start_date, end_date, color_hex, status [draft/published]).
     * `routes`: (id, trip_id, transport_type [enum: plane, car, walk, ship, train], geojson_data, color). *Nota: `geojson_data` será un LONGTEXT para guardar coordenadas JSON.*
     * `points_of_interest`: (id, trip_id, title, description, type [enum: stay, visit, food], icon, image_path, latitude, longitude, visit_date).
     * Asegúrate de incluir las claves foráneas (Foreign Keys) con `ON DELETE CASCADE`.

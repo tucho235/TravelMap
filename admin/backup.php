@@ -326,6 +326,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Import trips
                 if (isset($backupData['data']['trips'])) {
+                    $skippedTrips = 0;
+                    $updatedTrips = 0;
                     foreach ($backupData['data']['trips'] as $trip) {
                         $oldId = $trip['id'];
                         unset($trip['id'], $trip['created_at'], $trip['updated_at']);
@@ -341,9 +343,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $stmt = $db->prepare('UPDATE trips SET description = ?, color_hex = ?, status = ? WHERE id = ?');
                                 $stmt->execute([$trip['description'], $trip['color_hex'], $trip['status'], $existing['id']]);
                                 $idMap['trips'][$oldId] = $existing['id'];
+                                $updatedTrips++;
                             } else {
                                 // Skip (merge_skip) or already deleted (replace)
                                 $idMap['trips'][$oldId] = $existing['id'];
+                                $skippedTrips++;
                             }
                         } else {
                             // Insert new
@@ -360,6 +364,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $imported['trips']++;
                         }
                     }
+                    $imported['trips_skipped'] = $skippedTrips;
+                    $imported['trips_updated'] = $updatedTrips;
                 }
                 
                 // Import routes (with mapped trip_id)
@@ -392,17 +398,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Import points (with mapped trip_id)
                 if (isset($backupData['data']['points_of_interest'])) {
+                    $skippedPoints = 0;
+                    $updatedPoints = 0;
                     foreach ($backupData['data']['points_of_interest'] as $point) {
                         $oldTripId = $point['trip_id'];
                         $newTripId = $idMap['trips'][$oldTripId] ?? null;
                         
-                        if (!$newTripId) continue;
+                        if (!$newTripId) {
+                            $skippedPoints++;
+                            continue;
+                        }
                         
                         unset($point['id'], $point['created_at'], $point['updated_at']);
                         
-                        // Check if exists
-                        $stmt = $db->prepare('SELECT id FROM points_of_interest WHERE trip_id = ? AND title = ? AND latitude = ? AND longitude = ?');
-                        $stmt->execute([$newTripId, $point['title'], $point['latitude'], $point['longitude']]);
+                        // Check if exists (including visit_date to handle multiple stays at same location)
+                        if ($point['visit_date'] ?? null) {
+                            $stmt = $db->prepare('SELECT id FROM points_of_interest WHERE trip_id = ? AND title = ? AND latitude = ? AND longitude = ? AND visit_date = ?');
+                            $stmt->execute([$newTripId, $point['title'], $point['latitude'], $point['longitude'], $point['visit_date']]);
+                        } else {
+                            // For points without visit_date, only check location
+                            $stmt = $db->prepare('SELECT id FROM points_of_interest WHERE trip_id = ? AND title = ? AND latitude = ? AND longitude = ? AND visit_date IS NULL');
+                            $stmt->execute([$newTripId, $point['title'], $point['latitude'], $point['longitude']]);
+                        }
                         $existing = $stmt->fetch();
                         
                         if ($existing) {
@@ -416,6 +433,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     $point['visit_date'],
                                     $existing['id']
                                 ]);
+                                $updatedPoints++;
+                            } else {
+                                $skippedPoints++;
                             }
                         } else {
                             $stmt = $db->prepare('INSERT INTO points_of_interest (trip_id, title, description, type, icon, image_path, latitude, longitude, visit_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
@@ -433,6 +453,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $imported['points']++;
                         }
                     }
+                    $imported['points_skipped'] = $skippedPoints;
+                    $imported['points_updated'] = $updatedPoints;
                 }
                 
                 // Import settings
@@ -474,7 +496,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($imported['points'] > 0) $summary[] = $imported['points'] . ' points';
                 if ($imported['settings'] > 0) $summary[] = $imported['settings'] . ' settings';
                 
+                $details = [];
+                if (isset($imported['trips_skipped']) && $imported['trips_skipped'] > 0) {
+                    $details[] = $imported['trips_skipped'] . ' trips omitidos';
+                }
+                if (isset($imported['trips_updated']) && $imported['trips_updated'] > 0) {
+                    $details[] = $imported['trips_updated'] . ' trips actualizados';
+                }
+                if (isset($imported['points_skipped']) && $imported['points_skipped'] > 0) {
+                    $details[] = $imported['points_skipped'] . ' points omitidos';
+                }
+                if (isset($imported['points_updated']) && $imported['points_updated'] > 0) {
+                    $details[] = $imported['points_updated'] . ' points actualizados';
+                }
+                
                 $message = (__('backup.restored_success') ?? 'Backup restored successfully') . ': ' . implode(', ', $summary);
+                if (!empty($details)) {
+                    $message .= ' (' . implode(', ', $details) . ')';
+                }
                 $messageType = 'success';
                 
             } catch (Exception $e) {

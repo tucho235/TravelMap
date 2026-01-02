@@ -15,8 +15,8 @@ try {
     $stmt = $db->query('SELECT COUNT(*) as total FROM trips');
     $total_trips = $stmt->fetch()['total'];
     
-    // Contar viajes públicos
-    $stmt = $db->query('SELECT COUNT(*) as total FROM trips WHERE status = "public"');
+    // Contar viajes publicados
+    $stmt = $db->query('SELECT COUNT(*) as total FROM trips WHERE status = "published"');
     $public_trips = $stmt->fetch()['total'];
     
     // Contar puntos de interés

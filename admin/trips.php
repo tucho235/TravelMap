@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
         
         if ($action === 'publish') {
             foreach ($trip_ids as $id) {
-                if ($tripModel->update($id, ['status' => 'public'])) {
+                if ($tripModel->update($id, ['status' => 'published'])) {
                     $success_count++;
                 }
             }
@@ -203,8 +203,8 @@ $trips = $tripModel->getAll('start_date DESC, created_at DESC');
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?php if ($trip['status'] === 'public'): ?>
-                                            <span class="badge badge-success"><?= __('trips.public') ?></span>
+                                        <?php if ($trip['status'] === 'published'): ?>
+                                            <span class="badge badge-success"><?= __('trips.published') ?></span>
                                         <?php else: ?>
                                             <span class="badge badge-secondary"><?= __('trips.draft') ?></span>
                                         <?php endif; ?>
