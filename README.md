@@ -308,7 +308,7 @@ Ver [ESTRUCTURA.md](ESTRUCTURA.md) para detalles completos de la organización d
 * ~~Caché offline de tiles~~ ✅ **IMPLEMENTADO**
 * ~~Traducir completamente el panel de administración~~ ✅ **IMPLEMENTADO**
 * Agregar más idiomas (Francés, Alemán, Portugués, etc.)
-* Permitir enlazar viajes en particular pasando parámetros
+* ~~Permitir enlazar viajes en particular pasando parámetros~~ ✅ **IMPLEMENTADO**
 * Incrustar el mapa en sitios de terceros para compartir
 * Se aceptan ideas! Siempre manteniendo la simplicidad
 
