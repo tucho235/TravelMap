@@ -948,15 +948,14 @@
         const baseHeight = distance / 5; // More aggressive curvature
         const curveHeight = Math.max(baseHeight, distance * 0.15); // At least 15% of distance
         
-        // Calculate perpendicular offset for control point
-        const bearing = getBearing(start, end);
-        const perpBearing = bearing + 90; // Perpendicular to the flight path
+        // Always curve upward (north) for visual consistency
+        // This creates a more pleasing and intuitive arc effect
+        const offsetDegrees = (curveHeight / 111320) * (curvature || 1); // Convert meters to degrees (approx)
         
-        // Create control point offset from midpoint
-        const controlPoint = destinationPoint(
-            L.latLng(midLat, midLng), 
-            perpBearing, 
-            curveHeight * (curvature || 1)
+        // Create control point above the midpoint (always toward north)
+        const controlPoint = L.latLng(
+            midLat + offsetDegrees, // Always add to latitude (north)
+            midLng
         );
         
         // Generate points along the quadratic Bézier curve
