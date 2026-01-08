@@ -314,6 +314,7 @@ Ver [ESTRUCTURA.md](ESTRUCTURA.md) para detalles completos de la organización d
 * ~~Permitir enlazar viajes en particular pasando parámetros~~ ✅ **IMPLEMENTADO**
 * Incrustar el mapa en sitios de terceros para compartir
 * Se aceptan ideas! Siempre manteniendo la simplicidad
+* Crear url por viaje, sin carga de otros viajes, sólo el seleccionado, cuando id_trip está definido que muestre info completa de ese viaje
 
 ## 🤝 Contribuciones
 
