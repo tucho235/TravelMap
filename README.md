@@ -1,4 +1,4 @@
-# TravelMap - Diario de Viajes Interactivo V 1.0.67
+# TravelMap - Diario de Viajes Interactivo V 1.0.123
 
 Aplicación web completa para crear y visualizar mapas interactivos de viajes con puntos de interés, rutas georreferenciadas y gestión multimedia. Sistema desarrollado con tecnologías nativas sin dependencias de frameworks externos.
 
@@ -42,7 +42,7 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
     - Meta descripción para optimización en buscadores
     - Favicon personalizable
     - Integración de Google Analytics u otros scripts de análisis
-- **Importador de Vuelos FlightRadar**: 🛫 **NUEVO**
+- **Importador de Vuelos FlightRadar**: 🛫 
   - Importación desde archivos CSV exportados de FlightRadar/FlightDiary
   - Agrupación automática de vuelos en viajes según intervalos de tiempo
   - Vista previa antes de importar con opción de fusionar/separar viajes
@@ -50,19 +50,22 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
   - Movimiento de vuelos entre viajes
   - Base de datos de 70+ aeropuertos con coordenadas incluida
   - Creación automática de rutas con GeoJSON
-- **Importador de Estadías de Airbnb**: 🏠 **NUEVO**
+- **Importador de Estadías de Airbnb**: 🏠 
   - Script para exportar viajes pasados desde Airbnb
   - Importación desde CSV con geocodificación automática
   - Vinculación automática con viajes existentes por fechas
   - Creación de puntos tipo "stay" (estadía)
+- **Tags para viajes**: 🏠 
+  - Organización con tags
+  
 
 ### Visualizador Público
 - **Mapa a Pantalla Completa**: Interfaz responsive con todos los viajes y puntos publicados
-- **Renderizado WebGL de Alto Rendimiento**: 🚀 **NUEVO**
+- **Renderizado WebGL de Alto Rendimiento**: 🚀 
   - Motor MapLibre GL para renderizado vectorial
   - deck.gl para arcos de vuelo animados con WebGL
   - Rendimiento optimizado para miles de puntos y rutas
-- **Caché de Tiles Offline**: 📴 **NUEVO**
+- **Caché de Tiles Offline**: 📴 
   - Service Worker para cacheo automático de tiles del mapa
   - Soporte para navegación offline de áreas previamente visitadas
   - Actualización en segundo plano de tiles cacheados
@@ -318,6 +321,7 @@ Creado por Fabio Baccaglioni <fabiomb@gmail.com>
 
 Contribuciones:
 - [@Xyborg](https://github.com/Xyborg) - Importador FlightRadar CSV e Importador de Estadías Airbnb
+- [@tucho235](https://github.com/tucho235) - Sistema de tags para los viajes
 
 Este es un proyecto personal de código abierto. Siéntete libre de hacer fork y adaptarlo a tus necesidades.
 
