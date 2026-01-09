@@ -149,8 +149,10 @@
                         <tr>
                             <th style="width: 50px; text-align: center;">#</th>
                             <th style="width: 60px; text-align: center;"></th>
-                            <th>Transport Type</th>
-                            <th style="width: 100px; text-align: center;">Actions</th>
+                            <th>${__('routes.transport_type') || 'Transport Type'}</th>
+                            <th style="width: 80px; text-align: center;">${__('routes.is_round_trip') || 'Round Trip'}</th>
+                            <th style="width: 100px; text-align: center;">${__('routes.distance') || 'Distance'}</th>
+                            <th style="width: 100px; text-align: center;">${__('trips.actions') || 'Actions'}</th>
                         </tr>
                     </thead>
                     <tbody id="routesTableBody"></tbody>
@@ -175,7 +177,7 @@
             });
 
             const row = $(`
-                <tr data-route-index="${index}" style="cursor: pointer;" title="Click to focus on this route on the map">
+                <tr data-route-index="${index}" style="cursor: pointer;" title="${__('map.focus_route')}">
                     <td class="text-center align-middle">
                         <div style="width: 30px; height: 4px; background-color: ${color}; margin: 0 auto;"></div>
                     </td>
@@ -186,7 +188,15 @@
                         </select>
                     </td>
                     <td class="text-center align-middle">
-                        <button class="btn btn-sm btn-outline-danger delete-route-btn" data-route-index="${index}" title="Delete route">
+                        <div class="form-check d-inline-block">
+                            <input class="form-check-input round-trip-checkbox" type="checkbox" data-route-index="${index}" ${route.is_round_trip ? 'checked' : ''}>
+                        </div>
+                    </td>
+                    <td class="text-center align-middle small">
+                        ${formatDistanceDisplay(route.distance_meters, route.transport_type, route.is_round_trip)}
+                    </td>
+                    <td class="text-center align-middle">
+                        <button class="btn btn-sm btn-outline-danger delete-route-btn" data-route-index="${index}" title="${__('map.delete_route')}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                                 <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
                                 <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
@@ -209,6 +219,12 @@
         $('.delete-route-btn').off('click').on('click', function () {
             const index = parseInt($(this).data('route-index'));
             deleteRoute(index);
+        });
+
+        $('.round-trip-checkbox').off('change').on('change', function () {
+            const index = parseInt($(this).data('route-index'));
+            const isRoundTrip = $(this).is(':checked');
+            toggleRoundTrip(index, isRoundTrip);
         });
 
         // Highlight route on hover
@@ -324,6 +340,25 @@
     }
 
     /**
+     * Alterna si una ruta es de ida y vuelta
+     */
+    function toggleRoundTrip(index, isRoundTrip) {
+        if (index < 0 || index >= routesData.length) return;
+
+        const route = routesData[index];
+        route.is_round_trip = isRoundTrip;
+
+        if (route.layer) {
+            route.layer.isRoundTrip = isRoundTrip;
+        }
+
+        // Update the hidden form field
+        updateRoutesData();
+
+        console.log(`Route ${index} round trip set to ${isRoundTrip}`);
+    }
+
+    /**
      * Elimina una ruta específica
      */
     function deleteRoute(index) {
@@ -430,9 +465,10 @@
      */
     function handleRouteCreated(e) {
         const layer = e.layer;
+        const distanceMeters = calculateLayerDistance(layer);
 
         // Pedir tipo de transporte
-        const transportType = promptTransportType();
+        const transportType = promptTransportType(distanceMeters);
 
         if (!transportType) {
             return; // Usuario canceló
@@ -452,6 +488,8 @@
         // Guardar metadata en la capa
         layer.transportType = transportType;
         layer.color = color;
+        layer.isRoundTrip = true; // Por defecto es round trip
+        layer.distanceMeters = distanceMeters;
 
         // Actualizar datos
         updateRoutesData();
@@ -478,15 +516,22 @@
     /**
      * Pide al usuario el tipo de transporte
      */
-    function promptTransportType() {
+    function promptTransportType(distanceMeters) {
         const options = Object.keys(transportTypes);
-        let message = 'Selecciona el tipo de transporte:\n\n';
+        let message = '';
+
+        if (distanceMeters > 0) {
+            const formatted = formatDistanceDisplay(distanceMeters, 'car', false).replace(' · ', '');
+            message += `${__('routes.detected_distance') || 'Distancia detectada'}: ${formatted}\n\n`;
+        }
+
+        message += `${__('map.instruction_select_transport') || 'Selecciona el tipo de transporte'}:\n\n`;
 
         options.forEach((key, index) => {
             message += `${index + 1}. ${transportTypes[key]}\n`;
         });
 
-        message += '\nIngresa el número (1-' + options.length + '):';
+        message += `\n${__('routes.enter_transport_number') || 'Ingresa el número'} (1-' + options.length + '):`;
 
         const input = prompt(message);
 
@@ -500,7 +545,7 @@
             return options[index];
         }
 
-        alert('Opción no válida. Seleccionando Auto por defecto.');
+        alert(__('routes.invalid_option_default') || 'Opción no válida. Seleccionando Auto por defecto.');
         return 'car';
     }
 
@@ -512,10 +557,16 @@
 
         drawnItems.eachLayer(function (layer) {
             const geojson = layer.toGeoJSON();
+            const distance = calculateLayerDistance(layer);
+
+            // Adjust distance if it's round trip
+            const distanceForInfo = layer.isRoundTrip ? distance * 2 : distance;
 
             routesData.push({
                 transport_type: layer.transportType || 'car',
                 color: layer.color || transportColors['car'],
+                is_round_trip: layer.isRoundTrip || false,
+                distance_meters: distanceForInfo,
                 geojson: geojson,
                 layer: layer  // Keep reference to the layer
             });
@@ -525,6 +576,7 @@
         const routesDataForSave = routesData.map(route => ({
             transport_type: route.transport_type,
             color: route.color,
+            is_round_trip: route.is_round_trip ? 1 : 0,
             geojson: route.geojson
         }));
         document.getElementById('routes_data').value = JSON.stringify(routesDataForSave);
@@ -563,6 +615,8 @@
             layer.eachLayer(function (l) {
                 l.transportType = transportType;
                 l.color = color;
+                l.isRoundTrip = !!route.is_round_trip;
+                l.distanceMeters = route.distance_meters;
                 drawnItems.addLayer(l);
             });
         });
@@ -634,7 +688,7 @@
      * Limpia todas las rutas
      */
     function clearAllRoutes() {
-        if (!confirm('¿Estás seguro de que quieres eliminar todas las rutas?')) {
+        if (!confirm(__('map.confirm_delete_all'))) {
             return;
         }
 
@@ -650,7 +704,7 @@
         updateRoutesData();
 
         if (routesData.length === 0) {
-            if (!confirm('No has dibujado ninguna ruta. ¿Deseas continuar y eliminar todas las rutas existentes?')) {
+            if (!confirm(__('map.confirm_no_routes'))) {
                 e.preventDefault();
                 return false;
             }
@@ -664,7 +718,7 @@
      */
     function searchPlace(query) {
         if (!query || query.trim().length < 3) {
-            alert('Por favor, ingresa al menos 3 caracteres para buscar');
+            alert(__('map.search_min_chars'));
             return;
         }
 
@@ -767,6 +821,70 @@
         }, 10000);
 
         console.log('Navegado a:', name, lat, lon);
+    }
+
+    /**
+     * Calcula la distancia de una capa (polyline)
+     */
+    function calculateLayerDistance(layer) {
+        if (!layer || typeof layer.getLatLngs !== 'function') return 0;
+
+        const latLngs = layer.getLatLngs();
+        let totalDistance = 0;
+
+        for (let i = 0; i < latLngs.length - 1; i++) {
+            totalDistance += haversineDistance(
+                latLngs[i].lat, latLngs[i].lng,
+                latLngs[i + 1].lat, latLngs[i + 1].lng
+            );
+        }
+
+        return totalDistance;
+    }
+
+    /**
+     * Calcula la distancia entre dos puntos (fórmula de Haversine)
+     */
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // Radio de la Tierra en metros
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    /**
+     * Formatea la distancia para mostrar en la UI
+     */
+    function formatDistanceDisplay(meters, transportType, isRoundTrip) {
+        if (!meters || meters <= 0) return '0 km';
+
+        // Usar la unidad configurada si está disponible
+        const unit = appConfig?.map?.distanceUnit || 'km';
+        let value, label;
+
+        if (transportType === 'plane') {
+            value = meters / 1609.344;
+            label = 'mi';
+        } else if (transportType === 'ship') {
+            value = meters / 1852;
+            label = 'nm';
+        } else {
+            if (unit === 'mi') {
+                value = meters / 1609.344;
+                label = 'mi';
+            } else {
+                value = meters / 1000;
+                label = 'km';
+            }
+        }
+
+        const roundTripIcon = isRoundTrip ? ` <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ms-1 text-warning" style="vertical-align: text-bottom;"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>` : '';
+        return `${Math.round(value).toLocaleString()} ${label}${roundTripIcon}`;
     }
 
     /**
