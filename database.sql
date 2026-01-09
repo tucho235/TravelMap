@@ -108,7 +108,7 @@ INSERT INTO settings (setting_key, setting_value, setting_type, description) VAL
 ('transport_color_plane', '#FF4444', 'string', 'Color para rutas en avión'),
 ('transport_color_ship', '#00AAAA', 'string', 'Color para rutas en barco'),
 ('transport_color_car', '#4444FF', 'string', 'Color para rutas en auto'),
-('transport_color_bike', '#b88907ac', 'string', 'Color para rutas en motocicleta'),
+('transport_color_bike', '#b88907', 'string', 'Color para rutas en motocicleta'),
 ('transport_color_train', '#FF8800', 'string', 'Color para rutas en tren'),
 ('transport_color_walk', '#44FF44', 'string', 'Color para rutas caminando'),
 ('transport_color_bus', '#9C27B0', 'string', 'Color para rutas en bus'),

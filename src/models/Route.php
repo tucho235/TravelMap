@@ -175,7 +175,7 @@ class Route {
         $colors = [
             'plane' => '#FF4444',    // Rojo
             'car' => '#4444FF',      // Azul
-            'bike' => '#b88907ac',   // Marrón
+            'bike' => '#b88907',     // Marrón
             'walk' => '#44FF44',     // Verde
             'ship' => '#00AAAA',     // Cyan
             'train' => '#FF8800',    // Naranja

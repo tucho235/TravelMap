@@ -365,6 +365,7 @@
     "transport_plane": "Plane",
     "transport_ship": "Ship",
     "transport_car": "Car",
+    "transport_bike": "Bike",
     "transport_train": "Train",
     "transport_walk": "Walking",
     "transport_bus": "Bus",

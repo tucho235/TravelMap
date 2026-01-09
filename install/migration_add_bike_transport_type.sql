@@ -10,5 +10,5 @@ MODIFY COLUMN transport_type ENUM('plane', 'car', 'walk', 'ship', 'train', 'bike
 
 -- Insert default color settings for new transport types
 INSERT INTO settings (setting_key, setting_value, setting_type, description) VALUES
-('transport_color_bike', '#b88907ac', 'string', 'Color para rutas en motocicleta (bicicleta, motocicleta, cuatriciclos, etc.)')
+('transport_color_bike', '#b88907', 'string', 'Color para rutas en motocicleta (bicicleta, motocicleta, cuatriciclos, etc.)')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;

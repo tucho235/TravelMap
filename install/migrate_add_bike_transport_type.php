@@ -34,7 +34,7 @@ try {
     echo "\n2. Adding default color settings...\n";
     
     $newSettings = [
-        ['transport_color_bike', '#b88907ac', 'string', 'Color para rutas en motocicleta (bicicleta, motocicleta, cuatriciclos, etc.)']
+        ['transport_color_bike', '#b88907', 'string', 'Color para rutas en motocicleta (bicicleta, motocicleta, cuatriciclos, etc.)']
     ];
     
     $insertStmt = $db->prepare("

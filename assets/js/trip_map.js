@@ -31,7 +31,7 @@
     let transportColors = {
         'plane': '#FF4444',
         'car': '#4444FF',
-        'bike': '#b88907ac',
+        'bike': '#b88907',
         'train': '#FF8800',
         'ship': '#00AAAA',
         'walk': '#44FF44',

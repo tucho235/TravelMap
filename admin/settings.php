@@ -670,7 +670,7 @@ require_once __DIR__ . '/../includes/header.php';
                         'plane' => '#FF4444',
                         'ship' => '#00AAAA',
                         'car' => '#4444FF',
-                        'bike' => '#b88907ac',
+                        'bike' => '#b88907',
                         'train' => '#FF8800',
                         'walk' => '#44FF44',
                         'bus' => '#9C27B0',

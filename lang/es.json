@@ -367,6 +367,7 @@
     "transport_plane": "Avión",
     "transport_ship": "Barco",
     "transport_car": "Auto",
+    "transport_bike": "Motocicleta",
     "transport_train": "Tren",
     "transport_walk": "Caminata",
     "transport_bus": "Autobús",

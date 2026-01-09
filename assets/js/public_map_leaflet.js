@@ -280,7 +280,7 @@
         'plane': { color: '#FF4444', icon: transportIcons.plane, dashArray: '10, 5' },
         'ship': { color: '#00AAAA', icon: transportIcons.ship, dashArray: '10, 5' },
         'car': { color: '#4444FF', icon: transportIcons.car, dashArray: null },
-        'bike': { color: '#b88907ac', icon: transportIcons.bike, dashArray: null },
+        'bike': { color: '#b88907', icon: transportIcons.bike, dashArray: null },
         'train': { color: '#FF8800', icon: transportIcons.train, dashArray: null },
         'walk': { color: '#44FF44', icon: transportIcons.walk, dashArray: null },
         'bus': { color: '#9C27B0', icon: transportIcons.bus, dashArray: null },
