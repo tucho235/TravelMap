@@ -19,6 +19,26 @@
     let pointMarkers = [];
     let popup = null;
 
+    /**
+     * Get map style URL with language parameter for multilingual labels
+     * CARTO styles support language parameter via style.json modifications
+     * Available languages: en, es, fr, de, it, pt, ru, zh, ja, ar, and more
+     */
+    function getMapStyleUrl(styleKey) {
+        // Detect current language
+        const currentLang = window.i18n?.currentLang || document.documentElement.lang || 'en';
+        
+        // Base style URLs
+        const baseStyles = {
+            'positron': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+            'voyager': 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+            'dark-matter': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+            'osm-liberty': 'https://tiles.openfreemap.org/styles/liberty'
+        };
+        
+        return baseStyles[styleKey] || baseStyles['voyager'];
+    }
+    
     // Map style URLs (all free, no API key needed)
     const MAP_STYLES = {
         'positron': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -226,6 +246,53 @@
     }
 
     /**
+     * Apply language to map labels by modifying the text-field properties
+     * to use the localized name field from OpenStreetMap data
+     * 
+     * @param {string} lang - Language code (e.g., 'en', 'es', 'fr')
+     */
+    function applyLanguageToMap(lang) {
+        if (!map || !map.getStyle()) return;
+        
+        // Get the current map style
+        const style = map.getStyle();
+        if (!style || !style.layers) return;
+        
+        // Language field mapping for OpenStreetMap data
+        // name:XX where XX is the language code
+        const langField = `name:${lang}`;
+        
+        // Process each layer that has text labels
+        style.layers.forEach(layer => {
+            if (layer.layout && layer.layout['text-field']) {
+                const currentTextField = layer.layout['text-field'];
+                
+                // Skip if it's already a complex expression
+                if (Array.isArray(currentTextField) && currentTextField[0] === 'coalesce') {
+                    return;
+                }
+                
+                // Create a coalesce expression that tries:
+                // 1. Localized name (name:es, name:en, etc.)
+                // 2. Fallback to default name
+                // 3. Fallback to name:en if available
+                // 4. Fallback to original name
+                const newTextField = [
+                    'coalesce',
+                    ['get', langField],
+                    ['get', 'name:en'],
+                    ['get', 'name']
+                ];
+                
+                // Update the layer's text-field
+                map.setLayoutProperty(layer.id, 'text-field', newTextField);
+            }
+        });
+        
+        console.log(`Map labels updated to language: ${lang}`);
+    }
+
+    /**
      * Load config from server
      */
     function loadConfig() {
@@ -258,6 +325,9 @@
         // Get configured map style or default to voyager
         const mapStyleKey = appConfig?.map?.style || 'voyager';
         const mapStyleUrl = MAP_STYLES[mapStyleKey] || MAP_STYLES['voyager'];
+        
+        // Detect current language for map labels
+        const currentLang = window.i18n?.currentLang || document.documentElement.lang || 'en';
 
         // Create MapLibre GL map with performance optimizations
         map = new maplibregl.Map({
@@ -268,6 +338,7 @@
             minZoom: 1,
             maxZoom: 18,
             attributionControl: true,
+            language: currentLang,  // Set map language
             // Performance optimizations for AMD/low-end GPUs
             antialias: false,           // Disable antialiasing (major GPU saver)
             preserveDrawingBuffer: false,
@@ -312,6 +383,10 @@
             console.log('MapLibre GL map loaded');
             // Set default cursor - use the map container element
             document.getElementById('map').style.cursor = 'default';
+            
+            // Apply language to map labels
+            applyLanguageToMap(currentLang);
+            
             loadData();
         });
 

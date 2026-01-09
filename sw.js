@@ -3,7 +3,7 @@
  * Caches map tiles for faster loading and offline support
  */
 
-const CACHE_NAME = 'travelmap-tiles-v1';
+const CACHE_NAME = 'travelmap-tiles-v2';  // Incremented to force cache refresh
 const CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Tile domains to cache
@@ -58,15 +58,8 @@ self.addEventListener('fetch', (event) => {
 async function handleTileRequest(request) {
     const cache = await caches.open(CACHE_NAME);
     
-    // Try cache first
-    const cachedResponse = await cache.match(request);
-    if (cachedResponse) {
-        // Return cached version, but refresh in background
-        refreshCache(request, cache);
-        return cachedResponse;
-    }
-    
-    // Not in cache, fetch from network
+    // NETWORK FIRST strategy for tiles - this ensures fresh tiles are loaded
+    // Only fallback to cache if network fails
     try {
         const response = await fetch(request);
         
@@ -77,8 +70,13 @@ async function handleTileRequest(request) {
         
         return response;
     } catch (error) {
-        // Network error - return transparent fallback for tiles
-        // This prevents console spam when offline or DNS fails
+        // Network error - try cache
+        const cachedResponse = await cache.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // No cache either - return transparent fallback for tiles
         return new Response('', {
             status: 408,
             statusText: 'Request Timeout'
@@ -87,6 +85,8 @@ async function handleTileRequest(request) {
 }
 
 async function refreshCache(request, cache) {
+    // This function is no longer used with network-first strategy
+    // Kept for backward compatibility if needed
     try {
         const response = await fetch(request);
         if (response.status === 200) {
@@ -101,8 +101,21 @@ async function refreshCache(request, cache) {
 self.addEventListener('message', (event) => {
     if (event.data === 'cleanup') {
         cleanupCache();
+    } else if (event.data === 'clearCache') {
+        // Allow manual cache clearing
+        clearAllCaches();
     }
 });
+
+async function clearAllCaches() {
+    const cacheNames = await caches.keys();
+    await Promise.all(
+        cacheNames
+            .filter(name => name.startsWith('travelmap-'))
+            .map(name => caches.delete(name))
+    );
+    console.log('[SW] All caches cleared');
+}
 
 async function cleanupCache() {
     const cache = await caches.open(CACHE_NAME);

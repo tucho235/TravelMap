@@ -352,10 +352,12 @@
         // Crear el mapa centrado en el mundo
         map = L.map('map').setView([20, 0], 2);
 
-        // Capa base de OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19
+        // Note: CARTO Voyager tiles include more multilingual labels than standard OSM
+        // For full language support, consider using MapLibre renderer in settings
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            maxZoom: 19,
+            subdomains: 'abcd'
         }).addTo(map);
 
         // Grupo para las rutas dibujadas

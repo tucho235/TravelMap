@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Caché del Mapa - TravelMap</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        .error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #757575;
+        }
+        .btn-secondary:hover {
+            background: #616161;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        a {
+            color: #2196f3;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Limpiar Caché del Mapa</h1>
+        
+        <div class="info">
+            <strong>¿Para qué sirve esto?</strong><br>
+            Esta herramienta limpia la caché de los tiles (imágenes) del mapa almacenados por el Service Worker. 
+            Esto es útil cuando:
+            <ul>
+                <li>Los mapas no se actualizan</li>
+                <li>Ves tiles viejos o corruptos</li>
+                <li>Has cambiado configuración del mapa y no se aplica</li>
+                <li>Quieres forzar la descarga de tiles frescos</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Nota importante sobre tiles raster (Leaflet):</strong><br>
+            Los tiles raster son imágenes pre-renderizadas que no pueden cambiar el idioma dinámicamente. 
+            Si usas Leaflet, los nombres seguirán en el idioma predefinido del servidor de tiles.
+            <br><br>
+            <strong>Para soporte real de multilenguaje, usa MapLibre GL</strong> en Configuración > Mapa.
+        </div>
+
+        <div class="success" id="successMsg">
+            ✅ Caché limpiada correctamente. Los tiles se descargarán de nuevo al cargar el mapa.
+        </div>
+
+        <div class="error" id="errorMsg">
+            ❌ Error al limpiar la caché. Puede que tu navegador no soporte Service Workers.
+        </div>
+
+        <div id="status"></div>
+
+        <button onclick="clearCache()" id="clearBtn">
+            🧹 Limpiar Caché del Mapa
+        </button>
+
+        <button onclick="clearAllSiteCache()" class="btn-secondary" id="clearAllBtn">
+            🗑️ Limpiar Toda la Caché del Sitio
+        </button>
+
+        <button onclick="unregisterServiceWorker()" class="btn-secondary" id="unregisterBtn">
+            ⚠️ Desregistrar Service Worker
+        </button>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="index.php">← Volver al mapa</a>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = 'status';
+            status.textContent = message;
+            status.style.background = type === 'success' ? '#e8f5e9' : 
+                                     type === 'error' ? '#ffebee' : '#e3f2fd';
+        }
+
+        async function clearCache() {
+            const btn = document.getElementById('clearBtn');
+            btn.disabled = true;
+            btn.textContent = 'Limpiando...';
+            
+            try {
+                if (!('serviceWorker' in navigator)) {
+                    throw new Error('Service Workers no soportados en este navegador');
+                }
+
+                // Send message to service worker to clear cache
+                const registration = await navigator.serviceWorker.ready;
+                if (registration.active) {
+                    registration.active.postMessage('clearCache');
+                    
+                    // Also clear browser cache
+                    const cacheNames = await caches.keys();
+                    const travelMapCaches = cacheNames.filter(name => name.startsWith('travelmap-'));
+                    
+                    updateStatus(`Limpiando ${travelMapCaches.length} caché(s)...`);
+                    
+                    await Promise.all(
+                        travelMapCaches.map(name => caches.delete(name))
+                    );
+                    
+                    document.getElementById('successMsg').style.display = 'block';
+                    document.getElementById('errorMsg').style.display = 'none';
+                    updateStatus(`✅ ${travelMapCaches.length} caché(s) eliminada(s)`, 'success');
+                } else {
+                    throw new Error('No hay Service Worker activo');
+                }
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                document.getElementById('successMsg').style.display = 'none';
+                document.getElementById('errorMsg').style.display = 'block';
+                updateStatus('❌ Error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🧹 Limpiar Caché del Mapa';
+            }
+        }
+
+        async function clearAllSiteCache() {
+            const btn = document.getElementById('clearAllBtn');
+            if (!confirm('¿Estás seguro? Esto eliminará TODA la caché del sitio.')) {
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Limpiando todo...';
+            
+            try {
+                const cacheNames = await caches.keys();
+                updateStatus(`Limpiando ${cacheNames.length} caché(s) del sitio...`);
+                
+                await Promise.all(
+                    cacheNames.map(name => caches.delete(name))
+                );
+                
+                document.getElementById('successMsg').style.display = 'block';
+                updateStatus(`✅ ${cacheNames.length} caché(s) eliminada(s)`, 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('errorMsg').style.display = 'block';
+                updateStatus('❌ Error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🗑️ Limpiar Toda la Caché del Sitio';
+            }
+        }
+
+        async function unregisterServiceWorker() {
+            const btn = document.getElementById('unregisterBtn');
+            if (!confirm('¿Estás seguro? Esto desregistrará el Service Worker. Tendrás que recargar la página para volver a registrarlo.')) {
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Desregistrando...';
+            
+            try {
+                if (!('serviceWorker' in navigator)) {
+                    throw new Error('Service Workers no soportados');
+                }
+
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                updateStatus(`Desregistrando ${registrations.length} Service Worker(s)...`);
+                
+                await Promise.all(
+                    registrations.map(reg => reg.unregister())
+                );
+                
+                // Also clear all caches
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(name => caches.delete(name))
+                );
+                
+                document.getElementById('successMsg').style.display = 'block';
+                updateStatus('✅ Service Worker desregistrado y caché limpiada. Recarga la página.', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('errorMsg').style.display = 'block';
+                updateStatus('❌ Error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚠️ Desregistrar Service Worker';
+            }
+        }
+
+        // Check service worker status on load
+        window.addEventListener('load', async () => {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        updateStatus('✓ Service Worker detectado y activo');
+                    } else {
+                        updateStatus('ℹ️ No hay Service Worker registrado', 'info');
+                    }
+                } catch (error) {
+                    updateStatus('⚠️ Error al verificar Service Worker', 'error');
+                }
+            } else {
+                updateStatus('⚠️ Service Workers no soportados en este navegador', 'error');
+                document.getElementById('clearBtn').disabled = true;
+                document.getElementById('clearAllBtn').disabled = true;
+                document.getElementById('unregisterBtn').disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>

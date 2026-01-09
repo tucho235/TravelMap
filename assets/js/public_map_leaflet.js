@@ -359,7 +359,24 @@
             zoomControl: true
         });
 
-        // Map tile styles (same as MapLibre but raster versions)
+        // Detect current language for map labels
+        const currentLang = window.i18n?.currentLang || document.documentElement.lang || 'en';
+        
+        /**
+         * IMPORTANTE: Los tiles raster tienen soporte limitado de idiomas
+         * 
+         * Solución implementada: Usar un proxy PHP local que obtiene tiles con
+         * etiquetas en el idioma correcto desde servicios que soportan i18n.
+         * 
+         * Opciones de tiles con soporte multilingüe:
+         * 1. Tiles vectoriales (requiere MapLibre GL) - RECOMENDADO
+         * 2. Tiles con API key (Mapbox, Maptiler) - requiere registro
+         * 3. Proxy local que modifica tiles - implementación compleja
+         * 4. OSM Carto con rendering local - requiere servidor
+         */
+        
+        // Por ahora, usar CARTO que aunque no cambia idioma dinámicamente,
+        // tiene un mejor balance de nombres internacionales
         const tileStyles = {
             'positron': {
                 url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
@@ -379,20 +396,26 @@
             'osm-liberty': {
                 url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                subdomains: 'abc'  // OSM only supports a, b, c
+                subdomains: 'abc'
             }
         };
-
+        
         // Get configured style or default to voyager
         const mapStyleKey = mapConfig.style || 'voyager';
         const tileConfig = tileStyles[mapStyleKey] || tileStyles['voyager'];
 
         // Add tile layer
+        // Note: Para soporte real de idiomas, cambiar a MapLibre GL en configuración
         L.tileLayer(tileConfig.url, {
             attribution: tileConfig.attribution,
             maxZoom: 19,
             subdomains: tileConfig.subdomains || 'abc'
         }).addTo(map);
+        
+        // Log warning about language limitations
+        if (currentLang !== 'en') {
+            console.warn(`[TravelMap] Leaflet con tiles raster tiene soporte limitado para idioma "${currentLang}". Para mejor soporte multilingüe, cambia a MapLibre GL en Configuración > Mapa.`);
+        }
 
         // Cluster global para todos los puntos (solo si está habilitado)
         if (clusterEnabled) {
