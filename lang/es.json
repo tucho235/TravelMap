@@ -477,6 +477,8 @@
     "map_cluster_enabled": "Habilitar Agrupación de Puntos",
     "map_cluster_max_radius": "Radio Máximo de Agrupación",
     "map_cluster_disable_at_zoom": "Deshabilitar Agrupación en Zoom",
+    "trip_tags_enabled": "Habilitar sistema de etiquetas (Tags)",
+    "trip_tags_enabled_desc": "Muestra las etiquetas en el mapa público y permite gestionarlas en el administrador.",
     "transport_colors": "Colores de Transporte",
     "site_title": "Título del Sitio",
     "site_description": "Descripción del Sitio",

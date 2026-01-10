@@ -424,6 +424,8 @@
     "map_cluster_enabled": "Enable Point Clustering",
     "map_cluster_max_radius": "Cluster Max Radius",
     "map_cluster_disable_at_zoom": "Disable Clustering at Zoom",
+    "trip_tags_enabled": "Enable Trip Tags System",
+    "trip_tags_enabled_desc": "Displays tags on the public map and allows managing them in the admin panel.",
     "site_title": "Site Title",
     "site_description": "Site Description",
     "default_language": "Default Language",
