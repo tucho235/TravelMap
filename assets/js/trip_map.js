@@ -189,7 +189,7 @@
                     </td>
                     <td class="text-center align-middle">
                         <div class="form-check d-inline-block">
-                            <input class="form-check-input round-trip-checkbox" type="checkbox" data-route-index="${index}" ${route.is_round_trip ? 'checked' : ''}>
+                            <input class="form-check-input round-trip-checkbox" type="checkbox" data-route-index="${index}" ${route.is_round_trip === true ? 'checked' : ''}>
                         </div>
                     </td>
                     <td class="text-center align-middle small">
@@ -488,7 +488,7 @@
         // Guardar metadata en la capa
         layer.transportType = transportType;
         layer.color = color;
-        layer.isRoundTrip = true; // Por defecto es round trip
+        layer.isRoundTrip = false; // Por defecto no es round trip
         layer.distanceMeters = distanceMeters;
 
         // Actualizar datos
@@ -565,7 +565,7 @@
             routesData.push({
                 transport_type: layer.transportType || 'car',
                 color: layer.color || transportColors['car'],
-                is_round_trip: layer.isRoundTrip || false,
+                is_round_trip: layer.isRoundTrip === true, // Asegurar que sea explícitamente true
                 distance_meters: distanceForInfo,
                 geojson: geojson,
                 layer: layer  // Keep reference to the layer
@@ -615,7 +615,8 @@
             layer.eachLayer(function (l) {
                 l.transportType = transportType;
                 l.color = color;
-                l.isRoundTrip = !!route.is_round_trip;
+                // Asegurar que is_round_trip sea boolean y solo true si es 1 o true
+                l.isRoundTrip = route.is_round_trip === 1 || route.is_round_trip === true || route.is_round_trip === "1";
                 l.distanceMeters = route.distance_meters;
                 drawnItems.addLayer(l);
             });
