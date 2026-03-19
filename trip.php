@@ -92,10 +92,6 @@ $tripDataForJS = [
 ];
 
 // Configuración de renderizado de mapa
-$settingsModel = new \Settings($db); // Assuming Settings class is in global namespace or handled by autoloader if not careful, but required above. Wait, need to check namespace. 
-// File `src/models/Settings.php` was mapped in ESTRUCTURA.md. Let's include it.
-require_once __DIR__ . '/src/models/Settings.php';
-$settingsModel = new Settings($db);
 $settingsModel = new Settings($db);
 $mapRenderer = $settingsModel->get('map_renderer', 'maplibre');
 $mapStyle = $settingsModel->get('map_style', 'voyager');
@@ -267,7 +263,6 @@ $statsIcons = [
         <span class="lightbox-hint"><?= __('map.click_anywhere_to_close') ?></span>
     </div>
 
-    <!-- Pass Data to JS -->
     <!-- Pass Data to JS -->
     <script>
         const TRIP_DATA = <?= json_encode($tripDataForJS) ?>;
