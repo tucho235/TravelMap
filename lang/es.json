@@ -111,7 +111,8 @@
     "trips_section": "Viajes",
     "link_copied": "Enlace copiado al portapapeles",
     "copy_failed": "No se pudo copiar el enlace",
-    "loading_trips": "Cargando viajes..."
+    "loading_trips": "Cargando viajes...",
+    "view_trip_details": "Ver detalles"
   },
   "forms": {
     "required_fields": "Campos obligatorios",
@@ -211,7 +212,8 @@
     "tags_help": "Escribe y presiona Enter, Tab o Coma para agregar etiquetas.",
     "tag_too_long": "La etiqueta es demasiado larga (máximo 50 caracteres)",
     "tag_invalid_chars": "La etiqueta contiene caracteres inválidos (solo letras, números, espacios y guiones)",
-    "too_many_tags": "Demasiadas etiquetas (máximo 10)"
+    "too_many_tags": "Demasiadas etiquetas (máximo 10)",
+    "no_photos": "No hay fotos disponibles para este viaje."
   },
   "points": {
     "title": "Puntos de Interés",
@@ -479,6 +481,8 @@
     "map_cluster_disable_at_zoom": "Deshabilitar Agrupación en Zoom",
     "trip_tags_enabled": "Habilitar sistema de etiquetas (Tags)",
     "trip_tags_enabled_desc": "Muestra las etiquetas en el mapa público y permite gestionarlas en el administrador.",
+    "trip_page_enabled": "Habilitar página dedicada de viaje",
+    "trip_page_enabled_desc": "Muestra un enlace a la página detallada de cada viaje en el mapa y en el listado. Si está desactivado, la página trip.php no es accesible.",
     "transport_colors": "Colores de Transporte",
     "site_title": "Título del Sitio",
     "site_description": "Descripción del Sitio",
@@ -527,6 +531,7 @@
     "confirm": "Confirmar",
     "close": "Cerrar",
     "back": "Atrás",
+    "back_to_map": "Volver al mapa",
     "back_to_list": "Volver al listado",
     "next": "Siguiente",
     "previous": "Anterior",

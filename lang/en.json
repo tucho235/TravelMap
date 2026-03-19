@@ -111,7 +111,8 @@
     "trips_section": "Trips",
     "link_copied": "Link copied to clipboard",
     "copy_failed": "Failed to copy link",
-    "loading_trips": "Loading trips..."
+    "loading_trips": "Loading trips...",
+    "view_trip_details": "View details"
   },
   "forms": {
     "required_fields": "Required Fields",
@@ -211,7 +212,8 @@
     "tags_help": "Type and press Enter, Tab or Comma to add tags.",
     "tag_too_long": "Tag is too long (maximum 50 characters)",
     "tag_invalid_chars": "Tag contains invalid characters (only letters, numbers, spaces and hyphens allowed)",
-    "too_many_tags": "Too many tags (maximum 10)"
+    "too_many_tags": "Too many tags (maximum 10)",
+    "no_photos": "No photos available for this trip."
   },
   "points": {
     "title": "Points of Interest",
@@ -426,6 +428,8 @@
     "map_cluster_disable_at_zoom": "Disable Clustering at Zoom",
     "trip_tags_enabled": "Enable Trip Tags System",
     "trip_tags_enabled_desc": "Displays tags on the public map and allows managing them in the admin panel.",
+    "trip_page_enabled": "Enable Dedicated Trip Page",
+    "trip_page_enabled_desc": "Shows a link to the detailed trip page on the map and in the trip list. When disabled, trip.php is inaccessible.",
     "site_title": "Site Title",
     "site_description": "Site Description",
     "default_language": "Default Language",
@@ -507,6 +511,7 @@
     "confirm": "Confirm",
     "close": "Close",
     "back": "Back",
+    "back_to_map": "Back to map",
     "back_to_list": "Back to list",
     "next": "Next",
     "previous": "Previous",

@@ -323,6 +323,10 @@ $footerNoteText = $settingsModel->get('footer_note_text', '');
     </script>
     
 
+    <!-- Shared map modules -->
+    <script src="<?= ASSETS_URL ?>/js/map-config.js?v=<?php echo $version; ?>"></script>
+    <script src="<?= ASSETS_URL ?>/js/map-renderer.js?v=<?php echo $version; ?>"></script>
+
     <!-- Public Map JS -->
     <?php if ($mapRenderer === 'leaflet'): ?>
     <script src="<?= ASSETS_URL ?>/js/public_map_leaflet.js?v=<?php echo $version; ?>"></script>

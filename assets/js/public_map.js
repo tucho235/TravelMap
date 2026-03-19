@@ -19,33 +19,9 @@
     let pointMarkers = [];
     let popup = null;
 
-    /**
-     * Get map style URL with language parameter for multilingual labels
-     * CARTO styles support language parameter via style.json modifications
-     * Available languages: en, es, fr, de, it, pt, ru, zh, ja, ar, and more
-     */
-    function getMapStyleUrl(styleKey) {
-        // Detect current language
-        const currentLang = window.i18n?.currentLang || document.documentElement.lang || 'en';
-
-        // Base style URLs
-        const baseStyles = {
-            'positron': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-            'voyager': 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-            'dark-matter': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-            'osm-liberty': 'https://tiles.openfreemap.org/styles/liberty'
-        };
-
-        return baseStyles[styleKey] || baseStyles['voyager'];
-    }
-
-    // Map style URLs (all free, no API key needed)
-    const MAP_STYLES = {
-        'positron': 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
-        'voyager': 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-        'dark-matter': 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-        'osm-liberty': 'https://tiles.openfreemap.org/styles/liberty'
-    };
+    // Map styles — delegated to MapConfig
+    const MAP_STYLES     = MapConfig.MAP_STYLES;
+    const getMapStyleUrl = MapConfig.getMapStyleUrl;
 
     // Track visibility state
     let visibleTripIds = new Set();
@@ -121,65 +97,16 @@
         return params;
     }
 
-    // SVG icons for transport types
-    const transportIcons = {
-        plane: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.8667 3.7804C16.7931 3.03188 17.8307 2.98644 18.9644 3.00233C19.5508 3.01055 19.844 3.01467 20.0792 3.10588C20.4524 3.2506 20.7494 3.54764 20.8941 3.92081C20.9853 4.15601 20.9894 4.4492 20.9977 5.03557C21.0136 6.16926 20.9681 7.20686 20.2196 8.13326C19.5893 8.91337 18.5059 9.32101 17.9846 10.1821C17.5866 10.8395 17.772 11.5203 17.943 12.2209L19.2228 17.4662C19.4779 18.5115 19.2838 19.1815 18.5529 19.9124C18.164 20.3013 17.8405 20.2816 17.5251 19.779L13.6627 13.6249L11.8181 15.0911C11.1493 15.6228 10.8149 15.8886 10.6392 16.2627C10.2276 17.1388 10.4889 18.4547 10.5022 19.4046C10.5096 19.9296 10.0559 20.9644 9.41391 20.9993C9.01756 21.0209 8.88283 20.5468 8.75481 20.2558L7.52234 17.4544C7.2276 16.7845 7.21552 16.7724 6.54556 16.4777L3.74415 15.2452C3.45318 15.1172 2.97914 14.9824 3.00071 14.5861C3.03565 13.9441 4.07036 13.4904 4.59536 13.4978C5.54532 13.5111 6.86122 13.7724 7.73734 13.3608C8.11142 13.1851 8.37724 12.8507 8.90888 12.1819L10.3751 10.3373L4.22103 6.47489C3.71845 6.15946 3.69872 5.83597 4.08755 5.44715C4.8185 4.7162 5.48851 4.52214 6.53377 4.77718L11.7791 6.05703C12.4797 6.22798 13.1605 6.41343 13.8179 6.0154C14.679 5.49411 15.0866 4.41074 15.8667 3.7804Z"/></svg>',
-        car: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 15.4222V18.5C22 18.9659 22 19.1989 21.9239 19.3827C21.8224 19.6277 21.6277 19.8224 21.3827 19.9239C21.1989 20 20.9659 20 20.5 20C20.0341 20 19.8011 20 19.6173 19.9239C19.3723 19.8224 19.1776 19.6277 19.0761 19.3827C19 19.1989 19 18.9659 19 18.5C19 18.0341 19 17.8011 18.9239 17.6173C18.8224 17.3723 18.6277 17.1776 18.3827 17.0761C18.1989 17 17.9659 17 17.5 17H6.5C6.03406 17 5.80109 17 5.61732 17.0761C5.37229 17.1776 5.17761 17.3723 5.07612 17.6173C5 17.8011 5 18.0341 5 18.5C5 18.9659 5 19.1989 4.92388 19.3827C4.82239 19.6277 4.62771 19.8224 4.38268 19.9239C4.19891 20 3.96594 20 3.5 20C3.03406 20 2.80109 20 2.61732 19.9239C2.37229 19.8224 2.17761 19.6277 2.07612 19.3827C2 19.1989 2 18.9659 2 18.5V15.4222C2 14.22 2 13.6188 2.17163 13.052C2.34326 12.4851 2.67671 11.9849 3.3436 10.9846L4 10L4.96154 7.69231C5.70726 5.90257 6.08013 5.0077 6.8359 4.50385C7.59167 4 8.56112 4 10.5 4H13.5C15.4389 4 16.4083 4 17.1641 4.50385C17.9199 5.0077 18.2927 5.90257 19.0385 7.69231L20 10L20.6564 10.9846C21.3233 11.9849 21.6567 12.4851 21.8284 13.052C22 13.6188 22 14.22 22 15.4222Z"/><path d="M2 8.5L4 10L5.76114 10.4403C5.91978 10.4799 6.08269 10.5 6.24621 10.5H17.7538C17.9173 10.5 18.0802 10.4799 18.2389 10.4403L20 10L22 8.5"/><path d="M18 14V14.01"/><path d="M6 14V14.01"/></svg>',
-        bike: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(3 0)"><path d="m8.632 15.526c-1.162.003-2.102.944-2.106 2.105v4.264.041c0 1.163.943 2.106 2.106 2.106s2.106-.943 2.106-2.106c0-.014 0-.029 0-.043v.002-4.263c-.003-1.161-.944-2.102-2.104-2.106z"></path><path d="m16.263 2.631h-4.053c-.491-1.537-1.907-2.631-3.579-2.631s-3.087 1.094-3.571 2.604l-.007.027h-4c-.581 0-1.053.471-1.053 1.053s.471 1.053 1.053 1.053h4.053c.268.899.85 1.635 1.615 2.096l.016.009c-2.871.867-4.929 3.48-4.947 6.577v5.528c.009.956.781 1.728 1.736 1.737h1.422v-3c0-2.064 1.673-3.737 3.737-3.737s3.737 1.673 3.737 3.737v3h1.421c.957-.008 1.73-.781 1.738-1.737v-5.474c-.001-3.105-2.067-5.726-4.899-6.567l-.048-.012c.782-.471 1.363-1.206 1.625-2.08l.007-.026h4.053c.581-.002 1.051-.472 1.053-1.053-.023-.601-.505-1.083-1.104-1.105h-.002z"></path><path d="m8.631 5.84c-1.163 0-2.106-.943-2.106-2.106s.943-2.106 2.106-2.106 2.106.943 2.106 2.106c.001.018.001.039.001.06 0 1.13-.916 2.046-2.046 2.046-.021 0-.042 0-.063-.001h.003z"></path></g></svg>',
-        train: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 3H6.73259C9.34372 3 10.6493 3 11.8679 3.40119C13.0866 3.80239 14.1368 4.57795 16.2373 6.12907L19.9289 8.85517C19.9692 8.88495 19.9894 8.89984 20.0084 8.91416C21.2491 9.84877 21.985 11.307 21.9998 12.8603C22 12.8841 22 12.9091 22 12.9593C22 12.9971 22 13.016 21.9997 13.032C21.9825 14.1115 21.1115 14.9825 20.032 14.9997C20.016 15 19.9971 15 19.9593 15H2"/><path d="M2 11H6.095C8.68885 11 9.98577 11 11.1857 11.451C12.3856 11.9019 13.3983 12.77 15.4238 14.5061L16 15"/><path d="M10 7H17"/><path d="M2 19H22"/><path d="M18 19V21"/><path d="M12 19V21"/><path d="M6 19V21"/></svg>',
-        ship: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 21.1932C2.68524 22.2443 3.57104 22.2443 4.27299 21.1932C6.52985 17.7408 8.67954 23.6764 10.273 21.2321C12.703 17.5694 14.4508 23.9218 16.273 21.1932C18.6492 17.5582 20.1295 23.5776 22 21.5842"/><path d="M3.57228 17L2.07481 12.6457C1.80373 11.8574 2.30283 11 3.03273 11H20.8582C23.9522 11 19.9943 17 17.9966 17"/><path d="M18 11L15.201 7.50122C14.4419 6.55236 13.2926 6 12.0775 6H8C6.89543 6 6 6.89543 6 8V11"/><path d="M10 6V3C10 2.44772 9.55228 2 9 2H8"/></svg>',
-        walk: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12.5L7.73811 9.89287C7.91034 9.63452 8.14035 9.41983 8.40993 9.26578L10.599 8.01487C11.1619 7.69323 11.8483 7.67417 12.4282 7.9641C13.0851 8.29255 13.4658 8.98636 13.7461 9.66522C14.2069 10.7814 15.3984 12 18 12"/><path d="M13 9L11.7772 14.5951M10.5 8.5L9.77457 11.7645C9.6069 12.519 9.88897 13.3025 10.4991 13.777L14 16.5L15.5 21"/><path d="M9.5 16 L9 17.5L6.5 20.5"/><path d="M15 4.5C15 5.32843 14.3284 6 13.5 6C12.6716 6 12 5.32843 12 4.5C12 3.67157 12.6716 3 13.5 3C14.3284 3 15 3.67157 15 4.5Z"/></svg>',
-        bus: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.00391 10V5M11.0039 10V5M16.0039 10V5.5"/><path d="M5.01609 17C3.59614 17 2.88616 17 2.44503 16.5607C2.00391 16.1213 2.00391 15.4142 2.00391 14V8C2.00391 6.58579 2.00391 5.87868 2.44503 5.43934C2.88616 5 3.59614 5 5.01609 5H12.1005C15.5742 5 17.311 5 18.6402 5.70624C19.619 6.22633 20.4346 7.0055 20.9971 7.95786C21.7609 9.25111 21.8332 10.9794 21.9779 14.436C22.0168 15.3678 22.0363 15.8337 21.8542 16.1862C21.7204 16.4454 21.5135 16.6601 21.2591 16.8041C20.913 17 20.4449 17 19.5085 17H19.0039M9.00391 17H15.0039"/><path d="M7.00391 19C8.10848 19 9.00391 18.1046 9.00391 17C9.00391 15.8954 8.10848 15 7.00391 15C5.89934 15 5.00391 15.8954 5.00391 17C5.00391 18.1046 5.89934 19 7.00391 19Z"/><path d="M17.0039 19C18.1085 19 19.0039 18.1046 19.0039 17C19.0039 15.8954 18.1085 15 17.0039 15C15.8993 15 15.0039 15.8954 15.0039 17C15.0039 18.1046 15.8993 19 17.0039 19Z"/><path d="M1.99609 10.0009H15.3641C15.9911 10.0009 16.2041 10.3681 16.6841 10.9441C17.2361 11.4841 17.6093 11.8628 18.1241 11.9401C18.8441 12.0481 21.5081 11.9941 21.5081 11.9941"/></svg>',
-        aerial: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 8.93333C20 14 14.4615 18 12 18C9.53846 18 4 14 4 8.93333C4 5.10416 7.58172 2 12 2C16.4183 2 20 5.10416 20 8.93333Z"/><path d="M15 8.93333C15 14 12.9231 18 12 18C11.0769 18 9 14 9 8.93333C9 5.10416 10.3431 2 12 2C13.6569 2 15 5.10416 15 8.93333Z"/><path d="M9 20C9 19.535 9 19.3025 9.05111 19.1118C9.18981 18.5941 9.59413 18.1898 10.1118 18.0511C10.3025 18 10.535 18 11 18H13C13.465 18 13.6975 18 13.8882 18.0511C14.4059 18.1898 14.8102 18.5941 14.9489 19.1118C15 19.3025 15 19.535 15 20C15 20.465 15 20.6975 14.9489 20.8882C14.8102 21.4059 14.4059 21.8102 13.8882 21.9489C13.6975 22 13.465 22 13 22H11C10.535 22 10.3025 22 10.1118 21.9489C9.59413 21.8102 9.18981 21.4059 9.05111 20.8882C9 20.6975 9 20.465 9 20Z"/></svg>'
-    };
+    // Icons and config — delegated to MapConfig
+    const transportIcons  = MapConfig.transportIcons;
+    const transportConfig = MapConfig.transportConfig; // mutable — server colors applied below
+    const pointTypeIcons  = MapConfig.pointTypeIcons;
+    const pointTypeConfig = MapConfig.pointTypeConfig;
 
-    // Transport config (colors will be updated from server)
-    let transportConfig = {
-        'plane': { color: '#FF4444', icon: transportIcons.plane, dashArray: [10, 5] },
-        'ship': { color: '#00AAAA', icon: transportIcons.ship, dashArray: [10, 5] },
-        'car': { color: '#4444FF', icon: transportIcons.car, dashArray: null },
-        'bike': { color: '#b88907', icon: transportIcons.bike, dashArray: null },
-        'train': { color: '#FF8800', icon: transportIcons.train, dashArray: null },
-        'walk': { color: '#44FF44', icon: transportIcons.walk, dashArray: null },
-        'bus': { color: '#9C27B0', icon: transportIcons.bus, dashArray: null },
-        'aerial': { color: '#E91E63', icon: transportIcons.aerial, dashArray: [10, 5] }
-    };
-
-    // SVG icons for point types (using currentColor for dynamic coloring via CSS)
-    const pointTypeIcons = {
-        stay: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4V20C3 20.9428 3 21.4142 3.29289 21.7071C3.58579 22 4.05719 22 5 22H19C19.9428 22 20.4142 22 20.7071 21.7071C21 21.4142 21 20.9428 21 20V4"/><path d="M10.5 8V9.5M10.5 11V9.5M13.5 8V9.5M13.5 11V9.5M10.5 9.5H13.5"/><path d="M14 22L14 17.9999C14 16.8954 13.1046 15.9999 12 15.9999C10.8954 15.9999 10 16.8954 10 17.9999V22"/><path d="M2 4H8C8.6399 2.82727 10.1897 2 12 2C13.8103 2 15.3601 2.82727 16 4H22"/><path d="M6 8H7M6 12H7M6 16H7"/><path d="M17 8H18M17 12H18M17 16H18"/></svg>',
-        visit: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><path d="M8.31253 4.7812L7.6885 4.36517V4.36517L8.31253 4.7812ZM7.5 6V6.75C7.75076 6.75 7.98494 6.62467 8.12404 6.41603L7.5 6ZM2.17224 8.83886L1.45453 8.62115L2.17224 8.83886ZM4.83886 6.17224L4.62115 5.45453H4.62115L4.83886 6.17224ZM3.46243 20.092L3.93822 19.5123L3.93822 19.5123L3.46243 20.092ZM2.90796 19.5376L3.48772 19.0618L3.48772 19.0618L2.90796 19.5376ZM21.092 19.5376L20.5123 19.0618L20.5123 19.0618L21.092 19.5376ZM20.5376 20.092L20.0618 19.5123L20.0618 19.5123L20.5376 20.092ZM14.0195 3.89791C14.3847 4.09336 14.8392 3.95575 15.0346 3.59054C15.2301 3.22534 15.0924 2.77084 14.7272 2.57539L14.0195 3.89791ZM22.5455 8.62115C22.4252 8.22477 22.0064 8.00092 21.61 8.12116C21.2137 8.2414 20.9898 8.6602 21.1101 9.05658L22.5455 8.62115ZM21.25 11.5V13.5H22.75V11.5H21.25ZM14.5 20.25H9.5V21.75H14.5V20.25ZM2.75 13.5V11.5H1.25V13.5H2.75ZM12.3593 2.25H11.6407V3.75H12.3593V2.25ZM7.6885 4.36517L6.87596 5.58397L8.12404 6.41603L8.93657 5.19722L7.6885 4.36517ZM11.6407 2.25C11.1305 2.25 10.6969 2.24925 10.3369 2.28282C9.96142 2.31783 9.61234 2.39366 9.27276 2.57539L9.98055 3.89791C10.0831 3.84299 10.2171 3.80049 10.4762 3.77634C10.7506 3.75075 11.1031 3.75 11.6407 3.75V2.25ZM8.93657 5.19722C9.23482 4.74985 9.43093 4.45704 9.60448 4.24286C9.76825 4.04074 9.87794 3.95282 9.98055 3.89791L9.27276 2.57539C8.93318 2.75713 8.67645 3.00553 8.43904 3.29853C8.2114 3.57947 7.97154 3.94062 7.6885 4.36517L8.93657 5.19722ZM2.75 11.5C2.75 10.0499 2.75814 9.49107 2.88994 9.05657L1.45453 8.62115C1.24186 9.32224 1.25 10.159 1.25 11.5H2.75ZM7.5 5.25C6.159 5.25 5.32224 5.24186 4.62115 5.45453L5.05657 6.88994C5.49107 6.75814 6.04987 6.75 7.5 6.75V5.25ZM2.88994 9.05657C3.20503 8.01787 4.01787 7.20503 5.05657 6.88994L4.62115 5.45453C3.10304 5.91505 1.91505 7.10304 1.45453 8.62115L2.88994 9.05657ZM9.5 20.25C7.83789 20.25 6.65724 20.2488 5.75133 20.1417C4.86197 20.0366 4.33563 19.8384 3.93822 19.5123L2.98663 20.6718C3.69558 21.2536 4.54428 21.5095 5.57525 21.6313C6.58966 21.7512 7.87463 21.75 9.5 21.75V20.25ZM1.25 13.5C1.25 15.1254 1.24877 16.4103 1.36868 17.4248C1.49054 18.4557 1.74638 19.3044 2.3282 20.0134L3.48772 19.0618C3.16158 18.6644 2.96343 18.138 2.85831 17.2487C2.75123 16.3428 2.75 15.1621 2.75 13.5H1.25ZM3.93822 19.5123C3.77366 19.3772 3.62277 19.2263 3.48772 19.0618L2.3282 20.0134C2.52558 20.2539 2.74612 20.4744 2.98663 20.6718L3.93822 19.5123ZM21.25 13.5C21.25 15.1621 21.2488 16.3428 21.1417 17.2487C21.0366 18.138 20.8384 18.6644 20.5123 19.0618L21.6718 20.0134C22.2536 19.3044 22.5095 18.4557 22.6313 17.4248C22.7512 16.4103 22.75 15.1254 22.75 13.5H21.25ZM14.5 21.75C16.1254 21.75 17.4103 21.7512 18.4248 21.6313C19.4557 21.5095 20.3044 21.2536 21.0134 20.6718L20.0618 19.5123C19.6644 19.8384 19.138 20.0366 18.2487 20.1417C17.3428 20.2488 16.1621 20.25 14.5 20.25V21.75ZM20.5123 19.0618C20.3772 19.2263 20.2263 19.3772 20.0618 19.5123L21.0134 20.6718C21.2539 20.4744 21.4744 20.2539 21.6718 20.0134L20.5123 19.0618ZM12.3593 3.75C12.8969 3.75 13.2494 3.75075 13.5238 3.77634C13.7829 3.80049 13.9169 3.84299 14.0195 3.89791L14.7272 2.57539C14.3877 2.39366 14.0386 2.31783 13.6631 2.28282C13.3031 2.24925 12.8695 2.25 12.3593 2.25V3.75ZM22.75 11.5C22.75 10.159 22.7581 9.32224 22.5455 8.62115L21.1101 9.05658C21.2419 9.49107 21.25 10.0499 21.25 11.5H22.75Z"/><path d="M16 13C16 15.2091 14.2091 17 12 17C9.79086 17 8 15.2091 8 13C8 10.7909 9.79086 9 12 9C14.2091 9 16 10.7909 16 13Z" stroke="currentColor" stroke-width="1.25" fill="none"/><path d="M17.9737 3.02148C17.9795 2.99284 18.0205 2.99284 18.0263 3.02148C18.3302 4.50808 19.4919 5.66984 20.9785 5.97368C21.0072 5.97954 21.0072 6.02046 20.9785 6.02632C19.4919 6.33016 18.3302 7.49192 18.0263 8.97852C18.0205 9.00716 17.9795 9.00716 17.9737 8.97852C17.6698 7.49192 16.5081 6.33016 15.0215 6.02632C14.9928 6.02046 14.9928 5.97954 15.0215 5.97368C16.5081 5.66984 17.6698 4.50808 17.9737 3.02148Z"/></svg>',
-        food: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><path d="M21 17C18.2386 17 16 14.7614 16 12C16 9.23858 18.2386 7 21 7"/><path d="M21 21C16.0294 21 12 16.9706 12 12C12 7.02944 16.0294 3 21 3"/><path d="M6 3L6 8M6 21L6 11"/><path d="M3.5 8H8.5"/><path d="M9 3L9 7.35224C9 12.216 3 12.2159 3 7.35207L3 3"/></svg>'
-    };
-
-    // SVG icons for stats
+    // SVG icons for stats (page-specific, not shared)
     const statsIcons = {
         routes: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><path d="M12 5H8.5C6.567 5 5 6.567 5 8.5C5 10.433 6.567 12 8.5 12H15.5C17.433 12 19 13.567 19 15.5C19 17.433 17.433 19 15.5 19H12"/></svg>',
         points: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><path d="M7 18C5.17107 18.4117 4 19.0443 4 19.7537C4 20.9943 7.58172 22 12 22C16.4183 22 20 20.9943 20 19.7537C20 19.0443 18.8289 18.4117 17 18"/><path d="M14.5 9C14.5 10.3807 13.3807 11.5 12 11.5C10.6193 11.5 9.5 10.3807 9.5 9C9.5 7.61929 10.6193 6.5 12 6.5C13.3807 6.5 14.5 7.61929 14.5 9Z"/><path d="M13.2574 17.4936C12.9201 17.8184 12.4693 18 12.0002 18C11.531 18 11.0802 17.8184 10.7429 17.4936C7.6543 14.5008 3.51519 11.1575 5.53371 6.30373C6.6251 3.67932 9.24494 2 12.0002 2C14.7554 2 17.3752 3.67933 18.4666 6.30373C20.4826 11.1514 16.3536 14.5111 13.2574 17.4936Z"/></svg>'
-    };
-
-    // Point type config
-    const pointTypeConfig = {
-        'stay': {
-            icon: pointTypeIcons.stay,
-            labelKey: 'map.point_type_stay',
-            label: __('map.point_type_stay'),
-            color: '#FF6B6B'
-        },
-        'visit': {
-            icon: pointTypeIcons.visit,
-            labelKey: 'map.point_type_visit',
-            label: __('map.point_type_visit'),
-            color: '#4ECDC4',
-            darkText: true
-        },
-        'food': {
-            icon: pointTypeIcons.food,
-            labelKey: 'map.point_type_food',
-            label: __('map.point_type_food'),
-            color: '#FFE66D',
-            darkText: true
-        }
     };
 
     /**
@@ -550,79 +477,34 @@
     }
 
     /**
-     * Render a route on the map
+     * Render a route on the map.
+     * Layer creation is delegated to MapRenderer.addRouteLayer; popup handlers are page-specific.
      */
     function renderRoute(route, trip) {
-        if (!route.geojson || !route.geojson.geometry) {
-            return;
-        }
-
         const transportType = route.transport_type || 'car';
+        const isPlaneRoute  = transportType === 'plane';
+        const isFuture      = isFutureTrip(trip);
+        const sourceId      = `route-${trip.id}-${route.id}`;
+        const layerId       = `route-layer-${trip.id}-${route.id}`;
+        const visibility    = isPlaneRoute ? showFlightRoutes : showRoutes;
 
-        // Skip simple plane routes (A-to-B) - they're handled by deck.gl arcs
-        // Complex aerial routes with 3+ waypoints are rendered as lines
-        const isPlaneRoute = transportType === 'plane';
-        if (isPlaneRoute) {
-            const coords = route.geojson.geometry?.coordinates || [];
-            if (coords.length <= 2) {
-                return; // Simple flight - handled by deck.gl arcs
-            }
-            // Complex aerial route - continue to render as line
-        }
+        const arcEntry = MapRenderer.addRouteLayer(map, route, sourceId, layerId, {
+            isFuture:   isFuture,
+            visibility: visibility ? 'visible' : 'none'
+        });
 
-        const config = transportConfig[transportType] || transportConfig['car'];
-        const isFuture = isFutureTrip(trip);
-        const color = isFuture ? '#6B6B6B' : config.color;
-        const sourceId = `route-${trip.id}-${route.id}`;
-        const layerId = `route-layer-${trip.id}-${route.id}`;
+        if (arcEntry !== null) return; // Simple plane arc — handled by deck.gl
 
-        // Add source
-        if (!map.getSource(sourceId)) {
-            map.addSource(sourceId, {
-                type: 'geojson',
-                data: route.geojson
-            });
-            routeSourcesAdded.add(sourceId);
-        }
+        routeSourcesAdded.add(sourceId);
 
-        // Add layer
-        if (!map.getLayer(layerId)) {
-            // Plane routes are controlled by showFlightRoutes, others by showRoutes
-            const initialVisibility = isPlaneRoute ? showFlightRoutes : showRoutes;
+        // Popup and cursor handlers (page-specific)
+        if (map.getLayer(layerId)) {
+            const config = transportConfig[transportType] || transportConfig['car'];
 
-            const layerConfig = {
-                id: layerId,
-                type: 'line',
-                source: sourceId,
-                layout: {
-                    'line-join': 'round',
-                    'line-cap': 'round',
-                    'visibility': initialVisibility ? 'visible' : 'none'
-                },
-                paint: {
-                    'line-color': color,
-                    'line-width': isFuture ? 3 : 4,
-                    'line-opacity': 0.7
-                },
-                metadata: {
-                    tripId: trip.id,
-                    transportType: transportType
-                }
-            };
-
-            // Add dash pattern if needed
-            if (isFuture || config.dashArray) {
-                layerConfig.paint['line-dasharray'] = isFuture ? [2, 6] : config.dashArray;
-            }
-
-            map.addLayer(layerConfig);
-
-            // Add click handler for popup
             map.on('click', layerId, function (e) {
                 e.preventDefault();
                 const futureLabel = isFuture ? ` <span class="badge bg-secondary">Próximo</span>` : '';
 
-                // Generar HTML de tags
                 let tagsHtml = '';
                 if (appConfig?.tripTagsEnabled && trip.tags && trip.tags.length > 0) {
                     tagsHtml = '<div class="mt-1 d-flex gap-1 flex-wrap">';
@@ -635,7 +517,7 @@
                 popup.setLngLat(e.lngLat)
                     .setHTML(`
                         <div class="route-popup">
-                            <strong>${config.icon} ${escapeHtml(trip.title)}</strong>${futureLabel}
+                            <strong>${config.icon} ${escapeHtml(trip.title)}</strong>${appConfig?.tripPageEnabled ? ` <a href="trip.php?id=${trip.id}" target="_blank" class="ms-1 text-muted text-decoration-none" title="${__('map.view_trip_details')}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg></a>` : ''}${futureLabel}
                             ${tagsHtml}
                             <br>
                             <small class="text-muted">${__('map.transport')}: ${__('map.transport_' + transportType)}${formatDistance(route.distance_meters, transportType, route.is_round_trip)}</small>
@@ -644,13 +526,8 @@
                     .addTo(map);
             });
 
-            // Change cursor on hover
-            map.on('mouseenter', layerId, function () {
-                document.getElementById('map').style.cursor = 'pointer';
-            });
-            map.on('mouseleave', layerId, function () {
-                document.getElementById('map').style.cursor = 'default';
-            });
+            map.on('mouseenter', layerId, function () { document.getElementById('map').style.cursor = 'pointer'; });
+            map.on('mouseleave', layerId, function () { document.getElementById('map').style.cursor = 'default'; });
         }
     }
 
@@ -713,7 +590,7 @@
                                 isFuture: isFuture,
                                 distanceMeters: route.distance_meters,
                                 isRoundTrip: route.is_round_trip,
-                                color: isFuture ? [107, 107, 107, 150] : hexToRgba(transportConfig.plane.color, 180)
+                                color: isFuture ? [107, 107, 107, 150] : MapConfig.hexToRgba(transportConfig.plane.color, 180)
                             });
                         }
                     }
@@ -762,7 +639,7 @@
                     popup.setLngLat(info.coordinate)
                         .setHTML(`
                             <div class="route-popup">
-                                <strong>${transportIcons.plane} ${escapeHtml(d.tripTitle)}</strong>${futureLabel}
+                                <strong>${transportIcons.plane} ${escapeHtml(d.tripTitle)}</strong>${appConfig?.tripPageEnabled ? ` <a href="trip.php?id=${d.tripId}" target="_blank" class="ms-1 text-muted text-decoration-none" title="${__('map.view_trip_details')}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg></a>` : ''}${futureLabel}
                                 ${tagsHtml}
                                 <br>
                                 <small class="text-muted">${__('map.transport')}: ${__('map.transport_plane')}${formatDistance(d.distanceMeters, 'plane', d.isRoundTrip)}</small>
@@ -819,24 +696,7 @@
             if (feature.properties.cluster) {
                 // Cluster marker
                 const count = feature.properties.point_count;
-                const el = document.createElement('div');
-                el.className = 'marker-cluster-custom';
-                el.innerHTML = `<span>${count}</span>`;
-                el.style.cssText = `
-                    background: #1e293b;
-                    border: 2px solid white;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-                    font-weight: 600;
-                    color: white;
-                    font-size: 13px;
-                    cursor: pointer;
-                `;
+                const el = MapRenderer.createClusterMarkerEl(count);
 
                 const marker = new maplibregl.Marker({ element: el })
                     .setLngLat(coords)
@@ -857,15 +717,7 @@
                 // Individual point marker with icon
                 const point = feature.properties;
                 const typeConfig = pointTypeConfig[point.type] || pointTypeConfig['visit'];
-                const iconColor = typeConfig.darkText ? 'color: #000; stroke: #000;' : '';
-
-                const el = document.createElement('div');
-                el.className = 'custom-point-marker';
-                el.innerHTML = `
-                    <div class="point-marker-inner point-type-${point.type}" style="background-color: ${typeConfig.color}; border-color: ${point.tripColor};">
-                        <span class="point-icon" style="${iconColor}">${typeConfig.icon}</span>
-                    </div>
-                `;
+                const el = MapRenderer.createPointMarkerEl(point);
 
                 const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
                     .setLngLat(coords)
@@ -1249,7 +1101,7 @@
                             <input class="form-check-input trip-checkbox flex-shrink-0 mt-1" type="checkbox" id="trip-${trip.id}" value="${trip.id}" data-year="${year}" checked>
                             <div class="trip-color-dot mt-1" style="background-color: ${colorIndicator};"></div>
                             <label class="form-check-label flex-grow-1" for="trip-${trip.id}">
-                                <span class="trip-title">${escapeHtml(trip.title)}</span>
+                                <span class="trip-title">${escapeHtml(trip.title)}${appConfig?.tripPageEnabled ? ` <a href="trip.php?id=${trip.id}" target="_blank" class="ms-1 text-muted text-decoration-none" title="${__('map.view_trip_details')}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg></a>` : ''}</span>
                                 <span class="trip-details">
                                     ${formatDateRange(trip.start_date, trip.end_date)}
                                     <span class="trip-counts">
@@ -1382,16 +1234,6 @@
     }
 
     // ==================== UTILITIES ====================
-
-    function hexToRgba(hex, alpha) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? [
-            parseInt(result[1], 16),
-            parseInt(result[2], 16),
-            parseInt(result[3], 16),
-            alpha || 255
-        ] : [255, 68, 68, alpha || 255];
-    }
 
     function formatDateRange(startDate, endDate) {
         if (!startDate && !endDate) return 'Sin fechas';
