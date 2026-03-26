@@ -6,6 +6,7 @@ let map;
 let markers = [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    initResizer();
     initMap();
     initInteractions();
     initTimeline();
@@ -497,3 +498,76 @@ window.scrollCarousel = function (direction) {
         behavior: 'smooth'
     });
 };
+
+// ==================== PANEL RESIZER ====================
+
+const RESIZER_STORAGE_KEY = 'travelmap_trip_split';
+
+function initResizer() {
+    const resizer   = document.getElementById('tripResizer');
+    const leftPanel = document.querySelector('.trip-details');
+    const container = document.querySelector('.trip-container');
+
+    if (!resizer || !leftPanel || !container) return;
+
+    // Only active on desktop
+    const mq = window.matchMedia('(min-width: 992px)');
+    if (!mq.matches) return;
+
+    // Restore saved width
+    const saved = localStorage.getItem(RESIZER_STORAGE_KEY);
+    if (saved) {
+        applyLeftWidth(leftPanel, parseFloat(saved));
+    }
+
+    let isResizing = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = leftPanel.getBoundingClientRect().width;
+        resizer.classList.add('is-resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const containerWidth = container.getBoundingClientRect().width;
+        const minPx = 220;
+        const maxPx = containerWidth - 220 - 6; // 6px = resizer width
+        const newWidth = Math.min(Math.max(startWidth + (e.clientX - startX), minPx), maxPx);
+        applyLeftWidth(leftPanel, newWidth);
+        // Notify map to resize during drag
+        notifyMapResize();
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isResizing) return;
+        isResizing = false;
+        resizer.classList.remove('is-resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        // Persist preference
+        localStorage.setItem(RESIZER_STORAGE_KEY, leftPanel.getBoundingClientRect().width);
+        notifyMapResize();
+    });
+}
+
+function applyLeftWidth(leftPanel, widthPx) {
+    leftPanel.style.flex = `0 0 ${widthPx}px`;
+    leftPanel.style.width = `${widthPx}px`;
+}
+
+function notifyMapResize() {
+    if (map) {
+        if (typeof map.resize === 'function') {
+            map.resize(); // MapLibre GL
+        } else if (typeof map.invalidateSize === 'function') {
+            map.invalidateSize(); // Leaflet
+        }
+    }
+}

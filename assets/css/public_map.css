@@ -1093,8 +1093,35 @@ body {
     font-size: 13px;
     font-weight: 500;
     color: #1e293b;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 4px;
     line-height: 1.3;
+}
+
+.trip-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    color: #94a3b8;
+    text-decoration: none;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s, color 0.15s;
+    margin-left: 2px;
+}
+
+.trip-filter-item:hover .trip-page-link {
+    opacity: 1;
+}
+
+.trip-page-link:hover {
+    background: #e2e8f0;
+    color: #334155;
 }
 
 .trip-details {
