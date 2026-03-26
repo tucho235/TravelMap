@@ -211,6 +211,9 @@ $statsIcons = [
 
         </div>
 
+        <!-- Drag handle -->
+        <div class="trip-resizer" id="tripResizer" title="Arrastrar para redimensionar"></div>
+
         <!-- Right Column: Visuals -->
         <div class="trip-visuals">
             <div id="tripMap" class="trip-map"></div>

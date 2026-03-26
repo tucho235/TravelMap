@@ -11,16 +11,69 @@ body.trip-page {
 }
 
 .trip-container {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
 }
 
 @media (min-width: 992px) {
     .trip-container {
-        grid-template-columns: 56% 44%;
+        flex-direction: row;
         height: 100vh;
         overflow: hidden;
+    }
+
+    .trip-details {
+        flex: 0 0 56%;
+        width: 56%;
+        min-width: 220px;
+        max-width: calc(100% - 220px);
+    }
+
+    .trip-visuals {
+        flex: 1 1 0;
+        min-width: 220px;
+    }
+}
+
+/* ========== Drag Resizer ========== */
+.trip-resizer {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .trip-resizer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 6px;
+        width: 6px;
+        cursor: col-resize;
+        background: #e2e8f0;
+        transition: background 0.15s;
+        position: relative;
+        z-index: 20;
+    }
+
+    .trip-resizer::after {
+        content: '';
+        display: block;
+        width: 2px;
+        height: 40px;
+        border-radius: 2px;
+        background: #94a3b8;
+        transition: background 0.15s, height 0.15s;
+    }
+
+    .trip-resizer:hover,
+    .trip-resizer.is-resizing {
+        background: #cbd5e1;
+    }
+
+    .trip-resizer:hover::after,
+    .trip-resizer.is-resizing::after {
+        background: #475569;
+        height: 56px;
     }
 }
 
@@ -314,9 +367,6 @@ body.trip-page {
 .trip-visuals {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    position: sticky;
-    top: 0;
     overflow: hidden;
 }
 
@@ -324,7 +374,12 @@ body.trip-page {
     .trip-visuals {
         height: auto;
         min-height: 100vh;
-        position: relative;
+    }
+}
+
+@media (min-width: 992px) {
+    .trip-visuals {
+        height: 100vh;
     }
 }
 
