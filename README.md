@@ -62,9 +62,6 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
 - **Importador con imágenes por EXIF**:
   - Detección de coordenadas y fechas por EXIF
   - Detección de geolocalización y nombre de ciudad
-- **Página individual por viaje**:
-  - Ruta del viaje
-  - Fotografías con galería 
 
 ### Visualizador Público
 - **Mapa a Pantalla Completa**: Interfaz responsive con todos los viajes y puntos publicados
@@ -85,6 +82,9 @@ Aplicación web completa para crear y visualizar mapas interactivos de viajes co
 - **Popups Detallados**: Información completa de cada punto con imágenes y descripción
 - **Rutas Coloreadas Personalizables**: Visualización de trayectos diferenciados por viaje y tipo de transporte con colores configurables
 - **API REST**: Endpoint JSON público para obtener todos los datos geográficos
+- **Página individual por viaje**:
+  - Ruta del viaje
+  - Fotografías con galería 
 
 ## 🚀 Especificaciones Técnicas
 
