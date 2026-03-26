@@ -20,7 +20,28 @@
     "import_flights": "Importar Vuelos",
     "import_airbnb": "Importar Airbnb",
     "backup": "Respaldo",
-    "import_brouter": "Importar Rutas BRouter"
+    "import_brouter": "Importar Rutas BRouter",
+    "import_exif": "Importar desde Fotos (EXIF)"
+  },
+  "import_exif": {
+    "title": "Importar desde Fotos (EXIF)",
+    "subtitle": "Crea puntos de interés extrayendo automáticamente coordenadas GPS y fecha de imágenes JPEG",
+    "step1_title": "Seleccionar viaje y subir fotos",
+    "step2_title": "Revisar e importar",
+    "select_trip": "Viaje destino",
+    "choose_trip": "— Seleccionar viaje —",
+    "no_trips": "No hay viajes creados. <a href=\"trip_form.php\">Crea un viaje</a> primero.",
+    "photos": "Fotografías",
+    "drop_here": "Arrastra las fotos aquí o haz clic para explorar",
+    "only_jpeg": "Solo imágenes JPEG (requerido para datos EXIF GPS)",
+    "no_files": "Ninguna imagen seleccionada",
+    "process_btn": "Procesar imágenes",
+    "upload_hint": "Se leerán los datos EXIF de cada imagen",
+    "import_all_btn": "Importar habilitados",
+    "start_over_btn": "Nueva importación",
+    "importing": "Importando...",
+    "finish_btn": "Finalizar y limpiar temporales",
+    "view_points": "Ver puntos de interés"
   },
   "admin": {
     "title": "Panel de Administración",

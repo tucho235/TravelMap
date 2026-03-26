@@ -20,7 +20,28 @@
     "import_flights": "Import Flights",
     "import_airbnb": "Import Airbnb",
     "backup": "Backup",
-    "import_brouter": "Import BRouter Routes"
+    "import_brouter": "Import BRouter Routes",
+    "import_exif": "Import from Photos (EXIF)"
+  },
+  "import_exif": {
+    "title": "Import from Photos (EXIF)",
+    "subtitle": "Create points of interest by extracting GPS coordinates and dates from JPEG images",
+    "step1_title": "Select trip and upload photos",
+    "step2_title": "Review and import",
+    "select_trip": "Destination trip",
+    "choose_trip": "— Select a trip —",
+    "no_trips": "No trips found. <a href=\"trip_form.php\">Create a trip</a> first.",
+    "photos": "Photographs",
+    "drop_here": "Drag & drop photos here or click to browse",
+    "only_jpeg": "JPEG images only (required for EXIF GPS data)",
+    "no_files": "No image selected",
+    "process_btn": "Process images",
+    "upload_hint": "EXIF data will be read from each image",
+    "import_all_btn": "Import enabled",
+    "start_over_btn": "New import",
+    "importing": "Importing...",
+    "finish_btn": "Finish & clean temp files",
+    "view_points": "View points of interest"
   },
   "admin": {
     "title": "Admin Panel",

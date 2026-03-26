@@ -176,6 +176,19 @@ $user_id = get_current_user_id();
                         </a>
                     </div>
                     <div class="nav-item">
+                        <a class="nav-link <?= ($current_page === 'import_exif.php') ? 'active' : '' ?>"
+                        href="<?= BASE_URL ?>/admin/import_exif.php"
+                        title="<?= __('navigation.import_exif') ?? 'Importar desde Fotos (EXIF)' ?>">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"/>
+                                <path d="M2 12H22M12 2C9.33333 7.33333 9.33333 16.6667 12 22C14.6667 16.6667 14.6667 7.33333 12 2Z"/>
+                                <path d="M12 6.5L16 8.5M12 6.5L8 8.5"/>
+                            </svg>
+                            <span class="nav-item-label"><?= __('navigation.import_exif') ?? 'Importar Fotos EXIF' ?></span>
+                        </a>
+                    </div>
+                    <div class="nav-item">
                         <a class="nav-link <?= ($current_page === 'import_brouter.php') ? 'active' : '' ?>"
                         href="<?= BASE_URL ?>/admin/import_brouter.php"
                         title="<?= __('navigation.import_brouter') ?? 'Importar Rutas BRouter' ?>">

@@ -252,6 +252,9 @@ TravelMap incluye un sistema completo de internacionalización:
 - ✅ Detección automática del idioma del navegador
 - ✅ Archivos de traducción JSON independientes y fáciles de editar
 - ✅ Página individual por viaje
+- ✅ Importación con imágenes por EXIF de fechas y coordenadas
+- ✅ Importación de estadías en Airbnb
+- ✅ Importación de BRouter
 
 ### Instalación del Sistema i18n
 
