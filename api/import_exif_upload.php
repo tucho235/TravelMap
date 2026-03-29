@@ -84,13 +84,16 @@ function readImageExifData(string $filePath): array {
         }
     }
 
-    // --- Fallback: Extract date from filename if EXIF data is missing ---
-    if (!$result['has_date']) {
-        $filename = basename($filePath);
+    // --- Fallback: Extract date from filename if EXIF data is missing or suspicious ---
+    // Try fallback if: no date extracted yet OR the filename looks like it has date info
+    $filename = basename($filePath);
+    if (!$result['has_date'] || preg_match('/(\d{4})(\d{2})(\d{2})[_-]?(\d{2})(\d{2})(\d{2})/', $filename)) {
         $matched = false;
+        $debugLog = [];
 
         // Pattern 1: IMG_20250329_143025 or IMG-20250329-143025 (with separators)
         if (!$matched && preg_match('/(\d{4})(\d{2})(\d{2})[_-](\d{2})(\d{2})(\d{2})/', $filename, $matches)) {
+            $debugLog[] = "Pattern 1 matched";
             $year   = $matches[1];
             $month  = $matches[2];
             $day    = $matches[3];
@@ -102,6 +105,7 @@ function readImageExifData(string $filePath): array {
 
         // Pattern 2: IMG20250329143025 (no separators)
         if (!$matched && preg_match('/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/', $filename, $matches)) {
+            $debugLog[] = "Pattern 2 matched";
             $year   = $matches[1];
             $month  = $matches[2];
             $day    = $matches[3];
@@ -113,6 +117,7 @@ function readImageExifData(string $filePath): array {
 
         // Pattern 3: 2025-03-29_14-30-25 or 2025_03_29_14_30_25 (fully formatted)
         if (!$matched && preg_match('/(\d{4})[-_](\d{2})[-_](\d{2})[-_T](\d{2})[-_:](\d{2})[-_:](\d{2})/', $filename, $matches)) {
+            $debugLog[] = "Pattern 3 matched";
             $year   = $matches[1];
             $month  = $matches[2];
             $day    = $matches[3];
@@ -124,13 +129,34 @@ function readImageExifData(string $filePath): array {
 
         // Validate and save
         if ($matched) {
-            $dateTimeStr = "{$year}-{$month}-{$day} {$hour}:{$minute}:{$second}";
-            $dt = DateTime::createFromFormat('Y-m-d H:i:s', $dateTimeStr);
-            if ($dt && $dt->format('Y-m-d H:i:s') === $dateTimeStr) {
-                $result['has_date']  = true;
-                $result['date']      = $dt->format('Y-m-d\TH:i');
-                $result['timestamp'] = $dt->getTimestamp();
+            // Validate month, day, hour, minute, second are in valid ranges
+            $monthInt = (int)$month;
+            $dayInt   = (int)$day;
+            $hourInt  = (int)$hour;
+            $minInt   = (int)$minute;
+            $secInt   = (int)$second;
+            
+            if ($monthInt >= 1 && $monthInt <= 12 && 
+                $dayInt >= 1 && $dayInt <= 31 && 
+                $hourInt >= 0 && $hourInt <= 23 && 
+                $minInt >= 0 && $minInt <= 59 && 
+                $secInt >= 0 && $secInt <= 59) {
+                
+                $dateTimeStr = "{$year}-{$month}-{$day} {$hour}:{$minute}:{$second}";
+                $dt = DateTime::createFromFormat('Y-m-d H:i:s', $dateTimeStr);
+                if ($dt && $dt->format('Y-m-d H:i:s') === $dateTimeStr) {
+                    $result['has_date']  = true;
+                    $result['date']      = $dt->format('Y-m-d\TH:i');
+                    $result['timestamp'] = $dt->getTimestamp();
+                    error_log("EXIF Fallback SUCCESS for " . $filename . ": " . $result['date']);
+                } else {
+                    error_log("EXIF Fallback FAILED DateTime validation for " . $filename . ": dateTimeStr=" . $dateTimeStr);
+                }
+            } else {
+                error_log("EXIF Fallback FAILED range validation for " . $filename . ": month={$monthInt}, day={$dayInt}, hour={$hourInt}, min={$minInt}, sec={$secInt}");
             }
+        } else {
+            error_log("EXIF Fallback NO PATTERN MATCH for " . $filename);
         }
     }
 
