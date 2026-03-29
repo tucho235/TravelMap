@@ -87,15 +87,43 @@ function readImageExifData(string $filePath): array {
     // --- Fallback: Extract date from filename if EXIF data is missing ---
     if (!$result['has_date']) {
         $filename = basename($filePath);
-        // Pattern: PREFIX_YYYYMMDD_HHMMSS (e.g., IMG_20250329_143025.jpg)
-        if (preg_match('/[_-](\d{4})(\d{2})(\d{2})[_-](\d{2})(\d{2})(\d{2})/', $filename, $matches)) {
+        $matched = false;
+
+        // Pattern 1: IMG_20250329_143025 or IMG-20250329-143025 (with separators)
+        if (!$matched && preg_match('/(\d{4})(\d{2})(\d{2})[_-](\d{2})(\d{2})(\d{2})/', $filename, $matches)) {
             $year   = $matches[1];
             $month  = $matches[2];
             $day    = $matches[3];
             $hour   = $matches[4];
             $minute = $matches[5];
             $second = $matches[6];
+            $matched = true;
+        }
 
+        // Pattern 2: IMG20250329143025 (no separators)
+        if (!$matched && preg_match('/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/', $filename, $matches)) {
+            $year   = $matches[1];
+            $month  = $matches[2];
+            $day    = $matches[3];
+            $hour   = $matches[4];
+            $minute = $matches[5];
+            $second = $matches[6];
+            $matched = true;
+        }
+
+        // Pattern 3: 2025-03-29_14-30-25 or 2025_03_29_14_30_25 (fully formatted)
+        if (!$matched && preg_match('/(\d{4})[-_](\d{2})[-_](\d{2})[-_T](\d{2})[-_:](\d{2})[-_:](\d{2})/', $filename, $matches)) {
+            $year   = $matches[1];
+            $month  = $matches[2];
+            $day    = $matches[3];
+            $hour   = $matches[4];
+            $minute = $matches[5];
+            $second = $matches[6];
+            $matched = true;
+        }
+
+        // Validate and save
+        if ($matched) {
             $dateTimeStr = "{$year}-{$month}-{$day} {$hour}:{$minute}:{$second}";
             $dt = DateTime::createFromFormat('Y-m-d H:i:s', $dateTimeStr);
             if ($dt && $dt->format('Y-m-d H:i:s') === $dateTimeStr) {

@@ -372,7 +372,7 @@ require_once __DIR__ . '/../includes/header.php';
     function createImageCard(img, index) {
         const hasGps  = img.has_gps  === true;
         const hasDate = img.has_date === true;
-        const enabled = hasGps && hasDate;
+        const enabled = hasDate;  // Solo requiere fecha (puede venir del EXIF o del nombre de archivo)
 
         const lat  = hasGps  ? Number(img.latitude).toFixed(6)  : '';
         const lng  = hasGps  ? Number(img.longitude).toFixed(6) : '';
@@ -382,10 +382,10 @@ require_once __DIR__ . '/../includes/header.php';
         let badgeHtml = '';
         if (!hasGps && !hasDate) {
             badgeHtml = '<span class="badge bg-secondary mt-1" title="Sin coordenadas GPS ni fecha EXIF">Sin GPS · Sin fecha</span>';
-        } else if (!hasGps) {
-            badgeHtml = '<span class="badge bg-warning text-dark mt-1" title="No se encontraron coordenadas GPS en el EXIF">Sin GPS</span>';
         } else if (!hasDate) {
-            badgeHtml = '<span class="badge bg-warning text-dark mt-1" title="No se encontró fecha en el EXIF">Sin fecha</span>';
+            badgeHtml = '<span class="badge bg-secondary mt-1" title="No se encontró fecha en el EXIF ni en el nombre del archivo">Sin fecha</span>';
+        } else if (!hasGps) {
+            badgeHtml = '<span class="badge bg-info text-dark mt-1" title="Fecha presente pero sin coordenadas GPS">Fecha ✓</span>';
         } else {
             badgeHtml = '<span class="badge bg-success mt-1">GPS + Fecha ✓</span>';
         }
