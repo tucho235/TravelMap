@@ -420,9 +420,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         unset($point['id'], $point['created_at'], $point['updated_at']);
                         
-                        // Check if exists (including visit_date to handle multiple stays at same location)
+                        // Check if exists (comparing by date only, to handle different times on same day)
                         if ($point['visit_date'] ?? null) {
-                            $stmt = $db->prepare('SELECT id FROM points_of_interest WHERE trip_id = ? AND title = ? AND latitude = ? AND longitude = ? AND visit_date = ?');
+                            $stmt = $db->prepare('SELECT id FROM points_of_interest WHERE trip_id = ? AND title = ? AND latitude = ? AND longitude = ? AND DATE(visit_date) = DATE(?)');
                             $stmt->execute([$newTripId, $point['title'], $point['latitude'], $point['longitude'], $point['visit_date']]);
                         } else {
                             // For points without visit_date, only check location

@@ -442,8 +442,8 @@ require_once __DIR__ . '/../includes/header.php';
 
             /* Date */
             '        <div class="col-12 col-sm-4">',
-            '          <label class="form-label small mb-1 fw-semibold">Fecha de visita</label>',
-            '          <input type="date" class="form-control form-control-sm exif-field-date" value="' + esc(date) + '">',
+            '          <label class="form-label small mb-1 fw-semibold">Fecha y Hora de visita</label>',
+            '          <input type="datetime-local" class="form-control form-control-sm exif-field-date" value="' + esc(date.includes('T') ? date : date + 'T12:00') + '">',
             '        </div>',
 
             /* Lat */

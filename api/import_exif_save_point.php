@@ -101,7 +101,17 @@ $tripId      = (int)$input['trip_id'];
 $title       = trim((string)$input['title']);
 $description = trim((string)($input['description'] ?? ''));
 $type        = (string)$input['type'];
-$visitDate   = !empty($input['visit_date']) ? (string)$input['visit_date'] : null;
+// Convertir fecha EXIF (YYYY-MM-DD) a datetime (YYYY-MM-DD 12:00:00) si no tiene hora
+$visitDate   = null;
+if (!empty($input['visit_date'])) {
+    $dateStr = (string)$input['visit_date'];
+    // Si es solo fecha, agregar hora media del día
+    if (strlen($dateStr) === 10 && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)) {
+        $visitDate = $dateStr . ' 12:00:00';
+    } else {
+        $visitDate = $dateStr;
+    }
+}
 $latitude    = (float)$input['latitude'];
 $longitude   = (float)$input['longitude'];
 $tempToken   = (string)$input['temp_token'];

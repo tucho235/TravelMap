@@ -243,11 +243,11 @@ $point_types = Point::getTypes();
                         <!-- Fecha -->
                         <div class="col-md-6 mb-3">
                             <label for="visit_date" class="form-label"><?= __('points.visit_date') ?></label>
-                            <input type="date" 
+                            <input type="datetime-local" 
                                    class="form-control" 
                                    id="visit_date" 
                                    name="visit_date" 
-                                   value="<?= htmlspecialchars($form_data['visit_date'] ?? '') ?>">
+                                   value="<?= !empty($form_data['visit_date']) ? htmlspecialchars(str_replace(' ', 'T', substr($form_data['visit_date'], 0, 16))) : '' ?>">
                         </div>
                     </div>
 

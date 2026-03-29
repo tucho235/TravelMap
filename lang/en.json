@@ -256,7 +256,7 @@
       "other": "Other"
     },
     "date": "Date",
-    "visit_date": "Visit Date",
+    "visit_date": "Visit Date and Time",
     "coordinates": "Coordinates",
     "latitude": "Latitude",
     "longitude": "Longitude",
@@ -634,7 +634,7 @@
     "geocoding_note": "Geocoding uses OpenStreetMap with 1 request/second limit. Import may take a few minutes.",
     "stays_found": "stays found",
     "original_dates": "Original Dates",
-    "visit_date": "Visit Date",
+    "visit_date": "Visit Date and Time",
     "not_detected": "Not detected",
     "start_over": "Start Over",
     "import_selected": "Import Selected Stays",
