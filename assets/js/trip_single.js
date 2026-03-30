@@ -103,7 +103,7 @@ function initMapLibre() {
                             .setHTML(`
                                 <div style="padding:4px 2px;">
                                     <strong>${point.title}</strong>
-                                    ${point.visit_date ? `<br><small style="color:#64748b">${new Date(point.visit_date).toLocaleDateString()}</small>` : ''}
+                                    ${point.visit_date ? `<br><small style="color:#64748b">${new Date(point.visit_date.replace(' ', 'T')).toLocaleDateString()}</small>` : ''}
                                 </div>
                             `)
                             .addTo(map);
@@ -265,8 +265,12 @@ function initLeaflet() {
             iconAnchor: [8, 8]
         });
 
+        const popupContent = point.visit_date 
+            ? `<strong>${point.title}</strong><br><small style="color:#64748b">${new Date(point.visit_date.replace(' ', 'T')).toLocaleDateString()}</small>`
+            : `<strong>${point.title}</strong>`;
+        
         const marker = L.marker([point.latitude, point.longitude], { icon: icon })
-            .bindPopup(`<strong>${point.title}</strong>`);
+            .bindPopup(popupContent);
 
         markerClusterGroup.addLayer(marker);
         markers[point.id] = marker;
