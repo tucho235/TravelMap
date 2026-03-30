@@ -101,7 +101,29 @@ $tripId      = (int)$input['trip_id'];
 $title       = trim((string)$input['title']);
 $description = trim((string)($input['description'] ?? ''));
 $type        = (string)$input['type'];
-$visitDate   = !empty($input['visit_date']) ? (string)$input['visit_date'] : null;
+// Convertir fecha a formato DATETIME para la BD
+$visitDate   = null;
+if (!empty($input['visit_date'])) {
+    $dateStr = (string)$input['visit_date'];
+    
+    // Caso 1: formato datetime-local desde HTML5 input (YYYY-MM-DDTHH:mm)
+    if (strpos($dateStr, 'T') !== false) {
+        $dateStr = str_replace('T', ' ', $dateStr);  // Reemplazar T por espacio
+        // Asegurar que tenga segundos (MM:ss)
+        if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $dateStr)) {
+            $dateStr = $dateStr . ':00';  // Agregar :00 segundos
+        }
+        $visitDate = $dateStr;
+    }
+    // Caso 2: solo fecha (YYYY-MM-DD)
+    elseif (strlen($dateStr) === 10 && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)) {
+        $visitDate = $dateStr . ' 12:00:00';
+    }
+    // Caso 3: ya viene con hora completa (YYYY-MM-DD HH:MM:SS)
+    else {
+        $visitDate = $dateStr;
+    }
+}
 $latitude    = (float)$input['latitude'];
 $longitude   = (float)$input['longitude'];
 $tempToken   = (string)$input['temp_token'];
@@ -153,9 +175,14 @@ if (!isValidTempFilename($tempFilename)) {
 
 // Validate date format if provided
 if ($visitDate !== null) {
-    $dtCheck = DateTime::createFromFormat('Y-m-d', $visitDate);
-    if (!$dtCheck || $dtCheck->format('Y-m-d') !== $visitDate) {
-        $visitDate = null;
+    // Intentar validar como DATETIME (Y-m-d H:i:s)
+    $dtCheck = DateTime::createFromFormat('Y-m-d H:i:s', $visitDate);
+    if (!$dtCheck || $dtCheck->format('Y-m-d H:i:s') !== $visitDate) {
+        // Si no es datetime válido, intentar como solo fecha (Y-m-d)
+        $dtCheck = DateTime::createFromFormat('Y-m-d', $visitDate);
+        if (!$dtCheck || $dtCheck->format('Y-m-d') !== $visitDate) {
+            $visitDate = null;  // Si ninguno coincide, descartar
+        }
     }
 }
 

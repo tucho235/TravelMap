@@ -91,8 +91,9 @@ function geocodeCity($cityName) {
 }
 
 // Check for duplicates first
+// Para Airbnb comparar solo la fecha (sin hora) ya que solo tenemos DATE
 $conn = getDB();
-$checkSql = "SELECT id FROM points_of_interest WHERE title = ? AND visit_date = ?";
+$checkSql = "SELECT id FROM points_of_interest WHERE title = ? AND DATE(visit_date) = ?";
 $checkStmt = $conn->prepare($checkSql);
 $checkStmt->execute([$destination, $firstDate]);
 $existing = $checkStmt->fetch();
@@ -121,6 +122,12 @@ if ($geo === null) {
 
 // Create the point
 $pointModel = new Point();
+// Si firstDate es solo fecha (YYYY-MM-DD), agregar hora media del día
+$visitDateTime = $firstDate;
+if (strlen($firstDate) === 10 && preg_match('/^\d{4}-\d{2}-\d{2}$/', $firstDate)) {
+    $visitDateTime = $firstDate . ' 12:00:00';
+}
+
 $pointData = [
     'trip_id' => $tripId,
     'title' => $destination,
@@ -129,7 +136,7 @@ $pointData = [
     'icon' => 'hotel',
     'latitude' => $geo['lat'],
     'longitude' => $geo['lon'],
-    'visit_date' => $firstDate
+    'visit_date' => $visitDateTime
 ];
 
 $pointId = $pointModel->create($pointData);

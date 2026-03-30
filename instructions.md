@@ -58,7 +58,7 @@ Actúa como un Arquitecto de Software experto en PHP y MySQL.
     * `users`: (id, username, password_hash, created_at).
     * `trips`: (id, title, description, start_date, end_date, color_hex, status [draft/published]).
     * `routes`: (id, trip_id, transport_type [enum: plane, car, walk, ship, train], geojson_data, color). *Nota: `geojson_data` será un LONGTEXT para guardar coordenadas JSON.*
-    * `points_of_interest`: (id, trip_id, title, description, type [enum: stay, visit, food], icon, image_path, latitude, longitude, visit_date).
+    * `points_of_interest`: (id, trip_id, title, description, type [enum: stay, visit, food], icon, image_path, latitude, longitude, visit_date [DATETIME]).
     * Asegúrate de incluir las claves foráneas (Foreign Keys) con `ON DELETE CASCADE`.
 
 2.  **Estructura de Carpetas:** Define una estructura de directorios estándar y segura (ej: `/config`, `/public`, `/src`, `/uploads`, `/assets/vendor`). Explica brevemente qué va en cada una.

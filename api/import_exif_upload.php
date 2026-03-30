@@ -50,7 +50,103 @@ function exifGpsToDecimal(array $coords, string $hemisphere): ?float {
     return round($decimal, 7);
 }
 
-function readImageExifData(string $filePath): array {
+// ---------------------------------------------------------------------------
+// GPS Interpolation: Estimate missing coordinates from nearby images
+// ---------------------------------------------------------------------------
+
+function estimateGpsCoordinates(array &$images): void {
+    // Group images without GPS but with date/time
+    $needsEstimate = [];
+    $withGps = [];
+    
+    foreach ($images as $idx => &$img) {
+        if ($img['has_gps']) {
+            $withGps[$idx] = $img;
+        } elseif ($img['has_date'] && $img['timestamp'] !== null) {
+            $needsEstimate[$idx] = $img;
+        }
+    }
+    
+    // If not enough images with GPS or we have no images needing estimates, return
+    if (count($withGps) < 1 || count($needsEstimate) === 0) {
+        return;
+    }
+    
+    // For each image without GPS
+    foreach ($needsEstimate as $idx => &$targetImg) {
+        $targetTime = $targetImg['timestamp'];
+        
+        // Find images with GPS before and after this one
+        $before = null;
+        $after = null;
+        
+        foreach ($withGps as $gpsIdx => $gpsImg) {
+            $timeDiff = $gpsImg['timestamp'] - $targetTime;
+            
+            // Image with GPS after target
+            if ($timeDiff > 0) {
+                if ($after === null || $gpsImg['timestamp'] < $images[$after]['timestamp']) {
+                    $after = $gpsIdx;
+                }
+            }
+            // Image with GPS before target
+            elseif ($timeDiff < 0) {
+                if ($before === null || $gpsImg['timestamp'] > $images[$before]['timestamp']) {
+                    $before = $gpsIdx;
+                }
+            }
+            // Exact match (same timestamp)
+            else {
+                $before = $gpsIdx;
+                break;
+            }
+        }
+        
+        // Estimate coordinates
+        if ($before !== null && $after !== null) {
+            // Interpolate between before and after
+            $beforeTime = $images[$before]['timestamp'];
+            $afterTime = $images[$after]['timestamp'];
+            $timeBetween = $afterTime - $beforeTime;
+            $timeFromBefore = $targetTime - $beforeTime;
+            $progress = $timeBetween > 0 ? $timeFromBefore / $timeBetween : 0;
+            $progress = max(0, min(1, $progress)); // Clamp to [0, 1]
+            
+            $beforeLat = $images[$before]['latitude'];
+            $beforeLng = $images[$before]['longitude'];
+            $afterLat = $images[$after]['latitude'];
+            $afterLng = $images[$after]['longitude'];
+            
+            $estimatedLat = $beforeLat + ($afterLat - $beforeLat) * $progress;
+            $estimatedLng = $beforeLng + ($afterLng - $beforeLng) * $progress;
+            
+            $images[$idx]['latitude']  = round($estimatedLat, 7);
+            $images[$idx]['longitude'] = round($estimatedLng, 7);
+            $images[$idx]['has_gps']   = true;
+            $images[$idx]['gps_estimated'] = true;
+            
+            error_log("GPS Interpolation SUCCESS for {$targetImg['original_name']}: lat={$estimatedLat}, lng={$estimatedLng}");
+        } elseif ($before !== null) {
+            // Use coordinates from closest before image
+            $images[$idx]['latitude']  = $images[$before]['latitude'];
+            $images[$idx]['longitude'] = $images[$before]['longitude'];
+            $images[$idx]['has_gps']   = true;
+            $images[$idx]['gps_estimated'] = true;
+            
+            error_log("GPS Estimation (before) SUCCESS for {$targetImg['original_name']}: using coordinates from earlier image");
+        } elseif ($after !== null) {
+            // Use coordinates from closest after image
+            $images[$idx]['latitude']  = $images[$after]['latitude'];
+            $images[$idx]['longitude'] = $images[$after]['longitude'];
+            $images[$idx]['has_gps']   = true;
+            $images[$idx]['gps_estimated'] = true;
+            
+            error_log("GPS Estimation (after) SUCCESS for {$targetImg['original_name']}: using coordinates from later image");
+        }
+    }
+}
+
+function readImageExifData(string $filePath, string $originalFilename = ''): array {
     $result = [
         'has_gps'   => false,
         'has_date'  => false,
@@ -66,7 +162,7 @@ function readImageExifData(string $filePath): array {
 
     $exif = @exif_read_data($filePath, 0, true);
     if (!$exif) {
-        return $result;
+        $exif = [];
     }
 
     // --- Date ---
@@ -79,8 +175,85 @@ function readImageExifData(string $filePath): array {
         $dt = DateTime::createFromFormat('Y:m:d H:i:s', trim($dateStr));
         if ($dt) {
             $result['has_date']  = true;
-            $result['date']      = $dt->format('Y-m-d');
+            $result['date']      = $dt->format('Y-m-d\TH:i');
             $result['timestamp'] = $dt->getTimestamp();
+        }
+    }
+
+    // --- Fallback: Extract date from filename if EXIF data is missing or suspicious ---
+    // Try fallback if: no date extracted yet OR the filename looks like it has date info
+    // Use original filename if provided, otherwise use temporary filename
+    $filename = !empty($originalFilename) ? $originalFilename : basename($filePath);
+    if (!$result['has_date'] || preg_match('/(\d{4})(\d{2})(\d{2})[_-]?(\d{2})(\d{2})(\d{2})/', $filename)) {
+        $matched = false;
+        $debugLog = [];
+
+        // Pattern 1: IMG_20250329_143025 or IMG-20250329-143025 (with separators)
+        if (!$matched && preg_match('/(\d{4})(\d{2})(\d{2})[_-](\d{2})(\d{2})(\d{2})/', $filename, $matches)) {
+            $debugLog[] = "Pattern 1 matched";
+            $year   = $matches[1];
+            $month  = $matches[2];
+            $day    = $matches[3];
+            $hour   = $matches[4];
+            $minute = $matches[5];
+            $second = $matches[6];
+            $matched = true;
+        }
+
+        // Pattern 2: IMG20250329143025 (no separators)
+        if (!$matched && preg_match('/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/', $filename, $matches)) {
+            $debugLog[] = "Pattern 2 matched";
+            $year   = $matches[1];
+            $month  = $matches[2];
+            $day    = $matches[3];
+            $hour   = $matches[4];
+            $minute = $matches[5];
+            $second = $matches[6];
+            $matched = true;
+        }
+
+        // Pattern 3: 2025-03-29_14-30-25 or 2025_03_29_14_30_25 (fully formatted)
+        if (!$matched && preg_match('/(\d{4})[-_](\d{2})[-_](\d{2})[-_T](\d{2})[-_:](\d{2})[-_:](\d{2})/', $filename, $matches)) {
+            $debugLog[] = "Pattern 3 matched";
+            $year   = $matches[1];
+            $month  = $matches[2];
+            $day    = $matches[3];
+            $hour   = $matches[4];
+            $minute = $matches[5];
+            $second = $matches[6];
+            $matched = true;
+        }
+
+        // Validate and save
+        if ($matched) {
+            // Validate month, day, hour, minute, second are in valid ranges
+            $monthInt = (int)$month;
+            $dayInt   = (int)$day;
+            $hourInt  = (int)$hour;
+            $minInt   = (int)$minute;
+            $secInt   = (int)$second;
+            
+            if ($monthInt >= 1 && $monthInt <= 12 && 
+                $dayInt >= 1 && $dayInt <= 31 && 
+                $hourInt >= 0 && $hourInt <= 23 && 
+                $minInt >= 0 && $minInt <= 59 && 
+                $secInt >= 0 && $secInt <= 59) {
+                
+                $dateTimeStr = "{$year}-{$month}-{$day} {$hour}:{$minute}:{$second}";
+                $dt = DateTime::createFromFormat('Y-m-d H:i:s', $dateTimeStr);
+                if ($dt && $dt->format('Y-m-d H:i:s') === $dateTimeStr) {
+                    $result['has_date']  = true;
+                    $result['date']      = $dt->format('Y-m-d\TH:i');
+                    $result['timestamp'] = $dt->getTimestamp();
+                    error_log("EXIF Fallback SUCCESS for " . $filename . ": " . $result['date']);
+                } else {
+                    error_log("EXIF Fallback FAILED DateTime validation for " . $filename . ": dateTimeStr=" . $dateTimeStr);
+                }
+            } else {
+                error_log("EXIF Fallback FAILED range validation for " . $filename . ": month={$monthInt}, day={$dayInt}, hour={$hourInt}, min={$minInt}, sec={$secInt}");
+            }
+        } else {
+            error_log("EXIF Fallback NO PATTERN MATCH for " . $filename);
         }
     }
 
@@ -214,8 +387,8 @@ foreach ($files as $file) {
 
     chmod($tempPath, 0644);
 
-    // Read EXIF
-    $exifData = readImageExifData($tempPath);
+    // Read EXIF (pass original filename for fallback date extraction)
+    $exifData = readImageExifData($tempPath, $file['name']);
 
     $images[] = [
         'temp_filename' => $tempFilename,
@@ -236,6 +409,9 @@ usort($images, function (array $a, array $b): int {
     $tb = $b['timestamp'] ?? PHP_INT_MAX;
     return $ta <=> $tb;
 });
+
+// Estimate GPS coordinates for images without GPS but with date/time
+estimateGpsCoordinates($images);
 
 echo json_encode([
     'success' => true,

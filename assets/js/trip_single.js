@@ -98,6 +98,17 @@ function initMapLibre() {
                 } else {
                     const point = feature.properties;
                     const el    = MapRenderer.createPointMarkerEl(point);
+                    el.addEventListener('click', e => {
+                        e.stopPropagation();
+                        popup.setLngLat(coords)
+                            .setHTML(`
+                                <div style="padding:4px 2px;">
+                                    <strong>${point.title}</strong>
+                                    ${point.visit_date ? `<br><small style="color:#64748b">${new Date(point.visit_date.replace(' ', 'T')).toLocaleDateString()}</small>` : ''}
+                                </div>
+                            `)
+                            .addTo(map);
+                    });
 
                     const markerPopup = new maplibregl.Popup({ offset: 25, closeButton: false })
                         .setHTML(`
@@ -268,8 +279,12 @@ function initLeaflet() {
             iconAnchor: [8, 8]
         });
 
+        const popupContent = point.visit_date 
+            ? `<strong>${point.title}</strong><br><small style="color:#64748b">${new Date(point.visit_date.replace(' ', 'T')).toLocaleDateString()}</small>`
+            : `<strong>${point.title}</strong>`;
+        
         const marker = L.marker([point.latitude, point.longitude], { icon: icon })
-            .bindPopup(`<strong>${point.title}</strong>`);
+            .bindPopup(popupContent);
 
         marker.on('add', () => {
             if (String(point.id) === String(activeMarkerId)) {

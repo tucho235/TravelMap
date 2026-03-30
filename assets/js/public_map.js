@@ -1245,7 +1245,16 @@
 
     function formatDate(dateString) {
         if (!dateString) return '';
-        const date = new Date(dateString + 'T00:00:00');
+        // Handle both date-only (YYYY-MM-DD) and datetime (YYYY-MM-DD HH:mm:ss) formats
+        let isoString = dateString;
+        if (dateString.includes(' ')) {
+            // DATETIME format: replace space with T
+            isoString = dateString.replace(' ', 'T');
+        } else if (!dateString.includes('T')) {
+            // Date-only format: append T00:00:00
+            isoString = dateString + 'T00:00:00';
+        }
+        const date = new Date(isoString);
         return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 

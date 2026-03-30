@@ -204,11 +204,17 @@ class Point {
             $errors['longitude'] = 'La longitud debe estar entre -180 y 180';
         }
 
-        // Validar fecha si se proporciona
+        // Validar fecha y hora si se proporciona
         if (!empty($data['visit_date'])) {
-            $date = DateTime::createFromFormat('Y-m-d', $data['visit_date']);
-            if (!$date || $date->format('Y-m-d') !== $data['visit_date']) {
-                $errors['visit_date'] = 'La fecha debe estar en formato YYYY-MM-DD';
+            // Aceptar formato YYYY-MM-DD HH:MM:SS o YYYY-MM-DD
+            $date = DateTime::createFromFormat('Y-m-d H:i:s', $data['visit_date']);
+            if (!$date) {
+                $date = DateTime::createFromFormat('Y-m-d', $data['visit_date']);
+            }
+            if (!$date) {
+                $errors['visit_date'] = 'La fecha debe estar en formato YYYY-MM-DD o YYYY-MM-DD HH:MM:SS';
+            } elseif ($date->getTimestamp() > time()) {
+                $errors['visit_date'] = 'No se puede usar una fecha futura';
             }
         }
 

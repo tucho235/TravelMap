@@ -192,7 +192,7 @@ $point_types = Point::getTypes();
                                 </td>
                                 <td>
                                     <?php if ($point['visit_date']): ?>
-                                        <span class="cell-date"><?= date('d/m/Y', strtotime($point['visit_date'])) ?></span>
+                                        <span class="cell-date"><?= date('d/m/Y H:i', strtotime($point['visit_date'])) ?></span>
                                     <?php else: ?>
                                         <span class="text-muted">—</span>
                                     <?php endif; ?>

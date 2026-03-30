@@ -44,7 +44,9 @@ $points = $pointModel->getAll($tripId);
 
 // Sort points by visit_date (oldest to newest)
 usort($points, function($a, $b) {
-    return strtotime($a['visit_date'] ?? '1970-01-01') - strtotime($b['visit_date'] ?? '1970-01-01');
+    $dateA = strtotime($a['visit_date'] ?? '1970-01-01 00:00:00');
+    $dateB = strtotime($b['visit_date'] ?? '1970-01-01 00:00:00');
+    return $dateA - $dateB;
 });
 
 // Calcular estadísticas
@@ -221,6 +223,8 @@ $statsIcons = [
             <div class="trip-media">
                 <?php 
                 $pointsWithImages = array_filter($processedPoints, function($p) { return !empty($p['image_url']); });
+                // Sort by visit_date (newest first on left, oldest last on right)
+
                 if (!empty($pointsWithImages)): 
                 ?>
                 <button class="carousel-nav prev" onclick="scrollCarousel(-1)">&#10094;</button>

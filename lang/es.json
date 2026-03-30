@@ -256,7 +256,7 @@
       "other": "Otro"
     },
     "date": "Fecha",
-    "visit_date": "Fecha de Visita",
+    "visit_date": "Fecha y Hora de Visita",
     "coordinates": "Coordenadas",
     "latitude": "Latitud",
     "longitude": "Longitud",
@@ -654,7 +654,7 @@
     "geocoding_note": "La geocodificación usa OpenStreetMap con límite de 1 petición/segundo. La importación puede tardar unos minutos.",
     "stays_found": "estadías encontradas",
     "original_dates": "Fechas Originales",
-    "visit_date": "Fecha de Visita",
+    "visit_date": "Fecha y Hora de Visita",
     "not_detected": "No detectada",
     "start_over": "Comenzar de Nuevo",
     "import_selected": "Importar Estadías Seleccionadas",
