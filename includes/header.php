@@ -202,6 +202,21 @@ $user_id = get_current_user_id();
                         </a>
                     </div>
                     <div class="nav-item">
+                        <a class="nav-link <?= ($current_page === 'import_openrail_gpx.php') ? 'active' : '' ?>" 
+                           href="<?= BASE_URL ?>/admin/import_openrail_gpx.php" 
+                           title="<?= __('navigation.import_openrail_gpx') ?? 'Importar Rutas OpenRail'  ?>">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="4" y="10" width="16" height="6" rx="2" />
+                                <path d="M6 14h.01" />
+                                <path d="M18 14h.01" />
+                                <circle cx="8" cy="17" r="1" />
+                                <circle cx="16" cy="17" r="1" />
+                                <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" />
+                                <path d="M12 4v2" />
+                            </svg>
+                            <span class="nav-item-label"><?= __('navigation.import_openrail_gpx') ?? 'Importar Rutas OpenRail' ?></span>
+                        </a>
+                    </div>                    <div class="nav-item">
                         <a class="nav-link <?= ($current_page === 'backup.php') ? 'active' : '' ?>" href="<?= BASE_URL ?>/admin/backup.php" title="<?= __('navigation.backup') ?? 'Backup' ?>">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 21.5V7M15 19C14.4102 19.6068 12.8403 22 12 22C11.1597 22 9.58984 19.6068 9 19" />

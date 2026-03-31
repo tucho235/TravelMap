@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS points_of_interest (
     trip_id INT UNSIGNED NOT NULL,
     title VARCHAR(200) NOT NULL,
     description TEXT,
-    type ENUM('stay', 'visit', 'food') NOT NULL,
+    type ENUM('stay', 'visit', 'food', 'waypoint') NOT NULL,
     icon VARCHAR(100) DEFAULT 'default',
     image_path VARCHAR(255),
     latitude DECIMAL(10, 8) NOT NULL,
