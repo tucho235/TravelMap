@@ -42,20 +42,17 @@ $trips = $tripModel->getAll('title ASC');
 
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Procesar visit_date: convertir datetime-local format (YYYY-MM-DDTHH:mm) a MySQL DATETIME (YYYY-MM-DD HH:mm:ss)
-    $visit_date = $_POST['visit_date'] ?? null;
-    if (!empty($visit_date)) {
-        // datetime-local envía formato: YYYY-MM-DDTHH:mm
-        if (strpos($visit_date, 'T') !== false) {
-            // Reemplazar T con espacio y agregar :00 si no tiene segundos
-            $visit_date = str_replace('T', ' ', $visit_date);
-            if (strlen($visit_date) === 16) { // YYYY-MM-DD HH:mm
-                $visit_date = $visit_date . ':00'; // Agregar :00 segundos
-            }
-        }
+    // Procesar visit_date: combinar campo de fecha (requerido) y hora (opcional)
+    // Issue #48 — El campo DATETIME se divide en dos inputs: date (required) + time (optional)
+    $visit_date_date = trim($_POST['visit_date_date'] ?? '');
+    $visit_date_time = trim($_POST['visit_date_time'] ?? '');
+
+    if (!empty($visit_date_date)) {
+        // Si hay hora (HH:MM), agregar segundos; si no, usar 00:00:00
+        $time_part = !empty($visit_date_time) ? $visit_date_time . ':00' : '00:00:00';
+        $visit_date = $visit_date_date . ' ' . $time_part;
     } else {
-        // En edición, si el campo viene vacío, preservar el valor anterior
-        $visit_date = $is_edit ? ($point['visit_date'] ?? null) : null;
+        $visit_date = null;
     }
 
     $data = [
@@ -86,6 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $errors['image'] = $upload_result['error'];
         }
+    }
+
+    // Validar fecha de visita (requerida a nivel de formulario)
+    if (empty($visit_date_date)) {
+        $errors['visit_date'] = __('points.visit_date_required');
     }
 
     if (empty($errors)) {
@@ -145,7 +147,9 @@ $form_data = $point ?? [
     'icon' => $_POST['icon'] ?? 'default',
     'latitude' => $_POST['latitude'] ?? '',
     'longitude' => $_POST['longitude'] ?? '',
-    'visit_date' => $_POST['visit_date'] ?? '',
+    'visit_date' => !empty($_POST['visit_date_date'])
+        ? $_POST['visit_date_date'] . ' ' . (!empty($_POST['visit_date_time']) ? $_POST['visit_date_time'] . ':00' : '00:00:00')
+        : '',
     'image_path' => null
 ];
 
@@ -262,7 +266,7 @@ $existing_links = ($is_edit && $point) ? $poiLinkModel->getByPoiId($point['id'])
 
                     <div class="row">
                         <!-- Tipo -->
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="type" class="form-label"><?= __('points.type') ?> <span class="text-danger">*</span></label>
                             <select class="form-select <?= isset($errors['type']) ? 'is-invalid' : '' ?>" 
                                     id="type" 
@@ -279,14 +283,35 @@ $existing_links = ($is_edit && $point) ? $poiLinkModel->getByPoiId($point['id'])
                             <?php endif; ?>
                         </div>
 
-                        <!-- Fecha -->
-                        <div class="col-md-6 mb-3">
-                            <label for="visit_date" class="form-label"><?= __('points.visit_date') ?></label>
-                            <input type="datetime-local" 
+                        <!-- Fecha de visita (requerida) — Issue #48 -->
+                        <div class="col-md-4 mb-3">
+                            <label for="visit_date_date" class="form-label"><?= __('points.visit_date_date') ?> <span class="text-danger">*</span></label>
+                            <input type="date" 
+                                   class="form-control <?= isset($errors['visit_date']) ? 'is-invalid' : '' ?>" 
+                                   id="visit_date_date" 
+                                   name="visit_date_date" 
+                                   value="<?= !empty($form_data['visit_date']) ? htmlspecialchars(substr($form_data['visit_date'], 0, 10)) : '' ?>"
+                                   required>
+                            <?php if (isset($errors['visit_date'])): ?>
+                                <div class="invalid-feedback"><?= htmlspecialchars($errors['visit_date']) ?></div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Hora de visita (opcional) — Issue #48 -->
+                        <div class="col-md-4 mb-3">
+                            <label for="visit_date_time" class="form-label"><?= __('points.visit_date_time') ?></label>
+                            <input type="time" 
                                    class="form-control" 
-                                   id="visit_date" 
-                                   name="visit_date" 
-                                   value="<?= !empty($form_data['visit_date']) ? htmlspecialchars(str_replace(' ', 'T', substr($form_data['visit_date'], 0, 16))) : '' ?>">
+                                   id="visit_date_time" 
+                                   name="visit_date_time" 
+                                   value="<?php
+                                       if (!empty($form_data['visit_date'])) {
+                                           $t = substr($form_data['visit_date'], 11, 5);
+                                           // Mostrar vacío si la hora es 00:00 (indica "sin hora definida")
+                                           echo ($t !== '00:00') ? htmlspecialchars($t) : '';
+                                       }
+                                   ?>">
+                            <small class="form-text text-muted"><?= __('points.visit_time_optional') ?></small>
                         </div>
                     </div>
 
