@@ -19,6 +19,7 @@
     "import_export": "Importar / Exportar",
     "import_flights": "Importar Vuelos",
     "import_airbnb": "Importar Airbnb",
+    "import_openrail_gpx": "Importar OpenRail",
     "backup": "Respaldo",
     "import_brouter": "Importar Rutas BRouter",
     "import_exif": "Importar desde Fotos (EXIF)"
