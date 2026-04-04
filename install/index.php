@@ -31,6 +31,164 @@ if (empty($_SESSION['_csrf'])) {
     $_SESSION['_csrf'] = bin2hex(random_bytes(32));
 }
 
+// ── Autenticación del instalador ──────────────────────────────────────────────
+// Si db.php ya existe el sitio está instalado: exigir login antes de continuar.
+(function () {
+    $dbPhpPath = ROOT . '/config/db.php';
+    if (!file_exists($dbPhpPath)) {
+        return; // Instalación nueva: sin protección aún
+    }
+
+    // Manejar logout del instalador
+    if (isset($_GET['installer_logout'])) {
+        unset($_SESSION['installer_auth'], $_SESSION['installer_user']);
+        session_regenerate_id(true);
+        header('Location: index.php');
+        exit;
+    }
+
+    // Ya autenticado
+    if (!empty($_SESSION['installer_auth'])) {
+        return;
+    }
+
+    // Procesar formulario de login del instalador
+    $loginError = '';
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'installer_login') {
+        $token = $_POST['_csrf'] ?? '';
+        if (!hash_equals($_SESSION['_csrf'], $token)) {
+            $loginError = 'Error de seguridad. Recargá la página e intentá nuevamente.';
+        } else {
+            $username = trim($_POST['username'] ?? '');
+            $password = $_POST['password'] ?? '';
+
+            try {
+                require_once $dbPhpPath;
+                $db   = getDB();
+                $stmt = $db->prepare('SELECT id, username, password_hash FROM users WHERE username = ? LIMIT 1');
+                $stmt->execute([$username]);
+                $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($user && password_verify($password, $user['password_hash'])) {
+                    session_regenerate_id(true);
+                    $_SESSION['installer_auth'] = true;
+                    $_SESSION['installer_user'] = $user['username'];
+                    header('Location: index.php');
+                    exit;
+                } else {
+                    // Retardo constante para evitar timing attacks
+                    password_verify('dummy', '$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234');
+                    $loginError = 'Usuario o contraseña incorrectos.';
+                }
+            } catch (Throwable $e) {
+                $loginError = 'Error de conexión. Verificá config/db.php.';
+            }
+        }
+    }
+
+    // Mostrar formulario de acceso al instalador y detener ejecución
+    ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TravelMap – Acceso al Instalador</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .login-wrap {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0,0,0,.4);
+            padding: 40px;
+            width: 100%;
+            max-width: 380px;
+        }
+        .login-wrap h1 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .login-wrap p.sub {
+            font-size: .88rem;
+            color: #64748b;
+            margin-bottom: 28px;
+        }
+        label {
+            display: block;
+            font-size: .85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: .95rem;
+            margin-bottom: 16px;
+            transition: border-color .2s;
+        }
+        input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,.15); }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .btn:hover { background: #334155; }
+        .alert-error {
+            background: #fce8e6;
+            border-left: 4px solid #ea4335;
+            color: #7d191c;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: .88rem;
+            margin-bottom: 18px;
+        }
+        .lock-icon { text-align: center; font-size: 2.5rem; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="lock-icon">🔒</div>
+        <h1>Instalador / Actualizador</h1>
+        <p class="sub">Ingresá con tu cuenta de administrador para continuar.</p>
+        <?php if ($loginError): ?>
+        <div class="alert-error"><?= htmlspecialchars($loginError, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php endif; ?>
+        <form method="post" action="index.php">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars($_SESSION['_csrf'], ENT_QUOTES) ?>">
+            <input type="hidden" name="action" value="installer_login">
+            <label for="il_user">Usuario</label>
+            <input type="text" id="il_user" name="username" required autofocus autocomplete="username"
+                   value="<?= htmlspecialchars($_POST['username'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            <label for="il_pass">Contraseña</label>
+            <input type="password" id="il_pass" name="password" required autocomplete="current-password">
+            <button type="submit" class="btn">Ingresar</button>
+        </form>
+    </div>
+</body>
+</html>
+    <?php
+    exit;
+})();
+
 function csrfField(): string
 {
     return '<input type="hidden" name="_csrf" value="' . htmlspecialchars($_SESSION['_csrf'], ENT_QUOTES) . '">';
@@ -470,6 +628,13 @@ $requirementsOk = $phpOk && $pdoOk && $jsonOk && $writableConfigDir;
         preg_match('/\/\/\s*([\d.]+)/', file_get_contents(ROOT . '/version.php') ?: '', $_v);
         ?>
         <p>Versión de la aplicación: <?= h($_v[1] ?? '') ?></p>
+        <?php if (!empty($_SESSION['installer_user'])): ?>
+        <p style="margin-top:8px;font-size:.82rem;color:#888">
+            Sesión como <strong><?= h($_SESSION['installer_user']) ?></strong>
+            &nbsp;·&nbsp;
+            <a href="index.php?installer_logout=1" style="color:#ea4335;text-decoration:none;font-weight:600">Cerrar sesión</a>
+        </p>
+        <?php endif; ?>
     </header>
 
     <!-- Advertencia de seguridad -->
