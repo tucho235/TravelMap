@@ -20,7 +20,7 @@
     let popup = null;
 
     // Map styles — delegated to MapConfig
-    const MAP_STYLES     = MapConfig.MAP_STYLES;
+    const MAP_STYLES = MapConfig.MAP_STYLES;
     const getMapStyleUrl = MapConfig.getMapStyleUrl;
 
     // Track visibility state
@@ -98,9 +98,9 @@
     }
 
     // Icons and config — delegated to MapConfig
-    const transportIcons  = MapConfig.transportIcons;
+    const transportIcons = MapConfig.transportIcons;
     const transportConfig = MapConfig.transportConfig; // mutable — server colors applied below
-    const pointTypeIcons  = MapConfig.pointTypeIcons;
+    const pointTypeIcons = MapConfig.pointTypeIcons;
 
     // SVG icons for stats (page-specific, not shared)
     const statsIcons = {
@@ -481,14 +481,14 @@
      */
     function renderRoute(route, trip) {
         const transportType = route.transport_type || 'car';
-        const isPlaneRoute  = transportType === 'plane';
-        const isFuture      = isFutureTrip(trip);
-        const sourceId      = `route-${trip.id}-${route.id}`;
-        const layerId       = `route-layer-${trip.id}-${route.id}`;
-        const visibility    = isPlaneRoute ? showFlightRoutes : showRoutes;
+        const isPlaneRoute = transportType === 'plane';
+        const isFuture = isFutureTrip(trip);
+        const sourceId = `route-${trip.id}-${route.id}`;
+        const layerId = `route-layer-${trip.id}-${route.id}`;
+        const visibility = isPlaneRoute ? showFlightRoutes : showRoutes;
 
         const arcEntry = MapRenderer.addRouteLayer(map, route, sourceId, layerId, {
-            isFuture:   isFuture,
+            isFuture: isFuture,
             visibility: visibility ? 'visible' : 'none'
         });
 
@@ -726,9 +726,9 @@
                     e.stopPropagation(); // Prevent map click from closing popup
                     popup.setLngLat(coords)
                         .setHTML(MapRenderer.createPoiPopup(point, {
-                            tripColor:       point.tripColor,
-                            tripTitle:       point.tripTitle,
-                            tripTags:        point.tripTags,
+                            tripColor: point.tripColor,
+                            tripTitle: point.tripTitle,
+                            tripTags: point.tripTags,
                             tripTagsEnabled: appConfig && appConfig.tripTagsEnabled
                         }))
                         .addTo(map);
@@ -1058,7 +1058,7 @@
                             <input class="form-check-input trip-checkbox flex-shrink-0 mt-1" type="checkbox" id="trip-${trip.id}" value="${trip.id}" data-year="${year}" checked>
                             <div class="trip-color-dot mt-1" style="background-color: ${colorIndicator};"></div>
                             <label class="form-check-label flex-grow-1" for="trip-${trip.id}">
-                                <span class="trip-title">${escapeHtml(trip.title)}${appConfig?.tripPageEnabled ? ` <a href="trip.php?id=${trip.id}" target="_blank" class="trip-page-link" title="${__('map.view_trip_details')}"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg></a>` : ''}</span>
+                                <span class="trip-title">${escapeHtml(trip.title)}${appConfig?.tripPageEnabled ? ` <a href="trip.php?id=${trip.id}" class="trip-page-link" title="${__('map.view_trip_details')}"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/><path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/></svg></a>` : ''}</span>
                                 <span class="trip-details">
                                     ${formatDateRange(trip.start_date, trip.end_date)}
                                     <span class="trip-counts">
