@@ -36,7 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $trip_choice = $_POST['trip_choice'] ?? 'new';
     $existing_trip_id = $_POST['existing_trip_id'] ?? null;
     $new_trip_name = trim($_POST['new_trip_name'] ?? '');
-    $new_trip_description = trim($_POST['new_trip_description'] ?? __('import_gpx.default_description'));
+    $new_trip_description = ($trip_choice === 'existing') 
+        ? '' 
+        : trim($_POST['new_trip_description'] ?? __('import_gpx.default_description'));
     $transport_type = $_POST['transport_type'] ?? 'car';
     $import_waypoints = isset($_POST['import_waypoints']);
 
@@ -205,7 +207,6 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     <div id="newTripFields">
                         <input type="text" class="form-control" id="new_trip_name" name="new_trip_name" placeholder="<?= __('import_gpx.trip_name_placeholder') ?>">
-                        <input type="text" class="form-control mt-2" id="new_trip_description" name="new_trip_description" placeholder="<?= __('import_gpx.trip_description_placeholder') ?>" value="<?= __('import_gpx.default_description') ?>">
                     </div>
                     <div id="existingTripFields" class="d-none">
                         <select class="form-select" id="existing_trip_id" name="existing_trip_id">
@@ -220,6 +221,14 @@ require_once __DIR__ . '/../includes/header.php';
                             <?php endforeach; ?>
                         </select>
                     </div>
+                </div>
+
+                <!-- Descripción del viaje (solo para nuevo viaje) -->
+                <div class="col-12 col-md-6" id="descriptionField">
+                    <label for="new_trip_description" class="form-label fw-semibold">
+                        <?= __('import_gpx.trip_description') ?? 'Descripción' ?>
+                    </label>
+                    <input type="text" class="form-control" id="new_trip_description" name="new_trip_description" placeholder="<?= __('import_gpx.trip_description_placeholder') ?>" value="<?= __('import_gpx.default_description') ?>">
                 </div>
                 <div class="w-100"></div>
                 <!-- Tipo de transporte -->
@@ -357,6 +366,7 @@ require_once __DIR__ . '/../includes/header.php';
     const existingTripFields = document.getElementById('existingTripFields');
     const newTripName = document.getElementById('new_trip_name');
     const existingTripId = document.getElementById('existing_trip_id');
+    const descriptionField = document.getElementById('descriptionField');
 
     tripChoiceNew.addEventListener('change', function() {
         if (this.checked) {
@@ -364,6 +374,9 @@ require_once __DIR__ . '/../includes/header.php';
             existingTripFields.classList.add('d-none');
             newTripName.setAttribute('required', 'required');
             existingTripId.removeAttribute('required');
+            if (descriptionField) {
+                descriptionField.querySelector('input').removeAttribute('disabled');
+            }
         }
     });
 
@@ -373,6 +386,9 @@ require_once __DIR__ . '/../includes/header.php';
             existingTripFields.classList.remove('d-none');
             newTripName.removeAttribute('required');
             existingTripId.setAttribute('required', 'required');
+            if (descriptionField) {
+                descriptionField.querySelector('input').setAttribute('disabled', 'disabled');
+            }
         }
     });
 

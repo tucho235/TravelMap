@@ -34,6 +34,7 @@
     "create_new_trip": "Create new trip",
     "add_to_existing": "Add to existing trip",
     "trip_name_placeholder": "Name of new trip",
+    "trip_description": "Description",
     "trip_description_placeholder": "Trip description",
     "default_description": "Imported from GPX",
     "transport_type": "Transport type",
