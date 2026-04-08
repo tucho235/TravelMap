@@ -222,6 +222,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </select>
                     </div>
                 </div>
+                <div class="w-100"></div>
 
                 <!-- Descripción del viaje (solo para nuevo viaje) -->
                 <div class="col-12 col-md-6" id="descriptionField">
