@@ -506,7 +506,22 @@
     "footer_note_text": "Footer text",
     "footer_note_text_description": "Supports HTML for links. Leave empty for default with GitHub link.",
     "footer_note_placeholder": "Example: TravelMap - Created by Fabio Baccaglioni",
-    "distance_unit_description": "Unit of measurement used for all routes on the map"
+    "distance_unit_description": "Unit of measurement used for all routes on the map",
+    "trip": "Trip",
+    "trip_page_settings": "Trip Page",
+    "trip_tooltip_settings": "Point of Interest Popup",
+    "trip_tooltip_settings_desc": "Configure what information is shown in the popup when clicking a point on the individual trip page. The point title is always shown. On the main map, everything is always displayed.",
+    "trip_tooltip_show_image": "Header image",
+    "trip_tooltip_show_image_desc": "Show the point's thumbnail image in the popup.",
+    "trip_tooltip_show_trip_title": "Trip title",
+    "trip_tooltip_show_trip_title_desc": "Show the trip name in the point popup.",
+    "trip_tooltip_show_description": "Description",
+    "trip_tooltip_show_description_desc": "Show the point description in the popup.",
+    "trip_tooltip_show_links": "Links",
+    "trip_tooltip_show_links_desc": "Show external links of the point in the popup.",
+    "trip_tooltip_show_coordinates": "Coordinates",
+    "trip_tooltip_show_coordinates_desc": "Show the geographic coordinates of the point in the popup.",
+    "preview": "Preview"
   },
   "auth": {
     "login": "Login",

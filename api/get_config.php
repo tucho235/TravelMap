@@ -21,6 +21,13 @@ try {
     $transportColors = $settingsModel->getTransportColors();
     $tripTagsEnabled  = $settingsModel->get('trip_tags_enabled', true);
     $tripPageEnabled  = $settingsModel->get('trip_page_enabled', true);
+    $tripTooltipConfig = [
+        'showImage'       => (bool) $settingsModel->get('trip_tooltip_show_image', true),
+        'showTripTitle'   => (bool) $settingsModel->get('trip_tooltip_show_trip_title', false),
+        'showDescription' => (bool) $settingsModel->get('trip_tooltip_show_description', true),
+        'showLinks'       => (bool) $settingsModel->get('trip_tooltip_show_links', true),
+        'showCoordinates' => (bool) $settingsModel->get('trip_tooltip_show_coordinates', true),
+    ];
 
     // Log para depuración (comentar en producción)
     error_log('Map Config: ' . json_encode($mapConfig));
@@ -32,7 +39,8 @@ try {
             'map' => $mapConfig,
             'transportColors' => $transportColors,
             'tripTagsEnabled' => $tripTagsEnabled,
-            'tripPageEnabled' => $tripPageEnabled
+            'tripPageEnabled' => $tripPageEnabled,
+            'tripTooltipConfig' => $tripTooltipConfig,
         ]
     ];
     

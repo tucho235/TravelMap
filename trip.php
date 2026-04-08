@@ -93,6 +93,7 @@ foreach ($points as $point) {
 
 $tripDataForJS = [
     'id' => (int) $trip['id'],
+    'title' => $trip['title'],
     'color' => $trip['color_hex'],
     'routes' => $processedRoutes,
     'points' => $processedPoints
@@ -102,6 +103,13 @@ $tripDataForJS = [
 $settingsModel = new Settings($db);
 $mapRenderer = $settingsModel->get('map_renderer', 'maplibre');
 $mapStyle = $settingsModel->get('map_style', 'voyager');
+$tripTooltipConfig = [
+    'showImage'       => (bool) $settingsModel->get('trip_tooltip_show_image', true),
+    'showTripTitle'   => (bool) $settingsModel->get('trip_tooltip_show_trip_title', false),
+    'showDescription' => (bool) $settingsModel->get('trip_tooltip_show_description', true),
+    'showLinks'       => (bool) $settingsModel->get('trip_tooltip_show_links', true),
+    'showCoordinates' => (bool) $settingsModel->get('trip_tooltip_show_coordinates', true),
+];
 
 // Icons definition (matching public_map.js)
 $statsIcons = [
@@ -297,6 +305,7 @@ $statsIcons = [
         const MAP_RENDERER = '<?= $mapRenderer ?>';
         const MAP_STYLE = '<?= $mapStyle ?>';
         const ASSETS_URL = '<?= ASSETS_URL ?>';
+        const TRIP_TOOLTIP_CONFIG = <?= json_encode($tripTooltipConfig) ?>;
     </script>
 
     <script src="<?= ASSETS_URL ?>/vendor/jquery/jquery-3.7.1.min.js"></script>

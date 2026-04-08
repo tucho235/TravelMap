@@ -33,8 +33,8 @@ window.MapRenderer = (function () {
      * @returns {HTMLElement}
      */
     function createPointMarkerEl(point) {
-        const cfg      = MapConfig.pointTypeConfig;
-        const typeCfg  = cfg[point.type] || cfg['visit'];
+        const cfg = MapConfig.pointTypeConfig;
+        const typeCfg = cfg[point.type] || cfg['visit'];
         const iconStyle = typeCfg.darkText ? 'color:#000;stroke:#000;' : '';
 
         const el = document.createElement('div');
@@ -68,15 +68,15 @@ window.MapRenderer = (function () {
      */
     function addRouteLayer(map, route, sourceId, layerId, opts) {
         opts = opts || {};
-        var isFuture   = opts.isFuture   || false;
-        var visibility = opts.visibility  || 'visible';
+        var isFuture = opts.isFuture || false;
+        var visibility = opts.visibility || 'visible';
 
         var geojson = MapConfig.normalizeGeojson(route.geojson);
         if (!geojson || !geojson.geometry) return null;
 
         var transportType = route.transport_type || 'car';
-        var cfg           = MapConfig.transportConfig[transportType] || MapConfig.transportConfig['car'];
-        var coords        = geojson.geometry.coordinates || [];
+        var cfg = MapConfig.transportConfig[transportType] || MapConfig.transportConfig['car'];
+        var coords = geojson.geometry.coordinates || [];
 
         // Simple A-to-B plane → caller will render as deck.gl arc
         if (transportType === 'plane' && coords.length === 2) {
@@ -92,11 +92,11 @@ window.MapRenderer = (function () {
         }
 
         if (!map.getLayer(layerId)) {
-            var color      = isFuture ? '#6B6B6B' : cfg.color;
-            var lineWidth  = isFuture ? 3 : 4;
-            var paint      = {
-                'line-color':   color,
-                'line-width':   lineWidth,
+            var color = isFuture ? '#6B6B6B' : cfg.color;
+            var lineWidth = isFuture ? 3 : 4;
+            var paint = {
+                'line-color': color,
+                'line-width': lineWidth,
                 'line-opacity': 0.7
             };
 
@@ -107,12 +107,12 @@ window.MapRenderer = (function () {
             }
 
             map.addLayer({
-                id:     layerId,
-                type:   'line',
+                id: layerId,
+                type: 'line',
                 source: sourceId,
                 layout: {
                     'line-join': 'round',
-                    'line-cap':  'round',
+                    'line-cap': 'round',
                     'visibility': visibility
                 },
                 paint: paint,
@@ -138,18 +138,18 @@ window.MapRenderer = (function () {
         }
 
         var arcLayer = new deck.ArcLayer({
-            id:                  'flight-arcs',
-            data:                flightData,
-            getSourcePosition:   function (d) { return d.source; },
-            getTargetPosition:   function (d) { return d.target; },
-            getSourceColor:      function (d) { return d.color; },
-            getTargetColor:      function (d) { return d.color; },
-            getWidth:            2,
-            getHeight:           0.3,
-            greatCircle:         true,
-            pickable:            true,
-            numSegments:         25,
-            updateTriggers:      { getSourcePosition: flightData.length, getTargetPosition: flightData.length }
+            id: 'flight-arcs',
+            data: flightData,
+            getSourcePosition: function (d) { return d.source; },
+            getTargetPosition: function (d) { return d.target; },
+            getSourceColor: function (d) { return d.color; },
+            getTargetColor: function (d) { return d.color; },
+            getWidth: 2,
+            getHeight: 0.3,
+            greatCircle: true,
+            pickable: true,
+            numSegments: 25,
+            updateTriggers: { getSourcePosition: flightData.length, getTargetPosition: flightData.length }
         });
 
         if (existingOverlay) {
@@ -172,7 +172,7 @@ window.MapRenderer = (function () {
      */
     function createLeafletPointIcon(point, tripColor) {
         if (typeof L === 'undefined') return null;
-        var cfg     = MapConfig.pointTypeConfig;
+        var cfg = MapConfig.pointTypeConfig;
         var typeCfg = cfg[point.type] || cfg['visit'];
         var iconStyle = typeCfg.darkText ? 'color:#000;stroke:#000;' : '';
         return L.divIcon({
@@ -181,8 +181,8 @@ window.MapRenderer = (function () {
                 + ' style="background-color:' + typeCfg.color + ';border-color:' + (tripColor || '#3388ff') + ';">'
                 + '<span class="point-icon" style="' + iconStyle + '">' + typeCfg.icon + '</span>'
                 + '</div>',
-            iconSize:    [36, 36],
-            iconAnchor:  [18, 36],
+            iconSize: [36, 36],
+            iconAnchor: [18, 36],
             popupAnchor: [0, -36]
         });
     }
@@ -237,15 +237,21 @@ window.MapRenderer = (function () {
      * @param {string}  [opts.tripTitle]            - Trip title (omit when already on the trip page)
      * @param {Array}   [opts.tripTags]             - Array of tag strings
      * @param {boolean} [opts.tripTagsEnabled=false]
+     * @param {boolean} [opts.showDescription=true] - Show point description
+     * @param {boolean} [opts.showLinks=true]       - Show external links
+     * @param {boolean} [opts.showCoordinates=true] - Show lat/lon coordinates
      * @returns {string} HTML string
      */
     function createPoiPopup(point, opts) {
         opts = opts || {};
-        var showImage       = opts.showImage !== false;
-        var tripColor       = opts.tripColor  || null;
-        var tripTitle       = opts.tripTitle  || null;
-        var tripTags        = opts.tripTags   || null;
+        var showImage = opts.showImage !== false;
+        var tripColor = opts.tripColor || null;
+        var tripTitle = opts.tripTitle || null;
+        var tripTags = opts.tripTags || null;
         var tripTagsEnabled = opts.tripTagsEnabled || false;
+        var showDescription = opts.showDescription !== false;
+        var showLinks = opts.showLinks !== false;
+        var showCoordinates = opts.showCoordinates !== false;
 
         var t = function (key, fallback) {
             return (typeof window.__ === 'function') ? window.__(key) : (fallback || '');
@@ -258,10 +264,10 @@ window.MapRenderer = (function () {
         if (showImage && point.image_url) {
             var displayImage = point.thumbnail_url || point.image_url;
             html += '<img src="' + escapeHtml(displayImage) + '"'
-                  + ' alt="' + escapeHtml(point.title) + '"'
-                  + ' class="popup-image"'
-                  + ' onclick="openLightbox(\'' + escapeJsString(point.image_url) + '\',\'' + escapeJsString(point.title) + '\')"'
-                  + ' title="' + t('map.click_to_view_full', '') + '">';
+                + ' alt="' + escapeHtml(point.title) + '"'
+                + ' class="popup-image"'
+                + ' onclick="openLightbox(\'' + escapeJsString(point.image_url) + '\',\'' + escapeJsString(point.title) + '\')"'
+                + ' title="' + t('map.click_to_view_full', '') + '">';
         }
 
         html += '<div class="popup-content">';
@@ -270,12 +276,12 @@ window.MapRenderer = (function () {
         var typeLabel = typeConfig.labelKey ? t(typeConfig.labelKey, point.type) : (typeConfig.label || point.type);
         var textColor = typeConfig.darkText ? 'color: #000; --bs-badge-color: #000;' : '';
         html += '<span class="badge mb-2 d-inline-flex align-items-center gap-1"'
-              + ' style="background-color: ' + typeConfig.color + '; ' + textColor + '">'
-              + typeConfig.icon + ' ' + typeLabel + '</span>';
+            + ' style="background-color: ' + typeConfig.color + '; ' + textColor + '">'
+            + typeConfig.icon + ' ' + typeLabel + '</span>';
 
         if (tripTitle) {
             html += '<p class="popup-trip mb-1"><span style="color: ' + escapeHtml(tripColor || 'inherit') + '; font-weight: bold;">'
-                  + escapeHtml(tripTitle) + '</span></p>';
+                + escapeHtml(tripTitle) + '</span></p>';
         }
 
         if (tripTagsEnabled && tripTags && tripTags.length > 0) {
@@ -290,24 +296,26 @@ window.MapRenderer = (function () {
             html += '<p class="popup-date mb-1">' + formatDate(point.visit_date) + '</p>';
         }
 
-        if (point.description) {
+        if (showDescription && point.description) {
             html += '<p class="popup-description">' + escapeHtml(point.description) + '</p>';
         }
 
-        if (point.links && point.links.length > 0) {
+        if (showLinks && point.links && point.links.length > 0) {
             html += '<div class="popup-links">';
             point.links.forEach(function (link) {
                 var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"'
-                        + ' fill="' + escapeHtml(link.color) + '" viewBox="0 0 16 16">' + link.svg_paths + '</svg>';
+                    + ' fill="' + escapeHtml(link.color) + '" viewBox="0 0 16 16">' + link.svg_paths + '</svg>';
                 html += '<a href="' + escapeHtml(link.url) + '" target="_blank" rel="noopener noreferrer"'
-                      + ' class="popup-link-btn" title="' + escapeHtml(link.label) + '">' + svg + '</a>';
+                    + ' class="popup-link-btn" title="' + escapeHtml(link.label) + '">' + svg + '</a>';
             });
             html += '</div>';
         }
 
-        var displayLat = (point.originalLat !== undefined) ? point.originalLat : point.latitude;
-        var displayLon = (point.originalLon !== undefined) ? point.originalLon : point.longitude;
-        html += '<p class="popup-coords">' + parseFloat(displayLat).toFixed(6) + ', ' + parseFloat(displayLon).toFixed(6) + '</p>';
+        if (showCoordinates) {
+            var displayLat = (point.originalLat !== undefined) ? point.originalLat : point.latitude;
+            var displayLon = (point.originalLon !== undefined) ? point.originalLon : point.longitude;
+            html += '<p class="popup-coords">' + parseFloat(displayLat).toFixed(6) + ', ' + parseFloat(displayLon).toFixed(6) + '</p>';
+        }
 
         html += '</div></div>';
         return html;
@@ -316,12 +324,12 @@ window.MapRenderer = (function () {
     // ── Public API ────────────────────────────────────────────────────────────
 
     return {
-        createClusterMarkerEl:   createClusterMarkerEl,
-        createPointMarkerEl:     createPointMarkerEl,
-        addRouteLayer:           addRouteLayer,
-        renderFlightArcs:        renderFlightArcs,
-        createPoiPopup:          createPoiPopup,
-        createLeafletPointIcon:  createLeafletPointIcon,
+        createClusterMarkerEl: createClusterMarkerEl,
+        createPointMarkerEl: createPointMarkerEl,
+        addRouteLayer: addRouteLayer,
+        renderFlightArcs: renderFlightArcs,
+        createPoiPopup: createPoiPopup,
+        createLeafletPointIcon: createLeafletPointIcon,
         createLeafletClusterIcon: createLeafletClusterIcon
     };
 }());

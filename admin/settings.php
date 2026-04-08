@@ -100,12 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             'type' => 'boolean'
         ];
 
-        // Trip single page toggle (checkbox)
-        $updates['trip_page_enabled'] = [
-            'value' => isset($_POST['trip_page_enabled']) && $_POST['trip_page_enabled'] === '1',
-            'type' => 'boolean'
-        ];
-        
         // Colores de transporte
         $transportTypes = ['plane', 'ship', 'car', 'bike', 'train', 'walk', 'bus', 'aerial'];
         foreach ($transportTypes as $type) {
@@ -162,6 +156,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             ];
         }
         
+        // Configuraciones de la página de viaje individual
+        $updates['trip_page_enabled'] = [
+            'value' => isset($_POST['trip_page_enabled']) && $_POST['trip_page_enabled'] === '1',
+            'type' => 'boolean'
+        ];
+        $updates['trip_tooltip_show_image'] = [
+            'value' => isset($_POST['trip_tooltip_show_image']) && $_POST['trip_tooltip_show_image'] === '1',
+            'type' => 'boolean'
+        ];
+        $updates['trip_tooltip_show_trip_title'] = [
+            'value' => isset($_POST['trip_tooltip_show_trip_title']) && $_POST['trip_tooltip_show_trip_title'] === '1',
+            'type' => 'boolean'
+        ];
+        $updates['trip_tooltip_show_description'] = [
+            'value' => isset($_POST['trip_tooltip_show_description']) && $_POST['trip_tooltip_show_description'] === '1',
+            'type' => 'boolean'
+        ];
+        $updates['trip_tooltip_show_links'] = [
+            'value' => isset($_POST['trip_tooltip_show_links']) && $_POST['trip_tooltip_show_links'] === '1',
+            'type' => 'boolean'
+        ];
+        $updates['trip_tooltip_show_coordinates'] = [
+            'value' => isset($_POST['trip_tooltip_show_coordinates']) && $_POST['trip_tooltip_show_coordinates'] === '1',
+            'type' => 'boolean'
+        ];
+
         // Configuraciones del sitio público
         if (isset($_POST['site_title'])) {
             $updates['site_title'] = [
@@ -316,6 +336,14 @@ require_once __DIR__ . '/../includes/header.php';
                 <line x1="16" y1="6" x2="16" y2="22"></line>
             </svg>
             <?= __('settings.map') ?? 'Map' ?>
+        </button>
+    </li>
+    <li class="tab-item">
+        <button class="tab-link" data-tab="trip">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15.8667 3.7804C16.7931 3.03188 17.8307 2.98644 18.9644 3.00233C19.5508 3.01055 19.844 3.01467 20.0792 3.10588C20.4524 3.2506 20.7494 3.54764 20.8941 3.92081C20.9853 4.15601 20.9894 4.4492 20.9977 5.03557C21.0136 6.16926 20.9681 7.20686 20.2196 8.13326C19.5893 8.91337 18.5059 9.32101 17.9846 10.1821C17.5866 10.8395 17.772 11.5203 17.943 12.2209L19.2228 17.4662C19.4779 18.5115 19.2838 19.1815 18.5529 19.9124C18.164 20.3013 17.8405 20.2816 17.5251 19.779L13.6627 13.6249L11.8181 15.0911C11.1493 15.6228 10.8149 15.8886 10.6392 16.2627C10.2276 17.1388 10.4889 18.4547 10.5022 19.4046C10.5096 19.9296 10.0559 20.9644 9.41391 20.9993C9.01756 21.0209 8.88283 20.5468 8.75481 20.2558L7.52234 17.4544C7.2276 16.7845 7.21552 16.7724 6.54556 16.4777L3.74415 15.2452C3.45318 15.1172 2.97914 14.9824 3.00071 14.5861C3.03565 13.9441 4.07036 13.4904 4.59536 13.4978C5.54532 13.5111 6.86122 13.7724 7.73734 13.3608C8.11142 13.1851 8.37724 12.8507 8.90888 12.1819L10.3751 10.3373L4.22103 6.47489C3.71845 6.15946 3.69872 5.83597 4.08755 5.44715C4.8185 4.7162 5.48851 4.52214 6.53377 4.77718L11.7791 6.05703C12.4797 6.22798 13.1605 6.41343 13.8179 6.0154C14.679 5.49411 15.0866 4.41074 15.8667 3.7804Z"></path>
+            </svg>
+            <?= __('settings.trip') ?? 'Trip' ?>
         </button>
     </li>
     <li class="tab-item">
@@ -661,15 +689,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <div class="form-group" style="margin-top: 24px;">
-                    <label class="form-check form-switch">
-                        <input type="checkbox" class="form-check-input" id="trip_page_enabled" name="trip_page_enabled" value="1"
-                               <?= ($currentSettings['trip_page_enabled'] ?? true) ? 'checked' : '' ?>>
-                        <span class="form-check-label"><?= __('settings.trip_page_enabled', 'Habilitar página dedicada de viaje') ?></span>
-                    </label>
-                    <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_page_enabled_desc', 'Muestra un enlace a la página detallada de cada viaje en el mapa y en el listado. Si está desactivado, la página trip.php no es accesible.') ?></div>
-                </div>
-
-                <div class="form-group" style="margin-top: 24px;">
                     <label for="distance_unit" class="form-label"><?= __('settings.distance_unit_fallback') ?? 'Unidad de Distancia (Servidor / Predeterminada)' ?></label>
                     <select class="form-control form-select" id="distance_unit" name="distance_unit">
                         <option value="km" <?= ($currentSettings['distance_unit'] ?? 'km') === 'km' ? 'selected' : '' ?>><?= __('settings.unit_km') ?? 'Kilómetros (km)' ?></option>
@@ -735,6 +754,184 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
     
+    <!-- Trip Tab -->
+    <div class="tab-content" id="tab-trip">
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title"><?= __('settings.trip_page_settings', 'Trip Page') ?></h3>
+            </div>
+            <div class="admin-card-body">
+                <div class="form-group">
+                    <label class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" id="trip_page_enabled" name="trip_page_enabled" value="1"
+                               <?= ($currentSettings['trip_page_enabled'] ?? true) ? 'checked' : '' ?>>
+                        <span class="form-check-label"><?= __('settings.trip_page_enabled', 'Habilitar página dedicada de viaje') ?></span>
+                    </label>
+                    <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_page_enabled_desc', 'Muestra un enlace a la página detallada de cada viaje en el mapa y en el listado. Si está desactivado, la página trip.php no es accesible.') ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title"><?= __('settings.trip_tooltip_settings', 'Popup de puntos de interés') ?></h3>
+            </div>
+            <div class="admin-card-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
+
+                    <!-- Toggles -->
+                    <div>
+                        <p class="form-hint" style="margin-bottom: 20px;"><?= __('settings.trip_tooltip_settings_desc', 'Configura qué información se muestra en el popup al hacer clic sobre un punto en la página individual del viaje. El título del punto siempre se muestra. En el mapa general siempre se muestra todo.') ?></p>
+                        <div class="form-group">
+                            <label class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input tooltip-toggle" id="trip_tooltip_show_image" name="trip_tooltip_show_image" value="1"
+                                       <?= ($currentSettings['trip_tooltip_show_image'] ?? true) ? 'checked' : '' ?>>
+                                <span class="form-check-label"><?= __('settings.trip_tooltip_show_image', 'Imagen de cabecera') ?></span>
+                            </label>
+                            <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_tooltip_show_image_desc', 'Muestra la miniatura de la imagen del punto en el popup.') ?></div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input tooltip-toggle" id="trip_tooltip_show_trip_title" name="trip_tooltip_show_trip_title" value="1"
+                                       <?= ($currentSettings['trip_tooltip_show_trip_title'] ?? false) ? 'checked' : '' ?>>
+                                <span class="form-check-label"><?= __('settings.trip_tooltip_show_trip_title', 'Título del viaje') ?></span>
+                            </label>
+                            <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_tooltip_show_trip_title_desc', 'Muestra el nombre del viaje en el popup del punto.') ?></div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input tooltip-toggle" id="trip_tooltip_show_description" name="trip_tooltip_show_description" value="1"
+                                       <?= ($currentSettings['trip_tooltip_show_description'] ?? true) ? 'checked' : '' ?>>
+                                <span class="form-check-label"><?= __('settings.trip_tooltip_show_description', 'Descripción') ?></span>
+                            </label>
+                            <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_tooltip_show_description_desc', 'Muestra la descripción del punto en el popup.') ?></div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input tooltip-toggle" id="trip_tooltip_show_links" name="trip_tooltip_show_links" value="1"
+                                       <?= ($currentSettings['trip_tooltip_show_links'] ?? true) ? 'checked' : '' ?>>
+                                <span class="form-check-label"><?= __('settings.trip_tooltip_show_links', 'Links') ?></span>
+                            </label>
+                            <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_tooltip_show_links_desc', 'Muestra los enlaces externos del punto en el popup.') ?></div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input tooltip-toggle" id="trip_tooltip_show_coordinates" name="trip_tooltip_show_coordinates" value="1"
+                                       <?= ($currentSettings['trip_tooltip_show_coordinates'] ?? true) ? 'checked' : '' ?>>
+                                <span class="form-check-label"><?= __('settings.trip_tooltip_show_coordinates', 'Coordenadas') ?></span>
+                            </label>
+                            <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_tooltip_show_coordinates_desc', 'Muestra las coordenadas geográficas del punto en el popup.') ?></div>
+                        </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div>
+                        <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--admin-text-muted); margin-bottom: 12px;"><?= __('settings.preview', 'Preview') ?></div>
+                        <div style="background: #e8edf2; border-radius: 12px; padding: 20px; display: flex; align-items: center; justify-content: center; min-height: 200px;">
+                            <div id="tooltip-preview" style="
+                                width: 260px;
+                                background: #fff;
+                                border-radius: 10px;
+                                box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+                                overflow: hidden;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                                font-size: 14px;
+                            ">
+                                <!-- Image -->
+                                <div id="prev-image" style="width:100%; height:130px; overflow:hidden; display:block;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="130" viewBox="0 0 260 130" preserveAspectRatio="xMidYMid slice">
+                                        <defs>
+                                            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#87CEEB"/>
+                                                <stop offset="100%" stop-color="#b8dff5"/>
+                                            </linearGradient>
+                                            <linearGradient id="mtn1" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#6b7c64"/>
+                                                <stop offset="100%" stop-color="#4a5c43"/>
+                                            </linearGradient>
+                                            <linearGradient id="mtn2" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#8a9b82"/>
+                                                <stop offset="100%" stop-color="#5a7050"/>
+                                            </linearGradient>
+                                            <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#ffffff"/>
+                                                <stop offset="60%" stop-color="#dce8f0"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <!-- Sky -->
+                                        <rect width="260" height="130" fill="url(#sky)"/>
+                                        <!-- Sun -->
+                                        <circle cx="200" cy="28" r="16" fill="#FFD700" opacity="0.85"/>
+                                        <circle cx="200" cy="28" r="22" fill="#FFD700" opacity="0.18"/>
+                                        <!-- Clouds -->
+                                        <ellipse cx="60" cy="22" rx="28" ry="10" fill="white" opacity="0.7"/>
+                                        <ellipse cx="80" cy="18" rx="20" ry="9" fill="white" opacity="0.7"/>
+                                        <ellipse cx="40" cy="20" rx="18" ry="8" fill="white" opacity="0.6"/>
+                                        <!-- Back mountain -->
+                                        <polygon points="30,100 100,38 170,100" fill="url(#mtn2)"/>
+                                        <!-- Front mountain left -->
+                                        <polygon points="-10,130 70,45 150,130" fill="url(#mtn1)"/>
+                                        <!-- Front mountain right -->
+                                        <polygon points="110,130 190,50 270,130" fill="url(#mtn1)"/>
+                                        <!-- Snow caps -->
+                                        <polygon points="70,45 80,58 60,58" fill="url(#snow)" opacity="0.9"/>
+                                        <polygon points="190,50 202,65 178,65" fill="url(#snow)" opacity="0.9"/>
+                                        <polygon points="100,38 111,53 89,53" fill="url(#snow)" opacity="0.8"/>
+                                        <!-- Ground -->
+                                        <rect y="110" width="260" height="20" fill="#4a7a3a" opacity="0.6"/>
+                                    </svg>
+                                </div>
+                                <!-- Content -->
+                                <div style="padding: 13px 14px 12px;">
+                                    <!-- Title — always visible -->
+                                    <div style="font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 7px;">Machu Picchu</div>
+                                    <!-- Type badge -->
+                                    <span style="display:inline-flex; align-items:center; gap:4px; background:#4ECDC4; color:#1e293b; border-radius:50rem; padding:3px 9px; font-size:11px; font-weight:600; margin-bottom:8px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" fill="currentColor" stroke="none"><path d="M8.31253 4.7812L7.6885 4.36517V4.36517L8.31253 4.7812ZM7.5 6V6.75C7.75076 6.75 7.98494 6.62467 8.12404 6.41603L7.5 6ZM2.17224 8.83886L1.45453 8.62115L2.17224 8.83886ZM4.83886 6.17224L4.62115 5.45453H4.62115L4.83886 6.17224ZM3.46243 20.092L3.93822 19.5123L3.93822 19.5123L3.46243 20.092ZM2.90796 19.5376L3.48772 19.0618L3.48772 19.0618L2.90796 19.5376ZM21.092 19.5376L20.5123 19.0618L20.5123 19.0618L21.092 19.5376ZM20.5376 20.092L20.0618 19.5123L20.0618 19.5123L20.5376 20.092ZM14.0195 3.89791C14.3847 4.09336 14.8392 3.95575 15.0346 3.59054C15.2301 3.22534 15.0924 2.77084 14.7272 2.57539L14.0195 3.89791ZM22.5455 8.62115C22.4252 8.22477 22.0064 8.00092 21.61 8.12116C21.2137 8.2414 20.9898 8.6602 21.1101 9.05658L22.5455 8.62115ZM21.25 11.5V13.5H22.75V11.5H21.25ZM14.5 20.25H9.5V21.75H14.5V20.25ZM2.75 13.5V11.5H1.25V13.5H2.75ZM12.3593 2.25H11.6407V3.75H12.3593V2.25ZM7.6885 4.36517L6.87596 5.58397L8.12404 6.41603L8.93657 5.19722L7.6885 4.36517ZM11.6407 2.25C11.1305 2.25 10.6969 2.24925 10.3369 2.28282C9.96142 2.31783 9.61234 2.39366 9.27276 2.57539L9.98055 3.89791C10.0831 3.84299 10.2171 3.80049 10.4762 3.77634C10.7506 3.75075 11.1031 3.75 11.6407 3.75V2.25ZM8.93657 5.19722C9.23482 4.74985 9.43093 4.45704 9.60448 4.24286C9.76825 4.04074 9.87794 3.95282 9.98055 3.89791L9.27276 2.57539C8.93318 2.75713 8.67645 3.00553 8.43904 3.29853C8.2114 3.57947 7.97154 3.94062 7.6885 4.36517L8.93657 5.19722ZM2.75 11.5C2.75 10.0499 2.75814 9.49107 2.88994 9.05657L1.45453 8.62115C1.24186 9.32224 1.25 10.159 1.25 11.5H2.75ZM7.5 5.25C6.159 5.25 5.32224 5.24186 4.62115 5.45453L5.05657 6.88994C5.49107 6.75814 6.04987 6.75 7.5 6.75V5.25ZM2.88994 9.05657C3.20503 8.01787 4.01787 7.20503 5.05657 6.88994L4.62115 5.45453C3.10304 5.91505 1.91505 7.10304 1.45453 8.62115L2.88994 9.05657ZM9.5 20.25C7.83789 20.25 6.65724 20.2488 5.75133 20.1417C4.86197 20.0366 4.33563 19.8384 3.93822 19.5123L2.98663 20.6718C3.69558 21.2536 4.54428 21.5095 5.57525 21.6313C6.58966 21.7512 7.87463 21.75 9.5 21.75V20.25ZM1.25 13.5C1.25 15.1254 1.24877 16.4103 1.36868 17.4248C1.49054 18.4557 1.74638 19.3044 2.3282 20.0134L3.48772 19.0618C3.16158 18.6644 2.96343 18.138 2.85831 17.2487C2.75123 16.3428 2.75 15.1621 2.75 13.5H1.25ZM3.93822 19.5123C3.77366 19.3772 3.62277 19.2263 3.48772 19.0618L2.3282 20.0134C2.52558 20.2539 2.74612 20.4744 2.98663 20.6718L3.93822 19.5123ZM21.25 13.5C21.25 15.1621 21.2488 16.3428 21.1417 17.2487C21.0366 18.138 20.8384 18.6644 20.5123 19.0618L21.6718 20.0134C22.2536 19.3044 22.5095 18.4557 22.6313 17.4248C22.7512 16.4103 22.75 15.1254 22.75 13.5H21.25ZM14.5 21.75C16.1254 21.75 17.4103 21.7512 18.4248 21.6313C19.4557 21.5095 20.3044 21.2536 21.0134 20.6718L20.0618 19.5123C19.6644 19.8384 19.138 20.0366 18.2487 20.1417C17.3428 20.2488 16.1621 20.25 14.5 20.25V21.75ZM20.5123 19.0618C20.3772 19.2263 20.2263 19.3772 20.0618 19.5123L21.0134 20.6718C21.2539 20.4744 21.4744 20.2539 21.6718 20.0134L20.5123 19.0618ZM12.3593 3.75C12.8969 3.75 13.2494 3.75075 13.5238 3.77634C13.7829 3.80049 13.9169 3.84299 14.0195 3.89791L14.7272 2.57539C14.3877 2.39366 14.0386 2.31783 13.6631 2.28282C13.3031 2.24925 12.8695 2.25 12.3593 2.25V3.75ZM22.75 11.5C22.75 10.159 22.7581 9.32224 22.5455 8.62115L21.1101 9.05658C21.2419 9.49107 21.25 10.0499 21.25 11.5H22.75Z"/><path d="M16 13C16 15.2091 14.2091 17 12 17C9.79086 17 8 15.2091 8 13C8 10.7909 9.79086 9 12 9C14.2091 9 16 10.7909 16 13Z" stroke="currentColor" stroke-width="1.25" fill="none"/><path d="M17.9737 3.02148C17.9795 2.99284 18.0205 2.99284 18.0263 3.02148C18.3302 4.50808 19.4919 5.66984 20.9785 5.97368C21.0072 5.97954 21.0072 6.02046 20.9785 6.02632C19.4919 6.33016 18.3302 7.49192 18.0263 8.97852C18.0205 9.00716 17.9795 9.00716 17.9737 8.97852C17.6698 7.49192 16.5081 6.33016 15.0215 6.02632C14.9928 6.02046 14.9928 5.97954 15.0215 5.97368C16.5081 5.66984 17.6698 4.50808 17.9737 3.02148Z"/></svg>
+                                        Visit
+                                    </span>
+                                    <!-- Trip title -->
+                                    <div id="prev-trip-title" style="font-size:12px; color:#555; margin-bottom:5px; font-weight:600;">
+                                        <span style="color:#e67e22;">Perú 2024</span>
+                                    </div>
+                                    <!-- Date — always visible -->
+                                    <div style="font-size:11px; color:#888; margin-bottom:6px;">12 mar. 2024</div>
+                                    <!-- Description -->
+                                    <div id="prev-description" style="font-size:12px; color:#555; line-height:1.5; margin-bottom:8px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.</div>
+                                    <!-- Links -->
+                                    <div id="prev-links" style="display:flex; gap:5px; margin-bottom:8px;">
+                                        <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#f1f3f5;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                        </span>
+                                        <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#f1f3f5;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3498db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                                        </span>
+                                        <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#f1f3f5;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2ecc71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                        </span>
+                                    </div>
+                                    <!-- Coordinates -->
+                                    <div id="prev-coords" style="font-size:10px; color:#aaa; font-family:monospace;">-13.163141, -72.544963</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /grid -->
+
+                <style>
+                    @media (max-width: 900px) {
+                        #tooltip-preview-grid { grid-template-columns: 1fr !important; }
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+
     <!-- Site Tab -->
     <div class="tab-content" id="tab-site">
         <div class="admin-card">
@@ -1110,6 +1307,32 @@ document.querySelectorAll('.renderer-card').forEach(card => {
         this.classList.add('active');
     });
 });
+
+// Tooltip preview
+(function() {
+    const map = {
+        'trip_tooltip_show_image':       'prev-image',
+        'trip_tooltip_show_trip_title':  'prev-trip-title',
+        'trip_tooltip_show_description': 'prev-description',
+        'trip_tooltip_show_links':       'prev-links',
+        'trip_tooltip_show_coordinates': 'prev-coords'
+    };
+
+    function syncPreview() {
+        Object.entries(map).forEach(([toggleId, previewId]) => {
+            const toggle  = document.getElementById(toggleId);
+            const preview = document.getElementById(previewId);
+            if (!toggle || !preview) return;
+            preview.style.display = toggle.checked ? '' : 'none';
+        });
+    }
+
+    document.querySelectorAll('.tooltip-toggle').forEach(el => {
+        el.addEventListener('change', syncPreview);
+    });
+
+    syncPreview();
+})();
 
 // Map style card selection
 document.querySelectorAll('.map-style-card').forEach(card => {
