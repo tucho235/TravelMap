@@ -375,7 +375,7 @@ require_once __DIR__ . '/../includes/header.php';
             newTripName.setAttribute('required', 'required');
             existingTripId.removeAttribute('required');
             if (descriptionField) {
-                descriptionField.querySelector('input').removeAttribute('disabled');
+                descriptionField.classList.remove('d-none');
             }
         }
     });
@@ -387,7 +387,7 @@ require_once __DIR__ . '/../includes/header.php';
             newTripName.removeAttribute('required');
             existingTripId.setAttribute('required', 'required');
             if (descriptionField) {
-                descriptionField.querySelector('input').setAttribute('disabled', 'disabled');
+                descriptionField.classList.add('d-none');
             }
         }
     });
