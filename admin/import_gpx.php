@@ -304,6 +304,22 @@ require_once __DIR__ . '/../includes/header.php';
             .replace(/'/g, '&#039;');
     }
 
+    function showAlert(msg, type) {
+        const container = document.getElementById('alertContainer');
+        if (!container) return;
+        container.innerHTML = '<div class="alert alert-' + esc(type) + ' alert-dismissible fade show" role="alert">' +
+            msg + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+        window.scrollTo(0, 0);
+    }
+
+    // Mostrar mensajes de error o éxito del servidor
+    <?php if (!empty($error)): ?>
+    showAlert(<?= json_encode($error) ?>, 'danger');
+    <?php endif; ?>
+    <?php if (!empty($success)): ?>
+    showAlert(<?= json_encode($success) ?>, 'success');
+    <?php endif; ?>
+
     const dropArea = document.getElementById('dropArea');
     const fileInput = document.getElementById('fileInput');
     const fileCount = document.getElementById('fileCount');
