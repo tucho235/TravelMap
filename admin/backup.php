@@ -12,6 +12,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_auth();
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../src/helpers/BackupBuilder.php';
 
 $db = getDB();
 
@@ -81,11 +82,23 @@ if (is_dir($backupDir)) {
     });
 }
 
+// CSRF token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrfToken = $_SESSION['csrf_token'];
+
 // Handle form submissions
 $message = null;
 $messageType = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validar CSRF en todas las acciones POST
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
+        http_response_code(403);
+        die('Error de seguridad CSRF. Recarga la página e intenta de nuevo.');
+    }
+
     $action = $_POST['action'] ?? '';
     
     // Delete backup
@@ -109,123 +122,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Create backup
     if ($action === 'create') {
-        $includeTrips = isset($_POST['include_trips']);
-        $includeRoutes = isset($_POST['include_routes']);
-        $includePoints = isset($_POST['include_points']);
-        $includeTags = isset($_POST['include_tags']);
-        $includeSettings = isset($_POST['include_settings']);
-        $includeImages = isset($_POST['include_images']);
         $saveToServer = isset($_POST['save_to_server']);
-        
-        $backup = [
-            'version' => '1.0',
-            'exported_at' => date('c'),
-            'travelmap_version' => $version ?? '1.0.0',
-            'includes' => [],
-            'data' => []
-        ];
-        
-        try {
-            // Export trips
-            if ($includeTrips) {
-                $stmt = $db->query('SELECT * FROM trips ORDER BY id');
-                $backup['data']['trips'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                $backup['includes'][] = 'trips';
-            }
-            
-            // Export routes
-            if ($includeRoutes) {
-                $stmt = $db->query('SELECT * FROM routes ORDER BY id');
-                $backup['data']['routes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                $backup['includes'][] = 'routes';
-            }
-            
-            // Export points
-            if ($includePoints) {
-                $stmt = $db->query('SELECT * FROM points_of_interest ORDER BY id');
-                $backup['data']['points_of_interest'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                $backup['includes'][] = 'points';
-            }
 
-            // Export tags
-            if ($includeTags) {
-                $stmt = $db->query('SELECT * FROM trip_tags ORDER BY id');
-                $backup['data']['trip_tags'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                $backup['includes'][] = 'tags';
-            }
-            
-            // Export settings
-            if ($includeSettings) {
-                $stmt = $db->query('SELECT setting_key, setting_value, setting_type, description FROM settings ORDER BY setting_key');
-                $backup['data']['settings'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                $backup['includes'][] = 'settings';
-            }
-            
-            $timestamp = date('Y-m-d_His');
-            
-            // With images - create ZIP
-            if ($includeImages && $stats['images_count'] > 0) {
-                $zipFilename = "backup_{$timestamp}.zip";
-                $zipPath = $backupDir . '/' . $zipFilename;
-                
-                $zip = new ZipArchive();
-                if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-                    // Add JSON data
-                    $zip->addFromString('data.json', json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-                    
-                    // Add images
-                    $uploadsDir = ROOT_PATH . '/uploads/points';
-                    if (is_dir($uploadsDir)) {
-                        $images = glob($uploadsDir . '/*.{jpg,jpeg,png,gif}', GLOB_BRACE);
-                        foreach ($images as $img) {
-                            $zip->addFile($img, 'uploads/points/' . basename($img));
-                        }
-                        // Add thumbs
-                        $thumbsDir = $uploadsDir . '/thumbs';
-                        if (is_dir($thumbsDir)) {
-                            $thumbs = glob($thumbsDir . '/*.{jpg,jpeg,png,gif}', GLOB_BRACE);
-                            foreach ($thumbs as $thumb) {
-                                $zip->addFile($thumb, 'uploads/points/thumbs/' . basename($thumb));
-                            }
-                        }
-                    }
-                    
-                    $zip->close();
-                    
-                    if ($saveToServer) {
-                        $message = __('backup.created_success') ?? 'Backup created successfully';
-                        $messageType = 'success';
-                        header('Location: ' . $_SERVER['PHP_SELF'] . '?created=1');
-                        exit;
-                    } else {
-                        // Download
-                        header('Content-Type: application/zip');
-                        header('Content-Disposition: attachment; filename="' . $zipFilename . '"');
-                        header('Content-Length: ' . filesize($zipPath));
-                        readfile($zipPath);
-                        unlink($zipPath); // Delete after download
-                        exit;
-                    }
-                }
+        try {
+            $builder = new BackupBuilder($db, ROOT_PATH, $version ?? '1.0.0');
+            $path = $builder->create([
+                'include_trips'    => isset($_POST['include_trips']),
+                'include_routes'   => isset($_POST['include_routes']),
+                'include_points'   => isset($_POST['include_points']),
+                'include_tags'     => isset($_POST['include_tags']),
+                'include_settings' => isset($_POST['include_settings']),
+                'include_images'   => isset($_POST['include_images']),
+                'output_dir'       => $backupDir,
+            ]);
+
+            $filename = basename($path);
+            $ext      = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+            if ($saveToServer) {
+                $message = __('backup.created_success') ?? 'Backup created successfully';
+                $messageType = 'success';
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?created=1');
+                exit;
             } else {
-                // JSON only
-                $jsonFilename = "backup_{$timestamp}.json";
-                $jsonContent = json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                
-                if ($saveToServer) {
-                    file_put_contents($backupDir . '/' . $jsonFilename, $jsonContent);
-                    $message = __('backup.created_success') ?? 'Backup created successfully';
-                    $messageType = 'success';
-                    header('Location: ' . $_SERVER['PHP_SELF'] . '?created=1');
-                    exit;
-                } else {
-                    // Download
-                    header('Content-Type: application/json');
-                    header('Content-Disposition: attachment; filename="' . $jsonFilename . '"');
-                    header('Content-Length: ' . strlen($jsonContent));
-                    echo $jsonContent;
-                    exit;
-                }
+                // Stream al navegador y eliminar del servidor
+                $mimeType = ($ext === 'zip') ? 'application/zip' : 'application/json';
+                header('Content-Type: ' . $mimeType);
+                header('Content-Disposition: attachment; filename="' . $filename . '"');
+                header('Content-Length: ' . filesize($path));
+                readfile($path);
+                unlink($path);
+                exit;
             }
         } catch (Exception $e) {
             $message = __('backup.error_creating') ?? 'Error creating backup: ' . $e->getMessage();
@@ -255,14 +182,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Extract images if present
                         for ($i = 0; $i < $zip->numFiles; $i++) {
                             $name = $zip->getNameIndex($i);
-                            if (strpos($name, 'uploads/points/') === 0 && substr($name, -1) !== '/') {
-                                $targetPath = ROOT_PATH . '/' . $name;
-                                $targetDir = dirname($targetPath);
-                                if (!is_dir($targetDir)) {
-                                    mkdir($targetDir, 0755, true);
-                                }
-                                file_put_contents($targetPath, $zip->getFromIndex($i));
+                            // Validar estructura exacta — solo uploads/points/ o uploads/points/thumbs/
+                            // El regex bloquea path traversal (../) y extensiones no permitidas
+                            if (!preg_match('#^uploads/points/(?:thumbs/)?[^/]+\.(?:jpg|jpeg|png|gif)$#i', $name)) {
+                                continue;
                             }
+                            $targetPath = ROOT_PATH . '/' . $name;
+                            $targetDir = dirname($targetPath);
+                            if (!is_dir($targetDir)) {
+                                mkdir($targetDir, 0755, true);
+                            }
+                            file_put_contents($targetPath, $zip->getFromIndex($i));
                         }
                     }
                     $zip->close();
@@ -289,14 +219,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             // Extract images
                             for ($i = 0; $i < $zip->numFiles; $i++) {
                                 $name = $zip->getNameIndex($i);
-                                if (strpos($name, 'uploads/points/') === 0 && substr($name, -1) !== '/') {
-                                    $targetPath = ROOT_PATH . '/' . $name;
-                                    $targetDir = dirname($targetPath);
-                                    if (!is_dir($targetDir)) {
-                                        mkdir($targetDir, 0755, true);
-                                    }
-                                    file_put_contents($targetPath, $zip->getFromIndex($i));
+                                // Validar estructura exacta — solo uploads/points/ o uploads/points/thumbs/
+                                // El regex bloquea path traversal (../) y extensiones no permitidas
+                                if (!preg_match('#^uploads/points/(?:thumbs/)?[^/]+\.(?:jpg|jpeg|png|gif)$#i', $name)) {
+                                    continue;
                                 }
+                                $targetPath = ROOT_PATH . '/' . $name;
+                                $targetDir = dirname($targetPath);
+                                if (!is_dir($targetDir)) {
+                                    mkdir($targetDir, 0755, true);
+                                }
+                                file_put_contents($targetPath, $zip->getFromIndex($i));
                             }
                         }
                         $zip->close();
@@ -654,6 +587,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="admin-card-body">
             <form method="POST">
                 <input type="hidden" name="action" value="create">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                 
                 <div style="margin-bottom: 20px;">
                     <label class="form-label" style="font-weight: 600; margin-bottom: 12px; display: block;">
@@ -755,6 +689,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="admin-card-body">
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="restore">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                 
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label for="backup_file" class="form-label">
@@ -868,6 +803,7 @@ require_once __DIR__ . '/../includes/header.php';
                                         <!-- Restore -->
                                         <form method="POST" style="display: inline;" onsubmit="return confirm('<?= __('backup.confirm_restore') ?? 'Are you sure you want to restore this backup?' ?>');">
                                             <input type="hidden" name="action" value="restore">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="restore_filename" value="<?= htmlspecialchars($backup['filename']) ?>">
                                             <input type="hidden" name="restore_mode" value="merge_skip">
                                             <button type="submit" class="btn btn-sm btn-warning" title="<?= __('backup.restore') ?>">
@@ -881,6 +817,7 @@ require_once __DIR__ . '/../includes/header.php';
                                         <!-- Delete -->
                                         <form method="POST" style="display: inline;" onsubmit="return confirm('<?= __('backup.confirm_delete') ?? 'Are you sure you want to delete this backup?' ?>');">
                                             <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
                                             <input type="hidden" name="filename" value="<?= htmlspecialchars($backup['filename']) ?>">
                                             <button type="submit" class="btn btn-sm btn-danger" title="<?= __('common.delete') ?>">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
