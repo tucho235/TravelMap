@@ -890,6 +890,15 @@ html.sidebar-collapsed .sidebar-user-link {
 }
 
 .btn-primary {
+    --bs-btn-bg: var(--admin-primary);
+    --bs-btn-border-color: var(--admin-primary);
+    --bs-btn-hover-bg: var(--admin-primary-hover);
+    --bs-btn-hover-border-color: var(--admin-primary-hover);
+    --bs-btn-active-bg: var(--admin-primary-hover);
+    --bs-btn-active-border-color: var(--admin-primary-hover);
+    --bs-btn-disabled-bg: var(--admin-border);
+    --bs-btn-disabled-border-color: var(--admin-border);
+    --bs-btn-disabled-color: var(--admin-text-muted);
     background: var(--admin-primary);
     color: white;
     border-color: var(--admin-primary);
