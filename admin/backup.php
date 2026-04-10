@@ -837,6 +837,68 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
+<!-- CLI & Cron Card -->
+<div class="admin-card" style="margin-top: 24px;">
+    <div class="admin-card-header">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <?= __('backup.cli_title') ?? 'Automatización por línea de comandos' ?>
+        </h3>
+    </div>
+    <div class="admin-card-body">
+        <p style="margin: 0 0 16px 0; font-size: 13px; color: var(--text-muted, #6b7280);">
+            <?= __('backup.cli_intro') ?? 'Podés generar backups directamente desde la terminal o programarlos con cron, sin necesidad de abrir el navegador.' ?>
+            <?= __('backup.cli_docs_link') ?? 'Documentación completa en' ?>
+            <code style="font-size: 12px;">docs/BACKUP_CLI.md</code>.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+            <!-- Comandos básicos -->
+            <div>
+                <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted, #6b7280);">
+                    <?= __('backup.cli_commands') ?? 'Comandos' ?>
+                </p>
+                <pre style="margin: 0; padding: 14px; background: #1e293b; color: #e2e8f0; border-radius: 8px; font-size: 12px; line-height: 1.7; overflow-x: auto;"><span style="color:#94a3b8;"># Backup completo (datos + imágenes → ZIP)</span>
+php bin/travelmap-backup.php create
+
+<span style="color:#94a3b8;"># Solo datos, sin imágenes → JSON</span>
+php bin/travelmap-backup.php create --no-images
+
+<span style="color:#94a3b8;"># Solo secciones específicas</span>
+php bin/travelmap-backup.php create --only=trips,routes
+
+<span style="color:#94a3b8;"># Listar backups existentes</span>
+php bin/travelmap-backup.php list</pre>
+            </div>
+
+            <!-- Cron -->
+            <div>
+                <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted, #6b7280);">
+                    <?= __('backup.cli_cron') ?? 'Cron semanal' ?>
+                </p>
+                <pre style="margin: 0; padding: 14px; background: #1e293b; color: #e2e8f0; border-radius: 8px; font-size: 12px; line-height: 1.7; overflow-x: auto;"><span style="color:#94a3b8;"># Editar crontab:</span>
+crontab -e
+
+<span style="color:#94a3b8;"># Domingos 03:00 — backup completo</span>
+0 3 * * 0  /usr/bin/php \
+  <?= htmlspecialchars(ROOT_PATH, ENT_QUOTES, 'UTF-8') ?>/bin/travelmap-backup.php \
+  create >> /var/log/travelmap-backup.log 2>&amp;1
+
+<span style="color:#94a3b8;"># Si falla, cron envía email (configurar MAILTO)</span></pre>
+                <p style="margin: 10px 0 0 0; font-size: 12px; color: var(--text-muted, #6b7280);">
+                    <?= __('backup.cli_perms') ?? 'Permisos recomendados tras instalar:' ?>
+                    <code style="font-size: 11px;">chmod 0700 bin/travelmap-backup.php</code>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <!-- Info Card -->
 <div class="admin-card" style="margin-top: 24px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
     <div class="admin-card-body" style="padding: 20px;">

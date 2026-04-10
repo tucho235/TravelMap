@@ -771,6 +771,12 @@
     "confirm_restore": "Are you sure you want to restore this backup?",
     "confirm_delete": "Are you sure you want to delete this backup?",
     "transfer_tip_title": "Transferring to Another Server",
-    "transfer_tip_text": "To move your data to a remote server: 1) Create a backup without settings (to keep target server config). 2) Download the backup file. 3) On the target server, upload and restore with \"Merge (skip existing)\" mode. For images, use the ZIP option with \"Include Images\" checked."
+    "transfer_tip_text": "To move your data to a remote server: 1) Create a backup without settings (to keep target server config). 2) Download the backup file. 3) On the target server, upload and restore with \"Merge (skip existing)\" mode. For images, use the ZIP option with \"Include Images\" checked.",
+    "cli_title": "Command-line automation",
+    "cli_intro": "You can generate backups directly from the terminal or schedule them with cron, without opening the browser.",
+    "cli_docs_link": "Full documentation at",
+    "cli_commands": "Commands",
+    "cli_cron": "Weekly cron",
+    "cli_perms": "Recommended permissions after install:"
   }
 }

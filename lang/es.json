@@ -794,6 +794,12 @@
     "confirm_restore": "¿Estás seguro de que deseas restaurar este respaldo?",
     "confirm_delete": "¿Estás seguro de que deseas eliminar este respaldo?",
     "transfer_tip_title": "Transferir a Otro Servidor",
-    "transfer_tip_text": "Para mover tus datos a un servidor remoto: 1) Crea un respaldo sin configuración (para mantener la config del servidor destino). 2) Descarga el archivo. 3) En el servidor destino, sube y restaura con modo \"Fusionar (omitir existentes)\". Para imágenes, usa la opción ZIP con \"Incluir Imágenes\" marcado."
+    "transfer_tip_text": "Para mover tus datos a un servidor remoto: 1) Crea un respaldo sin configuración (para mantener la config del servidor destino). 2) Descarga el archivo. 3) En el servidor destino, sube y restaura con modo \"Fusionar (omitir existentes)\". Para imágenes, usa la opción ZIP con \"Incluir Imágenes\" marcado.",
+    "cli_title": "Automatización por línea de comandos",
+    "cli_intro": "Podés generar respaldos directamente desde la terminal o programarlos con cron, sin necesidad de abrir el navegador.",
+    "cli_docs_link": "Documentación completa en",
+    "cli_commands": "Comandos",
+    "cli_cron": "Cron semanal",
+    "cli_perms": "Permisos recomendados tras instalar:"
   }
 }
