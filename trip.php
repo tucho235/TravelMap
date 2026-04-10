@@ -267,7 +267,9 @@ $statsIcons = [
                              data-title="<?= htmlspecialchars($p['title']) ?>"
                              data-desc="<?= htmlspecialchars($p['description'] ?? '') ?>"
                              onclick="viewImageFromData(this)">
-                            <img src="<?= htmlspecialchars($p['thumbnail_url'] ?? $p['image_url']) ?>" alt="<?= htmlspecialchars($p['title']) ?>" loading="lazy">
+                            <div class="media-photo">
+                                <img src="<?= htmlspecialchars($p['thumbnail_url'] ?? $p['image_url']) ?>" alt="<?= htmlspecialchars($p['title']) ?>" loading="lazy">
+                            </div>
                             <span class="media-caption"><?= htmlspecialchars($p['title']) ?></span>
                         </div>
                     <?php endforeach; ?>

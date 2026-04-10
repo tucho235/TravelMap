@@ -361,9 +361,21 @@ function initLeaflet() {
             }), { maxWidth: 360, className: 'custom-popup' });
 
         marker.on('popupopen', () => {
+            if (activeMarkerId && markers[activeMarkerId]) {
+                const prevEl = markers[activeMarkerId].getElement();
+                if (prevEl) prevEl.classList.remove('marker-selected');
+            }
+            const el = marker.getElement();
+            if (el) el.classList.add('marker-selected');
+            activeMarkerId = point.id;
             highlightTimelineItem(point.id);
             highlightCarouselItem(point.id);
-            activeMarkerId = point.id;
+        });
+
+        marker.on('popupclose', () => {
+            const el = marker.getElement();
+            if (el) el.classList.remove('marker-selected');
+            if (String(activeMarkerId) === String(point.id)) activeMarkerId = null;
         });
 
         marker.on('add', () => {
@@ -580,24 +592,21 @@ window.viewImage = function (url) {
 
 window.viewImageFromData = function (element) {
     if (galleryItems.length === 0) initGallery();
-    const url = element.dataset.img;
-    const index = galleryItems.findIndex(item => item.url === url);
-    if (index !== -1) showLightboxImage(index);
 
     const pointId = element.dataset.pointId;
+    const url     = element.dataset.img;
+    const showImage = (typeof TRIP_TOOLTIP_CONFIG !== 'undefined') ? TRIP_TOOLTIP_CONFIG.showImage !== false : true;
+
     if (!pointId) return;
 
-    // Highlight timeline
+    // Highlight timeline and carousel immediately on click
     highlightTimelineItem(pointId);
+    highlightCarouselItem(pointId);
 
-    // Fly map to POI
+    // Get lat/lng from the matching timeline element
     const timelineEl = document.querySelector(`.timeline-point[data-id="${pointId}"]`);
-    if (!timelineEl) return;
-    const lat = parseFloat(timelineEl.dataset.lat);
-    const lng = parseFloat(timelineEl.dataset.lng);
-    if (isNaN(lat) || isNaN(lng)) return;
-
-    doFlyTo(lat, lng);
+    const lat = timelineEl ? parseFloat(timelineEl.dataset.lat) : NaN;
+    const lng = timelineEl ? parseFloat(timelineEl.dataset.lng) : NaN;
 
     // Update active marker highlight
     if (activeMarkerId && markers[activeMarkerId]) {
@@ -609,6 +618,27 @@ window.viewImageFromData = function (element) {
         const curEl = markers[pointId].getElement();
         if (curEl) curEl.classList.add('marker-selected');
     }
+
+    // Close any open tooltip
+    if (MAP_RENDERER === 'leaflet') {
+        pendingPopupMarkerId = null;
+        if (map) map.closePopup();
+    } else {
+        if (currentOpenPopup) {
+            currentOpenPopup.remove();
+            currentOpenPopup = null;
+            currentOpenPopupPointId = null;
+        }
+    }
+
+    // If tooltip has no header image, the carousel is the only way to see the photo: open lightbox.
+    // If tooltip has header image, the lightbox is accessible from the tooltip image — just fly.
+    if (!showImage) {
+        const index = galleryItems.findIndex(item => item.url === url);
+        if (index !== -1) showLightboxImage(index);
+    }
+
+    if (!isNaN(lat) && !isNaN(lng)) doFlyTo(lat, lng);
 };
 
 function showLightboxImage(index) {
