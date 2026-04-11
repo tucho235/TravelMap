@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 /**
- * travelmap-backup.php — CLI de backups para TravelMap
+ * travelmap.php — CLI principal de TravelMap
  *
  * SEGURIDAD:
  *   - Solo funciona desde CLI (PHP_SAPI === 'cli').
@@ -9,13 +9,15 @@
  *   - El directorio bin/ tiene .htaccess que deniega todo acceso web.
  *   - Aplicar permisos tras instalar:
  *       chmod 0750 bin/
- *       chmod 0700 bin/travelmap-backup.php
+ *       chmod 0700 bin/travelmap.php
  *     Con eso www-data no puede leer este archivo aunque .htaccess falle.
  *
  * USO:
- *   php bin/travelmap-backup.php create [--no-images] [--only=trips,routes,...] [--output=/ruta]
- *   php bin/travelmap-backup.php list
- *   php bin/travelmap-backup.php help
+ *   php bin/travelmap.php <modulo> <operacion> [opciones]
+ *   php bin/travelmap.php help
+ *
+ * MÓDULOS DISPONIBLES:
+ *   backup   Gestión de backups (create, list)
  *
  * Ver docs/BACKUP_CLI.md para ejemplos de cron y configuración de nginx.
  */
@@ -31,19 +33,21 @@ if (PHP_SAPI !== 'cli') {
 // ── Capa 2: umask restrictivo para los archivos que crearemos ────────────────
 umask(0077);
 
-// ── Parseo temprano de argumentos (antes del bootstrap) ──────────────────────
-$args    = array_slice($argv, 1);
-$command = $args[0] ?? 'help';
+// ── Parseo de argumentos ─────────────────────────────────────────────────────
+$args      = array_slice($argv, 1);
+$module    = $args[0] ?? 'help';
+$operation = $args[1] ?? 'help';
 
 /**
  * Parsea flags del tipo --nombre o --nombre=valor desde $args.
+ * Ignora los dos primeros elementos (modulo y operacion).
  * Devuelve ['flags' => [...], 'values' => ['key' => 'val', ...]].
  */
 function parseArgs(array $args): array
 {
     $flags  = [];
     $values = [];
-    foreach (array_slice($args, 1) as $arg) {
+    foreach (array_slice($args, 2) as $arg) {
         if (strpos($arg, '--') !== 0) {
             continue;
         }
@@ -76,7 +80,7 @@ function info(string $message): void
 }
 
 // ── Despacho anticipado: help no requiere DB ─────────────────────────────────
-if ($command === 'help') {
+if ($module === 'help') {
     cmdHelp();
     exit(0);
 }
@@ -84,14 +88,12 @@ if ($command === 'help') {
 // ── Bootstrap (sin includes/auth.php — emite header() y mataría el CLI) ──────
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../src/helpers/BackupBuilder.php';
 
-// ── Despacho de comandos ─────────────────────────────────────────────────────
-match ($command) {
-    'create' => cmdCreate($args),
-    'list'   => cmdList(),
-    default  => (function () use ($command) {
-        fwrite(STDERR, '[ERROR] Comando desconocido: ' . $command . PHP_EOL);
+// ── Despacho de módulos ──────────────────────────────────────────────────────
+match ($module) {
+    'backup' => dispatchBackup($operation, $args),
+    default  => (function () use ($module) {
+        fwrite(STDERR, '[ERROR] Módulo desconocido: ' . $module . PHP_EOL);
         cmdHelp();
         exit(1);
     })(),
@@ -99,9 +101,24 @@ match ($command) {
 
 exit(0);
 
-// ── Implementación de comandos ───────────────────────────────────────────────
+// ── Módulo: backup ───────────────────────────────────────────────────────────
 
-function cmdCreate(array $args): void
+function dispatchBackup(string $operation, array $args): void
+{
+    require_once __DIR__ . '/../src/helpers/BackupBuilder.php';
+
+    match ($operation) {
+        'create' => backupCreate($args),
+        'list'   => backupList(),
+        default  => (function () use ($operation) {
+            fwrite(STDERR, '[ERROR] Operación desconocida para backup: ' . $operation . PHP_EOL);
+            cmdHelpBackup();
+            exit(1);
+        })(),
+    };
+}
+
+function backupCreate(array $args): void
 {
     $parsed    = parseArgs($args);
     $flags     = $parsed['flags'];
@@ -111,14 +128,11 @@ function cmdCreate(array $args): void
     // --output=<ruta>
     if (isset($values['output'])) {
         $requestedDir = $values['output'];
-        // Resolver ../  y symlinks usando realpath() del directorio padre
-        // (el dir destino puede no existir aún, así que resolvemos su padre)
-        $parentDir = is_dir($requestedDir) ? $requestedDir : dirname($requestedDir);
+        $parentDir    = is_dir($requestedDir) ? $requestedDir : dirname($requestedDir);
         $resolvedParent = realpath($parentDir);
         if ($resolvedParent === false) {
             fail("--output: el directorio padre no existe o no es accesible: {$parentDir}");
         }
-        // Reconstruir ruta final con el padre resuelto
         $backupDir = is_dir($requestedDir)
             ? $resolvedParent
             : $resolvedParent . '/' . basename($requestedDir);
@@ -128,8 +142,8 @@ function cmdCreate(array $args): void
     $includeImages = !in_array('no-images', $flags, true);
 
     // --only=trips,routes,points,tags,settings
-    $validSections = ['trips', 'routes', 'points', 'tags', 'settings'];
-    $activeSections = $validSections; // por defecto, todas
+    $validSections  = ['trips', 'routes', 'points', 'tags', 'settings'];
+    $activeSections = $validSections;
     if (isset($values['only'])) {
         $requested = array_map('trim', explode(',', $values['only']));
         $unknown   = array_diff($requested, $validSections);
@@ -144,7 +158,6 @@ function cmdCreate(array $args): void
         $db      = getDB();
         $version = defined('APP_VERSION') ? APP_VERSION : '1.0.0';
 
-        // Leer versión desde version.php si existe
         $versionFile = ROOT_PATH . '/version.php';
         if (is_file($versionFile) && !isset($version)) {
             require $versionFile;
@@ -168,12 +181,12 @@ function cmdCreate(array $args): void
         info('     Tipo:   ' . strtoupper(pathinfo($path, PATHINFO_EXTENSION)));
 
     } catch (\Exception $e) {
-        error_log('travelmap-backup create: ' . $e->getMessage());
+        error_log('travelmap backup create: ' . $e->getMessage());
         fail('No se pudo crear el backup: ' . $e->getMessage());
     }
 }
 
-function cmdList(): void
+function backupList(): void
 {
     $backupDir = ROOT_PATH . '/backups';
 
@@ -188,7 +201,6 @@ function cmdList(): void
         return;
     }
 
-    // Ordenar por fecha descendente
     usort($files, fn($a, $b) => filemtime($b) <=> filemtime($a));
 
     info(str_pad('FECHA', 20) . str_pad('TIPO', 6) . str_pad('TAMAÑO', 12) . 'ARCHIVO');
@@ -204,19 +216,39 @@ function cmdList(): void
     info('Total: ' . count($files) . ' backup(s)');
 }
 
+// ── Ayuda ────────────────────────────────────────────────────────────────────
+
 function cmdHelp(): void
 {
     $script = basename(__FILE__);
     echo <<<HELP
-    TravelMap — CLI de backups
+    TravelMap CLI
 
     USO:
-      php bin/{$script} <comando> [opciones]
+      php bin/{$script} <modulo> <operacion> [opciones]
+      php bin/{$script} help
 
-    COMANDOS:
+    MÓDULOS:
+      backup   Gestión de backups
+
+    Para ayuda de un módulo específico:
+      php bin/{$script} backup help
+
+    HELP;
+}
+
+function cmdHelpBackup(): void
+{
+    $script = basename(__FILE__);
+    echo <<<HELP
+    TravelMap CLI — módulo backup
+
+    USO:
+      php bin/{$script} backup <operacion> [opciones]
+
+    OPERACIONES:
       create            Crea un nuevo backup (por defecto: todos los datos + imágenes en ZIP)
       list              Lista los backups existentes en ROOT_PATH/backups
-      help              Muestra esta ayuda
 
     OPCIONES DE create:
       --no-images       Excluye imágenes; produce un archivo JSON en lugar de ZIP
@@ -226,22 +258,22 @@ function cmdHelp(): void
 
     EJEMPLOS:
       # Backup completo (datos + imágenes)
-      php bin/{$script} create
+      php bin/{$script} backup create
 
       # Solo datos, sin imágenes
-      php bin/{$script} create --no-images
+      php bin/{$script} backup create --no-images
 
       # Solo viajes y rutas
-      php bin/{$script} create --no-images --only=trips,routes
+      php bin/{$script} backup create --no-images --only=trips,routes
 
       # Backup con destino personalizado
-      php bin/{$script} create --output=/mnt/nas/travelmap
+      php bin/{$script} backup create --output=/mnt/nas/travelmap
 
       # Listar backups existentes
-      php bin/{$script} list
+      php bin/{$script} backup list
 
     CRON (ejemplo semanal — domingos 03:00):
-      0 3 * * 0  /usr/bin/php /ruta/a/TravelMap/bin/{$script} create >> /var/log/travelmap-backup.log 2>&1
+      0 3 * * 0  /usr/bin/php /ruta/a/TravelMap/bin/{$script} backup create >> /var/log/travelmap.log 2>&1
 
     Ver docs/BACKUP_CLI.md para más detalles sobre seguridad y nginx.
 

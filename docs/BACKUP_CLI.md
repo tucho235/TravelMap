@@ -10,8 +10,8 @@ Después de clonar o actualizar el repositorio, aplicar estos permisos para que 
 
 ```bash
 chmod 0750 bin/
-chmod 0700 bin/travelmap-backup.php
-chown <usuario-cron>:<grupo-cron> bin/ bin/travelmap-backup.php
+chmod 0700 bin/travelmap.php
+chown <usuario-cron>:<grupo-cron> bin/ bin/travelmap.php  # opcional
 ```
 
 Reemplazar `<usuario-cron>` por el usuario que ejecutará el cron (p. ej. `pi`, `tucho235`, `www-data` si el cron corre como Apache, aunque lo último no es recomendable).
@@ -34,22 +34,25 @@ Así el servidor web no puede alcanzar el directorio ni aunque falle el `.htacce
 
 ```bash
 # Backup completo (todos los datos + imágenes → produce ZIP)
-php bin/travelmap-backup.php create
+php bin/travelmap.php backup create
 
 # Solo datos, sin imágenes (produce JSON)
-php bin/travelmap-backup.php create --no-images
+php bin/travelmap.php backup create --no-images
 
 # Solo algunas secciones
-php bin/travelmap-backup.php create --no-images --only=trips,routes
+php bin/travelmap.php backup create --no-images --only=trips,routes
 
 # Guardar en directorio personalizado
-php bin/travelmap-backup.php create --output=/mnt/nas/backups
+php bin/travelmap.php backup create --output=/mnt/nas/backups
 
 # Listar backups existentes
-php bin/travelmap-backup.php list
+php bin/travelmap.php backup list
 
-# Ayuda
-php bin/travelmap-backup.php help
+# Ayuda del módulo backup
+php bin/travelmap.php backup help
+
+# Ayuda general
+php bin/travelmap.php help
 ```
 
 ### Flags de `create`
@@ -73,14 +76,14 @@ crontab -e
 Agregar la línea (backup todos los domingos a las 03:00):
 
 ```cron
-0 3 * * 0  /usr/bin/php /home/tucho235/Developer/TravelMap/bin/travelmap-backup.php create >> /var/log/travelmap-backup.log 2>&1
+0 3 * * 0  /usr/bin/php /home/tucho235/Developer/TravelMap/bin/travelmap.php backup create >> /var/log/travelmap.log 2>&1
 ```
 
 - Si el comando falla (exit ≠ 0) y `MAILTO` está configurado, cron enviará un email con el error.
-- El log `/var/log/travelmap-backup.log` se puede rotar con logrotate:
+- El log `/var/log/travelmap.log` se puede rotar con logrotate:
 
 ```
-/var/log/travelmap-backup.log {
+/var/log/travelmap.log {
     weekly
     rotate 8
     compress

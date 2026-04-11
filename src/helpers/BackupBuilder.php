@@ -3,7 +3,7 @@
  * BackupBuilder — TravelMap
  *
  * Lógica compartida para construir archivos de backup (JSON o ZIP).
- * Usada tanto por admin/backup.php (web) como por bin/travelmap-backup.php (CLI).
+ * Usada tanto por admin/backup.php (web) como por bin/travelmap.php (CLI).
  *
  * No emite headers, no redirige, no usa variables superglobales HTTP.
  * Lanza RuntimeException en caso de error para que el llamador decida cómo manejarlo.

@@ -863,16 +863,16 @@ require_once __DIR__ . '/../includes/header.php';
                     <?= __('backup.cli_commands') ?? 'Comandos' ?>
                 </p>
                 <pre style="margin: 0; padding: 14px; background: #1e293b; color: #e2e8f0; border-radius: 8px; font-size: 12px; line-height: 1.7; overflow-x: auto;"><span style="color:#94a3b8;"># Backup completo (datos + imágenes → ZIP)</span>
-php bin/travelmap-backup.php create
+php bin/travelmap.php backup create
 
 <span style="color:#94a3b8;"># Solo datos, sin imágenes → JSON</span>
-php bin/travelmap-backup.php create --no-images
+php bin/travelmap.php backup create --no-images
 
 <span style="color:#94a3b8;"># Solo secciones específicas</span>
-php bin/travelmap-backup.php create --only=trips,routes
+php bin/travelmap.php backup create --only=trips,routes
 
 <span style="color:#94a3b8;"># Listar backups existentes</span>
-php bin/travelmap-backup.php list</pre>
+php bin/travelmap.php backup list</pre>
             </div>
 
             <!-- Cron -->
@@ -885,13 +885,13 @@ crontab -e
 
 <span style="color:#94a3b8;"># Domingos 03:00 — backup completo</span>
 0 3 * * 0  /usr/bin/php \
-  <?= htmlspecialchars(ROOT_PATH, ENT_QUOTES, 'UTF-8') ?>/bin/travelmap-backup.php \
-  create >> /var/log/travelmap-backup.log 2>&amp;1
+  <?= htmlspecialchars(ROOT_PATH, ENT_QUOTES, 'UTF-8') ?>/bin/travelmap.php \
+  backup create >> /var/log/travelmap.log 2>&amp;1
 
 <span style="color:#94a3b8;"># Si falla, cron envía email (configurar MAILTO)</span></pre>
                 <p style="margin: 10px 0 0 0; font-size: 12px; color: var(--text-muted, #6b7280);">
                     <?= __('backup.cli_perms') ?? 'Permisos recomendados tras instalar:' ?>
-                    <code style="font-size: 11px;">chmod 0700 bin/travelmap-backup.php</code>
+                    <code style="font-size: 11px;">chmod 0700 bin/travelmap.php</code>
                 </p>
             </div>
 
