@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS poi_links (
     link_type  ENUM(
                    'website', 'google_maps', 'instagram', 'facebook',
                    'twitter', 'tripadvisor', 'booking', 'airbnb',
-                   'youtube', 'wikipedia', 'other'
+                   'youtube', 'wikipedia', 'google_photos', 'other'
                ) NOT NULL DEFAULT 'website',
     url        VARCHAR(500) NOT NULL,
     label      VARCHAR(100) DEFAULT NULL,
