@@ -58,7 +58,7 @@ Ver [docs/INSTALACION.md](docs/INSTALACION.md) para el procedimiento completo.
 
 ## Contribuciones
 
-Creado por Fabio Baccaglioni <fabiomb@gmail.com>
+Creado por Fabio Baccaglioni [@fabiomb](https://github.com/fabiomb/)
 
 - [@Xyborg](https://github.com/Xyborg)
 - [@tucho235](https://github.com/tucho235)
