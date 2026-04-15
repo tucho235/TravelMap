@@ -142,6 +142,10 @@ class Route {
      */
     public function delete($id) {
         try {
+            // Eliminar links asociados (sin FK cascade en tabla polimórfica)
+            $this->db->prepare('DELETE FROM links WHERE entity_type = ? AND entity_id = ?')
+                     ->execute(['route', $id]);
+
             $stmt = $this->db->prepare('DELETE FROM routes WHERE id = ?');
             return $stmt->execute([$id]);
         } catch (PDOException $e) {
@@ -152,12 +156,17 @@ class Route {
 
     /**
      * Eliminar todas las rutas de un viaje
-     * 
+     *
      * @param int $trip_id ID del viaje
      * @return bool True si se eliminaron correctamente
      */
     public function deleteByTripId($trip_id) {
         try {
+            // Eliminar links de todas las rutas del viaje (sin FK cascade)
+            $this->db->prepare(
+                'DELETE FROM links WHERE entity_type = ? AND entity_id IN (SELECT id FROM routes WHERE trip_id = ?)'
+            )->execute(['route', $trip_id]);
+
             $stmt = $this->db->prepare('DELETE FROM routes WHERE trip_id = ?');
             return $stmt->execute([$trip_id]);
         } catch (PDOException $e) {

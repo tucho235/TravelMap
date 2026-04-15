@@ -16,12 +16,12 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/models/Trip.php';
 require_once __DIR__ . '/../src/models/Route.php';
 require_once __DIR__ . '/../src/models/Point.php';
-require_once __DIR__ . '/../src/models/RouteLink.php';
+require_once __DIR__ . '/../src/models/Link.php';
 
 $tripModel = new Trip();
 $routeModel = new Route();
 $pointModel = new Point();
-$routeLinkModel = new RouteLink();
+$routeLinkModel = new Link();
 $message = '';
 $message_type = '';
 
@@ -326,7 +326,7 @@ const tripColor = '<?= htmlspecialchars($trip['color_hex']) ?>';
 const existingRoutes = <?= json_encode($routes_js) ?>;
 const existingPoints = <?= json_encode($points_js) ?>;
 const transportTypes = <?= json_encode($transport_types) ?>;
-const routeLinkTypes = <?= json_encode(RouteLink::getTypes()) ?>;
+const routeLinkTypes = <?= json_encode(Link::getTypes()) ?>;
 window.routeLinkTypes = routeLinkTypes;
 
 // Traducciones para JS

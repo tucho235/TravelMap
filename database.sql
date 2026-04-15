@@ -186,43 +186,25 @@ CREATE TABLE IF NOT EXISTS geocode_cache (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- Tabla: poi_links
--- Descripción: Links externos tipificados para puntos de interés
+-- Tabla: links
+-- Descripción: Links externos tipificados para entidades del sistema
+--              (poi, route, trip). Tabla polimórfica — usa entity_type
+--              + entity_id en lugar de FKs específicas por entidad.
 -- ============================================
-CREATE TABLE IF NOT EXISTS poi_links (
-    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    poi_id     INT UNSIGNED NOT NULL,
-    link_type  ENUM(
-                   'website', 'google_maps', 'instagram', 'facebook',
-                   'twitter', 'tripadvisor', 'booking', 'airbnb',
-                   'youtube', 'wikipedia', 'google_photos', 'other'
-               ) NOT NULL DEFAULT 'website',
-    url        VARCHAR(500) NOT NULL,
-    label      VARCHAR(100) DEFAULT NULL,
-    sort_order TINYINT UNSIGNED DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (poi_id) REFERENCES points_of_interest(id) ON DELETE CASCADE,
-    INDEX idx_poi_id (poi_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================
--- Tabla: route_links
--- Descripción: Links externos tipificados para trayectos
--- ============================================
-CREATE TABLE IF NOT EXISTS route_links (
-    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    route_id   INT UNSIGNED NOT NULL,
-    link_type  ENUM(
-                   'website', 'google_maps', 'instagram', 'facebook',
-                   'twitter', 'tripadvisor', 'booking', 'airbnb',
-                   'youtube', 'wikipedia', 'google_photos', 'other'
-               ) NOT NULL DEFAULT 'website',
-    url        VARCHAR(500) NOT NULL,
-    label      VARCHAR(100) DEFAULT NULL,
-    sort_order TINYINT UNSIGNED DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE CASCADE,
-    INDEX idx_route_id (route_id)
+CREATE TABLE IF NOT EXISTS links (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    entity_type ENUM('poi', 'route', 'trip') NOT NULL,
+    entity_id   INT UNSIGNED NOT NULL,
+    link_type   ENUM(
+                    'website', 'google_maps', 'instagram', 'facebook',
+                    'twitter', 'tripadvisor', 'booking', 'airbnb',
+                    'youtube', 'wikipedia', 'google_photos', 'other'
+                ) NOT NULL DEFAULT 'website',
+    url         VARCHAR(500) NOT NULL,
+    label       VARCHAR(100) DEFAULT NULL,
+    sort_order  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_entity (entity_type, entity_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================

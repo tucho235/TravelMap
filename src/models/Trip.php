@@ -151,6 +151,14 @@ class Trip {
      */
     public function delete($id) {
         try {
+            // Eliminar links de POIs y rutas del viaje antes del cascade delete
+            $this->db->prepare(
+                'DELETE FROM links WHERE entity_type = ? AND entity_id IN (SELECT id FROM points_of_interest WHERE trip_id = ?)'
+            )->execute(['poi', $id]);
+            $this->db->prepare(
+                'DELETE FROM links WHERE entity_type = ? AND entity_id IN (SELECT id FROM routes WHERE trip_id = ?)'
+            )->execute(['route', $id]);
+
             $stmt = $this->db->prepare('DELETE FROM trips WHERE id = ?');
             return $stmt->execute([$id]);
         } catch (PDOException $e) {

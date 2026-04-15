@@ -6,8 +6,7 @@ require_once __DIR__ . '/src/models/Trip.php';
 require_once __DIR__ . '/src/models/Route.php';
 require_once __DIR__ . '/src/models/Point.php';
 require_once __DIR__ . '/src/models/TripTag.php';
-require_once __DIR__ . '/src/models/PoiLink.php';
-require_once __DIR__ . '/src/models/RouteLink.php';
+require_once __DIR__ . '/src/models/Link.php';
 require_once __DIR__ . '/src/helpers/FileHelper.php';
 require_once __DIR__ . '/src/helpers/DateTimeHelper.php';
 require_once __DIR__ . '/src/models/Settings.php';
@@ -32,8 +31,7 @@ $tripModel    = new Trip();
 $routeModel   = new Route();
 $pointModel   = new Point();
 $tripTagModel = new TripTag();
-$poiLinkModel = new PoiLink();
-$routeLinkModel = new RouteLink();
+$linkModel = new Link();
 
 $trip = $tripModel->getById($tripId);
 
@@ -65,7 +63,7 @@ foreach ($routes as $route) {
     $dist = (int) ($route['distance_meters'] ?? 0);
     $totalDistance += $dist;
 
-    $routeLinks = RouteLink::toApiArray($routeLinkModel->getByRouteId((int) $route['id']));
+    $routeLinks = Link::toApiArray($linkModel->getByRouteId((int) $route['id']));
 
     $processedRoute = [
         'id' => (int) $route['id'],
@@ -100,7 +98,7 @@ foreach ($points as $point) {
         $thumbnail_url = $thumb_path ? BASE_URL . '/' . $thumb_path : null;
     }
     
-    $links = PoiLink::toApiArray($poiLinkModel->getByPoiId((int) $point['id']));
+    $links = Link::toApiArray($linkModel->getByPoiId((int) $point['id']));
 
     $processedPoint = [
         'id' => (int) $point['id'],
@@ -284,7 +282,7 @@ $statsIcons = [
                                                rel="noopener noreferrer"
                                                class="point-link-btn"
                                                title="<?= htmlspecialchars($link['label']) ?>">
-                                                <?= RouteLink::getSvg($link['type'], 14) ?>
+                                                <?= Link::getSvg($link['type'], 14) ?>
                                             </a>
                                             <?php endforeach; ?>
                                         </div>
@@ -310,7 +308,7 @@ $statsIcons = [
                                                rel="noopener noreferrer"
                                                class="point-link-btn"
                                                title="<?= htmlspecialchars($link['label']) ?>">
-                                                <?= PoiLink::getSvg($link['type'], 14) ?>
+                                                <?= Link::getSvg($link['type'], 14) ?>
                                             </a>
                                             <?php endforeach; ?>
                                         </div>
