@@ -77,8 +77,8 @@ class Trip {
             $end_date = isset($data['end_date']) && ($data['end_date'] !== '' && $data['end_date'] !== '0000-00-00') ? $data['end_date'] : null;
 
             $stmt = $this->db->prepare('
-                INSERT INTO trips (title, description, start_date, end_date, color_hex, status)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO trips (title, description, start_date, end_date, color_hex, status, show_routes_in_timeline)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ');
 
             $result = $stmt->execute([
@@ -87,7 +87,8 @@ class Trip {
                 $start_date,
                 $end_date,
                 $data['color_hex'] ?? '#3388ff',
-                $data['status'] ?? 'draft'
+                $data['status'] ?? 'draft',
+                array_key_exists('show_routes_in_timeline', $data) ? $data['show_routes_in_timeline'] : null
             ]);
 
             return $result ? $this->db->lastInsertId() : false;
@@ -115,7 +116,7 @@ class Trip {
             }
 
             // Build dynamic update query based on provided fields
-            $allowedFields = ['title', 'description', 'start_date', 'end_date', 'color_hex', 'status'];
+            $allowedFields = ['title', 'description', 'start_date', 'end_date', 'color_hex', 'status', 'show_routes_in_timeline'];
             $setClauses = [];
             $values = [];
 

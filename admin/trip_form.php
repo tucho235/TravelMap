@@ -46,13 +46,17 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rawTimeline = $_POST['show_routes_in_timeline'] ?? '';
+    $timelineValue = ($rawTimeline === '1') ? 1 : (($rawTimeline === '0') ? 0 : null);
+
     $data = [
         'title' => trim($_POST['title'] ?? ''),
         'description' => trim($_POST['description'] ?? ''),
         'start_date' => $_POST['start_date'] ?? null,
         'end_date' => $_POST['end_date'] ?? null,
         'color_hex' => $_POST['color_hex'] ?? '#3388ff',
-        'status' => $_POST['status'] ?? 'draft'
+        'status' => $_POST['status'] ?? 'draft',
+        'show_routes_in_timeline' => $timelineValue,
     ];
 
     // Validar datos
@@ -312,6 +316,23 @@ $form_data = $trip ?? [
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['status']) ?></div>
                             <?php endif; ?>
                             <small class="form-text text-muted"><?= __('trips.status_help') ?></small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Rutas en timeline -->
+                        <div class="col-md-6 mb-3">
+                            <label for="show_routes_in_timeline" class="form-label"><?= __('trips.show_routes_in_timeline') ?></label>
+                            <?php
+                            $timelineRaw = $form_data['show_routes_in_timeline'] ?? null;
+                            $timelineSel = ($timelineRaw === null || $timelineRaw === '') ? '' : (string)(int)$timelineRaw;
+                            ?>
+                            <select class="form-select" id="show_routes_in_timeline" name="show_routes_in_timeline">
+                                <option value="" <?= $timelineSel === '' ? 'selected' : '' ?>><?= __('trips.timeline_routes_default') ?></option>
+                                <option value="1" <?= $timelineSel === '1' ? 'selected' : '' ?>><?= __('trips.timeline_routes_show') ?></option>
+                                <option value="0" <?= $timelineSel === '0' ? 'selected' : '' ?>><?= __('trips.timeline_routes_hide') ?></option>
+                            </select>
+                            <small class="form-text text-muted"><?= __('trips.show_routes_in_timeline_help') ?></small>
                         </div>
                     </div>
 

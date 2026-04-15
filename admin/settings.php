@@ -161,6 +161,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             'value' => isset($_POST['trip_page_enabled']) && $_POST['trip_page_enabled'] === '1',
             'type' => 'boolean'
         ];
+        $updates['trip_timeline_show_routes'] = [
+            'value' => isset($_POST['trip_timeline_show_routes']) && $_POST['trip_timeline_show_routes'] === '1',
+            'type' => 'boolean'
+        ];
         $updates['trip_tooltip_show_image'] = [
             'value' => isset($_POST['trip_tooltip_show_image']) && $_POST['trip_tooltip_show_image'] === '1',
             'type' => 'boolean'
@@ -781,6 +785,15 @@ require_once __DIR__ . '/../includes/header.php';
                         <span class="form-check-label"><?= __('settings.trip_page_enabled', 'Habilitar página dedicada de viaje') ?></span>
                     </label>
                     <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_page_enabled_desc', 'Muestra un enlace a la página detallada de cada viaje en el mapa y en el listado. Si está desactivado, la página trip.php no es accesible.') ?></div>
+                </div>
+
+                <div class="form-group" style="margin-top: 16px;">
+                    <label class="form-check form-switch">
+                        <input type="checkbox" class="form-check-input" id="trip_timeline_show_routes" name="trip_timeline_show_routes" value="1"
+                               <?= ($currentSettings['trip_timeline_show_routes'] ?? false) ? 'checked' : '' ?>>
+                        <span class="form-check-label"><?= __('settings.trip_timeline_show_routes') ?></span>
+                    </label>
+                    <div class="form-hint" style="margin-left: 44px;"><?= __('settings.trip_timeline_show_routes_desc') ?></div>
                 </div>
             </div>
         </div>
