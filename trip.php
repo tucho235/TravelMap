@@ -47,6 +47,15 @@ $routes = $routeModel->getByTripId($tripId);
 $tags = $tripTagModel->getByTripId($tripId);
 $points = $pointModel->getAll($tripId);
 
+// Determinar si mostrar rutas en timeline: propiedad del viaje tiene prioridad, luego config global
+$_settingsForTimeline = new Settings($db);
+$tripShowRoutes = $trip['show_routes_in_timeline'];
+if ($tripShowRoutes === null) {
+    $tripShowRoutes = (bool) $_settingsForTimeline->get('trip_timeline_show_routes', false);
+} else {
+    $tripShowRoutes = (bool) $tripShowRoutes;
+}
+
 // Calcular estadísticas y procesar rutas
 $totalDistance = 0;
 $processedRoutes = [];
@@ -55,9 +64,9 @@ $timelineItems = [];
 foreach ($routes as $route) {
     $dist = (int) ($route['distance_meters'] ?? 0);
     $totalDistance += $dist;
-    
+
     $routeLinks = RouteLink::toApiArray($routeLinkModel->getByRouteId((int) $route['id']));
-    
+
     $processedRoute = [
         'id' => (int) $route['id'],
         'transport_type' => $route['transport_type'],
@@ -70,14 +79,16 @@ foreach ($routes as $route) {
         'links' => $routeLinks,
     ];
     $processedRoutes[] = $processedRoute;
-    
-    // Agregar a timeline (todas las rutas, sin filtrar)
-    $timelineItems[] = [
-        'type' => 'route',
-        'item' => $processedRoute,
-        'sort_date' => !empty($route['start_datetime']) ? strtotime($route['start_datetime']) : PHP_INT_MAX,
-        'has_date' => !empty($route['start_datetime']),
-    ];
+
+    // Solo agregar al timeline si está habilitado y tiene fecha de inicio
+    if ($tripShowRoutes && !empty($route['start_datetime'])) {
+        $timelineItems[] = [
+            'type' => 'route',
+            'item' => $processedRoute,
+            'sort_date' => strtotime($route['start_datetime']),
+            'has_date' => true,
+        ];
+    }
 }
 
 // Procesar puntos para JS y timeline

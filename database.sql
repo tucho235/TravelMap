@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS trips (
     end_date DATE,
     color_hex VARCHAR(7) DEFAULT '#3388ff',
     status ENUM('draft', 'published') DEFAULT 'draft',
+    show_routes_in_timeline TINYINT(1) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_status (status),
@@ -56,6 +57,8 @@ CREATE TABLE IF NOT EXISTS routes (
     name VARCHAR(200) DEFAULT NULL,
     description TEXT DEFAULT NULL,
     image_path VARCHAR(255) DEFAULT NULL,
+    start_datetime DATETIME DEFAULT NULL,
+    end_datetime DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
@@ -131,7 +134,8 @@ INSERT INTO settings (setting_key, setting_value, setting_type, description) VAL
 ('map_style', 'voyager', 'string', 'Estilo del mapa base (positron, voyager, dark-matter, osm-liberty)'),
 ('thumbnail_max_width', '400', 'number', 'Ancho máximo de miniaturas en píxeles'),
 ('thumbnail_max_height', '300', 'number', 'Alto máximo de miniaturas en píxeles'),
-('thumbnail_quality', '80', 'number', 'Calidad de compresión JPEG para miniaturas (0-100)');
+('thumbnail_quality', '80', 'number', 'Calidad de compresión JPEG para miniaturas (0-100)'),
+('trip_timeline_show_routes', 'false', 'boolean', 'Mostrar rutas en el timeline de la página de viaje por defecto');
 
 -- ============================================
 -- Datos iniciales (opcional)

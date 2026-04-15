@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.236] – 2026-04-15
+- Migración 020: columna `show_routes_in_timeline` (NULL/0/1) en tabla `trips`
+- Nueva opción por viaje para mostrar u ocultar rutas en el timeline de `trip.php`; si no está configurada, usa el valor por defecto global
+- Setting global `trip_timeline_show_routes` (default: ocultar) en la tab de configuración de viaje
+- Rutas sin fecha de inicio excluidas del timeline automáticamente
+- Fix columna "Acciones" demasiado angosta en tabla de rutas del editor de mapa
+- Fix `database.sql`: incorpora migración 019 (`start_datetime`, `end_datetime` en `routes`)
+
 ## [1.0.234] – 2026-04-14
 - Mejora visual: pantalla para carga de rutas con modal adaptado al diseño general
 
