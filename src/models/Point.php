@@ -165,8 +165,61 @@ class Point {
     }
 
     /**
+     * Buscar POIs por texto libre, viaje o tipo.
+     *
+     * @param string|null $query   Texto a buscar en title/description (LIKE).
+     * @param int|null    $tripId  Filtrar por viaje.
+     * @param string|null $type    'stay' | 'visit' | 'food' | 'waypoint' | null para todos.
+     * @param int         $limit   Máximo de resultados (1-100).
+     * @return array Lista de POIs.
+     */
+    public function search(
+        ?string $query,
+        ?int $tripId,
+        ?string $type,
+        int $limit = 25
+    ): array {
+        $limit = max(1, min(100, $limit));
+
+        $qLike = null;
+        if ($query !== null && $query !== '') {
+            $qLike = '%' . addcslashes($query, '%_\\') . '%';
+        }
+
+        $allowedTypes = ['stay', 'visit', 'food', 'waypoint'];
+        if ($type !== null && !in_array($type, $allowedTypes, true)) {
+            $type = null;
+        }
+
+        try {
+            $sql = '
+                SELECT id, trip_id, title, description, type, latitude, longitude,
+                       visit_date, image_path, created_at
+                FROM points_of_interest
+                WHERE (:q IS NULL OR title LIKE :q_like OR description LIKE :q_like)
+                  AND (:trip IS NULL OR trip_id = :trip)
+                  AND (:type IS NULL OR type = :type)
+                ORDER BY visit_date DESC, id DESC
+                LIMIT :lim
+            ';
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':q',      $qLike !== null ? 1 : null, $qLike !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+            $stmt->bindValue(':q_like', $qLike,  $qLike  !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':trip',   $tripId, $tripId !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+            $stmt->bindValue(':type',   $type,   $type   !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':lim',    $limit,  PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('Error en Point::search: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Validar datos de punto de interés
-     * 
+     *
      * @param array $data Datos a validar
      * @return array Array de errores (vacío si todo es válido)
      */

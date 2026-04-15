@@ -24,6 +24,9 @@ docker-entrypoint.sh
 README_DOCKER.md
 Dockerfile
 
+# ── Logs MCP ──────────────────────────────────────────────────────────────────
+logs/
+
 # ── Otros ─────────────────────────────────────────────────────────────────────
 CLAUDE.md
 assets/css/public_map_leaflet_backup.css

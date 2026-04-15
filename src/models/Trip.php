@@ -191,8 +191,76 @@ class Trip {
     }
 
     /**
+     * Buscar viajes por texto libre, tag o rango de fechas.
+     *
+     * @param string|null $query    Texto a buscar en title/description (LIKE).
+     * @param string|null $tag      Filtrar por tag exacto.
+     * @param string|null $dateFrom Fecha mínima (Y-m-d). Filtra trips que terminan >= esta fecha.
+     * @param string|null $dateTo   Fecha máxima (Y-m-d). Filtra trips que empiezan <= esta fecha.
+     * @param string|null $status   'draft' | 'published' | null para todos.
+     * @param int         $limit    Máximo de resultados (1-100).
+     * @return array Lista de viajes.
+     */
+    public function search(
+        ?string $query,
+        ?string $tag,
+        ?string $dateFrom,
+        ?string $dateTo,
+        ?string $status,
+        int $limit = 25
+    ): array {
+        $limit = max(1, min(100, $limit));
+
+        // Escapar wildcards LIKE en PHP, luego bindear como string normal
+        $qLike = null;
+        if ($query !== null && $query !== '') {
+            $qLike = '%' . addcslashes($query, '%_\\') . '%';
+        }
+
+        // Validar fechas
+        $from = null;
+        if ($dateFrom !== null && DateTime::createFromFormat('Y-m-d', $dateFrom) !== false) {
+            $from = $dateFrom;
+        }
+        $to = null;
+        if ($dateTo !== null && DateTime::createFromFormat('Y-m-d', $dateTo) !== false) {
+            $to = $dateTo;
+        }
+
+        try {
+            $sql = '
+                SELECT DISTINCT t.id, t.title, t.description, t.start_date, t.end_date,
+                                t.status, t.color_hex, t.created_at
+                FROM trips t
+                LEFT JOIN trip_tags tt ON tt.trip_id = t.id
+                WHERE (:q IS NULL OR t.title LIKE :q_like OR t.description LIKE :q_like)
+                  AND (:tag IS NULL OR tt.tag_name = :tag)
+                  AND (:fromDate IS NULL OR t.end_date   >= :fromDate OR t.end_date IS NULL)
+                  AND (:toDate   IS NULL OR t.start_date <= :toDate   OR t.start_date IS NULL)
+                  AND (:status IS NULL OR t.status = :status)
+                ORDER BY t.start_date DESC, t.id DESC
+                LIMIT :lim
+            ';
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':q',        $qLike !== null ? 1 : null, $qLike !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+            $stmt->bindValue(':q_like',   $qLike,    $qLike   !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':tag',      $tag,      $tag     !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':fromDate', $from,     $from    !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':toDate',   $to,       $to      !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':status',   $status,   $status  !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':lim',      $limit,    PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (PDOException $e) {
+            error_log('Error en Trip::search: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Validar datos de viaje
-     * 
+     *
      * @param array $data Datos a validar
      * @return array Array de errores (vacío si todo es válido)
      */
