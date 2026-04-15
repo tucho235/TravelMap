@@ -979,11 +979,19 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">${__('routes.start_datetime') || 'Inicio'}</label>
-                                    <input type="datetime-local" class="form-control" id="routeStartDatetimeInput">
+                                    <div class="row g-1">
+                                        <div class="col-7"><input type="date" class="form-control" id="routeStartDateInput"></div>
+                                        <div class="col-5"><input type="time" class="form-control" id="routeStartTimeInput"></div>
+                                    </div>
+                                    <small class="form-text text-muted">${__('points.visit_time_optional') || 'Hora opcional'}</small>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">${__('routes.end_datetime') || 'Fin'}</label>
-                                    <input type="datetime-local" class="form-control" id="routeEndDatetimeInput">
+                                    <div class="row g-1">
+                                        <div class="col-7"><input type="date" class="form-control" id="routeEndDateInput"></div>
+                                        <div class="col-5"><input type="time" class="form-control" id="routeEndTimeInput"></div>
+                                    </div>
+                                    <small class="form-text text-muted">${__('points.visit_time_optional') || 'Hora opcional'}</small>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -1043,15 +1051,23 @@
             currentRouteIndex = index;
             const route = routesData[index];
             
-            // Formatear datetime para input datetime-local (YYYY-MM-DDTHH:MM)
-            const formatDatetimeLocal = (dt) => {
-                if (!dt) return '';
-                const d = new Date(dt);
-                return d.toISOString().slice(0, 16);
+            // Separar fecha y hora sin usar Date() para evitar problemas de zona horaria
+            const splitDatetime = (dt) => {
+                if (!dt) return { date: '', time: '' };
+                const normalized = String(dt).replace('T', ' ');
+                const parts = normalized.split(' ');
+                const datePart = parts[0] || '';
+                const timePart = parts[1] ? parts[1].slice(0, 5) : '';
+                // Si la hora es 00:00 dejar vacío (sin hora definida, igual que point_form)
+                return { date: datePart, time: (timePart === '00:00' ? '' : timePart) };
             };
-            
-            $('#routeStartDatetimeInput').val(formatDatetimeLocal(route.start_datetime));
-            $('#routeEndDatetimeInput').val(formatDatetimeLocal(route.end_datetime));
+
+            const startDt = splitDatetime(route.start_datetime);
+            const endDt   = splitDatetime(route.end_datetime);
+            $('#routeStartDateInput').val(startDt.date);
+            $('#routeStartTimeInput').val(startDt.time);
+            $('#routeEndDateInput').val(endDt.date);
+            $('#routeEndTimeInput').val(endDt.time);
             $('#routeNameInput').val(route.name || '');
             $('#routeDescInput').val(route.description || '');
             
@@ -1076,8 +1092,15 @@
         $('#saveRouteDetails').on('click', function() {
             if (currentRouteIndex !== null && routesData[currentRouteIndex]) {
                 const route = routesData[currentRouteIndex];
-                route.start_datetime = $('#routeStartDatetimeInput').val() || null;
-                route.end_datetime = $('#routeEndDatetimeInput').val() || null;
+                // Combinar fecha + hora; si no hay hora usar 00:00:00 (igual que point_form)
+                const buildDatetime = (dateId, timeId) => {
+                    const d = $(dateId).val();
+                    if (!d) return null;
+                    const t = $(timeId).val();
+                    return d + ' ' + (t ? t + ':00' : '00:00:00');
+                };
+                route.start_datetime = buildDatetime('#routeStartDateInput', '#routeStartTimeInput');
+                route.end_datetime   = buildDatetime('#routeEndDateInput',   '#routeEndTimeInput');
                 route.name = $('#routeNameInput').val();
                 route.description = $('#routeDescInput').val();
                 
