@@ -48,7 +48,7 @@ class PasswordShare {
     public function validatePassword($password) {
         try {
             $stmt = $this->db->prepare("
-                SELECT trips, expires_at, active
+                SELECT id, trips, expires_at, active
                 FROM password_shares
                 WHERE password = ? AND active = TRUE
             ");
@@ -67,9 +67,44 @@ class PasswordShare {
                 }
             }
 
-            return $row['trips'];
+            return [
+                'id' => $row['id'],
+                'trips' => $row['trips']
+            ];
         } catch (Exception $e) {
             error_log("Error validating password: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifica si una contraseña por ID sigue siendo válida
+     */
+    public function validatePasswordById($passwordId) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT trips, expires_at, active
+                FROM password_shares
+                WHERE id = ? AND active = TRUE
+            ");
+            $stmt->execute([$passwordId]);
+            $row = $stmt->fetch();
+
+            if (!$row) {
+                return false;
+            }
+
+            // Verificar expiración: nulo significa que nunca expira
+            if ($row['expires_at'] !== null) {
+                $expiresAt = strtotime($row['expires_at']);
+                if (time() > $expiresAt) {
+                    return false;
+                }
+            }
+
+            return $row['trips'];
+        } catch (Exception $e) {
+            error_log("Error validating password by ID: " . $e->getMessage());
             return false;
         }
     }

@@ -24,17 +24,30 @@ if ($requiresPass) {
     
     if (isset($_POST['password'])) {
         // Intentar validar contraseña
-        $allowedTrips = $passwordShareModel->validatePassword($_POST['password']);
-        if ($allowedTrips !== false) {
-            $_SESSION['public_password_trips'] = $allowedTrips;
+        $validationResult = $passwordShareModel->validatePassword($_POST['password']);
+        if ($validationResult !== false) {
+            $_SESSION['public_password_id'] = $validationResult['id'];
+            $_SESSION['public_password_trips'] = $validationResult['trips'];
             $hasValidPassword = true;
+            $allowedTrips = $validationResult['trips'];
         } else {
             $passwordError = __('public.requires_pass_invalid') ?? 'Invalid password';
         }
+    } elseif (isset($_SESSION['public_password_id'])) {
+        // Revalidar la contraseña por ID en cada carga de página
+        $allowedTrips = $passwordShareModel->validatePasswordById($_SESSION['public_password_id']);
+        if ($allowedTrips !== false) {
+            $hasValidPassword = true;
+            // Actualizar los trips en la sesión por si cambiaron
+            $_SESSION['public_password_trips'] = $allowedTrips;
+        } else {
+            // Contraseña ya no es válida, limpiar sesión
+            unset($_SESSION['public_password_id']);
+            unset($_SESSION['public_password_trips']);
+        }
     } elseif (isset($_SESSION['public_password_trips'])) {
-        // Verificar si la sesión aún es válida
-        $hasValidPassword = true;
-        $allowedTrips = $_SESSION['public_password_trips'];
+        // Fallback para sesiones antiguas: invalidar para forzar re-login
+        unset($_SESSION['public_password_trips']);
     }
     
     if (!$hasValidPassword) {
@@ -71,7 +84,7 @@ if ($requiresPass) {
                         
                         <?php if (isset($passwordError)): ?>
                             <div class="alert alert-danger">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="12" y1="8" x2="12" y2="12"></line>
                                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
