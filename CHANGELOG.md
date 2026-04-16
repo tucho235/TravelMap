@@ -1,12 +1,25 @@
 # Changelog
 
-## [1.0.236] – 2026-04-15
+## [1.0.239] – 2026-04-15
+- Refactor: tabla `links` polimórfica reemplaza a `poi_links` y `route_links`
+- Nuevo modelo `Link` con soporte de `entity_type` (`poi`, `route`, `trip`) y `entity_id`
+- Migración 021: crea `links`, migra datos existentes y elimina las tablas redundantes
+- `database.sql` actualizado para instalaciones nuevas
+- Cascade delete manejado en código en `Point::delete()`, `Route::delete()`, `Route::deleteByTripId()` y `Trip::delete()`
+
+## [1.0.238] – 2026-04-15
+- Agregar scrollbar a descripciones largas en popups de puntos de interés
+
+## [1.0.237] – 2026-04-15
+- Fix: links de rutas no mantenían su tipo al editar (se convertían a "Website")
 - Migración 020: columna `show_routes_in_timeline` (NULL/0/1) en tabla `trips`
 - Nueva opción por viaje para mostrar u ocultar rutas en el timeline de `trip.php`; si no está configurada, usa el valor por defecto global
 - Setting global `trip_timeline_show_routes` (default: ocultar) en la tab de configuración de viaje
-- Rutas sin fecha de inicio excluidas del timeline automáticamente
-- Fix columna "Acciones" demasiado angosta en tabla de rutas del editor de mapa
-- Fix `database.sql`: incorpora migración 019 (`start_datetime`, `end_datetime` en `routes`)
+- Formulario de viaje: selector de 3 estados para rutas en timeline (por defecto / mostrar / ocultar)
+- Rutas sin fecha de inicio excluidas del timeline (antes aparecían al final sin orden)
+- Fix: columna "Acciones" demasiado angosta en tabla de rutas del editor de mapa (botones apilados)
+- Fix: `database.sql` no incluía la migración 019 (`start_datetime`, `end_datetime` en `routes`)
+- Fix i18n: claves `trip_timeline_show_routes` caían en `original_settings` en lugar del objeto `settings` activo en `es.json`
 
 ## [1.0.234] – 2026-04-14
 - Mejora visual: pantalla para carga de rutas con modal adaptado al diseño general

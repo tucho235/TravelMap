@@ -14,12 +14,12 @@ require_auth();
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../src/models/Point.php';
 require_once __DIR__ . '/../src/models/Trip.php';
-require_once __DIR__ . '/../src/models/PoiLink.php';
+require_once __DIR__ . '/../src/models/Link.php';
 require_once __DIR__ . '/../src/helpers/FileHelper.php';
 
 $pointModel = new Point();
 $tripModel  = new Trip();
-$poiLinkModel = new PoiLink();
+$poiLinkModel = new Link();
 $errors = [];
 $success = false;
 $point = null;
@@ -154,7 +154,7 @@ $form_data = $point ?? [
 ];
 
 $point_types  = Point::getTypes();
-$link_types   = PoiLink::getTypes();
+$link_types   = Link::getTypes();
 $existing_links = ($is_edit && $point) ? $poiLinkModel->getByPoiId($point['id']) : [];
 ?>
 

@@ -13,8 +13,7 @@ require_once __DIR__ . '/../src/models/Trip.php';
 require_once __DIR__ . '/../src/models/Route.php';
 require_once __DIR__ . '/../src/models/Point.php';
 require_once __DIR__ . '/../src/models/TripTag.php';
-require_once __DIR__ . '/../src/models/PoiLink.php';
-require_once __DIR__ . '/../src/models/RouteLink.php';
+require_once __DIR__ . '/../src/models/Link.php';
 require_once __DIR__ . '/../src/helpers/FileHelper.php';
 
 try {
@@ -22,8 +21,7 @@ try {
     $routeModel     = new Route();
     $pointModel     = new Point();
     $tripTagModel   = new TripTag();
-    $poiLinkModel   = new PoiLink();
-    $routeLinkModel = new RouteLink();
+    $linkModel = new Link();
     
     // Obtener todos los viajes publicados
     $trips = $tripModel->getAll('start_date DESC', 'published');
@@ -50,7 +48,7 @@ try {
             $totalDistance += $dist;
             
             // Obtener links de la ruta
-            $links = RouteLink::toApiArray($routeLinkModel->getByRouteId((int) $route['id']));
+            $links = Link::toApiArray($linkModel->getByRouteId((int) $route['id']));
             
             // Obtener thumbnail si existe
             $thumbnail_url = null;
@@ -89,7 +87,7 @@ try {
                 $thumbnail_url = $thumb_path ? BASE_URL . '/' . $thumb_path : null;
             }
             
-            $links = PoiLink::toApiArray($poiLinkModel->getByPoiId((int) $point['id']));
+            $links = Link::toApiArray($linkModel->getByPoiId((int) $point['id']));
 
             $processedPoints[] = [
                 'id' => (int) $point['id'],

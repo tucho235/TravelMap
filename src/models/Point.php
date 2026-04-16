@@ -145,7 +145,11 @@ class Point {
         try {
             // Obtener la imagen antes de eliminar para borrar el archivo
             $point = $this->getById($id);
-            
+
+            // Eliminar links asociados (sin FK cascade en tabla polimórfica)
+            $this->db->prepare('DELETE FROM links WHERE entity_type = ? AND entity_id = ?')
+                     ->execute(['poi', $id]);
+
             $stmt = $this->db->prepare('DELETE FROM points_of_interest WHERE id = ?');
             $result = $stmt->execute([$id]);
             

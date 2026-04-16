@@ -1,11 +1,12 @@
 <?php
 /**
- * Modelo: PoiLink
+ * Modelo: Link
  *
- * Gestiona los links externos asociados a puntos de interés
+ * Gestiona los links externos asociados a entidades del sistema (poi, route, trip).
+ * Reemplaza a los modelos PoiLink y RouteLink con una tabla polimórfica única.
  */
 
-class PoiLink {
+class Link {
     private $db;
 
     // Tipos de link soportados con metadata para UI
@@ -31,37 +32,53 @@ class PoiLink {
     }
 
     /**
-     * Obtener todos los links de un POI
+     * Obtener todos los links de una entidad
+     *
+     * @param string $entity_type  'poi', 'route' o 'trip'
+     * @param int    $entity_id
      */
-    public function getByPoiId(int $poi_id): array {
+    public function getByEntity(string $entity_type, int $entity_id): array {
         try {
             $stmt = $this->db->prepare(
-                'SELECT * FROM poi_links WHERE poi_id = ? ORDER BY sort_order ASC, id ASC'
+                'SELECT * FROM links WHERE entity_type = ? AND entity_id = ? ORDER BY sort_order ASC, id ASC'
             );
-            $stmt->execute([$poi_id]);
+            $stmt->execute([$entity_type, $entity_id]);
             return $stmt->fetchAll();
         } catch (PDOException $e) {
-            error_log('Error al obtener links del POI: ' . $e->getMessage());
+            error_log('Error al obtener links: ' . $e->getMessage());
             return [];
         }
     }
 
+    /** Alias para POIs */
+    public function getByPoiId(int $poi_id): array {
+        return $this->getByEntity('poi', $poi_id);
+    }
+
+    /** Alias para rutas */
+    public function getByRouteId(int $route_id): array {
+        return $this->getByEntity('route', $route_id);
+    }
+
     /**
-     * Reemplaza todos los links de un POI (delete + insert)
+     * Reemplaza todos los links de una entidad (delete + insert, transaccional)
      *
-     * @param int   $poi_id
-     * @param array $links  Array de ['link_type'=>..., 'url'=>..., 'label'=>..., 'sort_order'=>...]
+     * @param string $entity_type  'poi', 'route' o 'trip'
+     * @param int    $entity_id
+     * @param array  $links        Array de ['link_type'=>..., 'url'=>..., 'label'=>..., 'sort_order'=>...]
      */
-    public function replaceForPoi(int $poi_id, array $links): bool {
+    public function replaceForEntity(string $entity_type, int $entity_id, array $links): bool {
         try {
             $this->db->beginTransaction();
 
-            $this->db->prepare('DELETE FROM poi_links WHERE poi_id = ?')->execute([$poi_id]);
+            $this->db->prepare(
+                'DELETE FROM links WHERE entity_type = ? AND entity_id = ?'
+            )->execute([$entity_type, $entity_id]);
 
             if (!empty($links)) {
                 $stmt = $this->db->prepare(
-                    'INSERT INTO poi_links (poi_id, link_type, url, label, sort_order)
-                     VALUES (?, ?, ?, ?, ?)'
+                    'INSERT INTO links (entity_type, entity_id, link_type, url, label, sort_order)
+                     VALUES (?, ?, ?, ?, ?, ?)'
                 );
                 foreach ($links as $i => $link) {
                     $type = $link['link_type'] ?? 'other';
@@ -72,7 +89,8 @@ class PoiLink {
                     if ($url === '') continue;
 
                     $stmt->execute([
-                        $poi_id,
+                        $entity_type,
+                        $entity_id,
                         $type,
                         $url,
                         trim($link['label'] ?? '') ?: null,
@@ -85,9 +103,19 @@ class PoiLink {
             return true;
         } catch (PDOException $e) {
             $this->db->rollBack();
-            error_log('Error al guardar links del POI: ' . $e->getMessage());
+            error_log('Error al guardar links: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /** Alias para POIs */
+    public function replaceForPoi(int $poi_id, array $links): bool {
+        return $this->replaceForEntity('poi', $poi_id, $links);
+    }
+
+    /** Alias para rutas */
+    public function replaceForRoute(int $route_id, array $links): bool {
+        return $this->replaceForEntity('route', $route_id, $links);
     }
 
     /**
