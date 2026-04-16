@@ -38,9 +38,57 @@ final class RouteTools
                 'geojson_data'       => ['type' => 'string', 'maxLength' => 5000000],
                 'brouter_csv_text'   => ['type' => 'string', 'maxLength' => 5242880],
                 'brouter_csv_base64' => ['type' => 'string', 'maxLength' => 7340032],
+                'links' => [
+                    'type'     => 'array',
+                    'maxItems' => 10,
+                    'items'    => [
+                        'type'       => 'object',
+                        'required'   => ['url'],
+                        'properties' => [
+                            'url'       => ['type' => 'string', 'maxLength' => 500],
+                            'label'     => ['type' => 'string', 'maxLength' => 100],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                        ],
+                        'additionalProperties' => false,
+                    ],
+                ],
             ],
             'additionalProperties' => false,
         ], [self::class, 'createRoute']);
+
+        $d->register('update_route',
+            'Actualiza los metadatos de una ruta existente. Solo se modifican los campos proporcionados. ' .
+            'La geometría (geojson) no se puede cambiar desde esta tool. ' .
+            'Para actualizar los links proporciona el array completo (reemplaza los existentes).',
+        [
+            'type'       => 'object',
+            'required'   => ['id'],
+            'properties' => [
+                'id'             => ['type' => 'integer', 'minimum' => 1],
+                'name'           => ['type' => 'string', 'maxLength' => 200],
+                'description'    => ['type' => 'string', 'maxLength' => 5000],
+                'transport_type' => ['type' => 'string', 'enum' => self::ALLOWED_TRANSPORT],
+                'color'          => ['type' => 'string', 'pattern' => '/^#[0-9A-Fa-f]{6}$/'],
+                'is_round_trip'  => ['type' => 'boolean'],
+                'start_datetime' => ['type' => 'string'],
+                'end_datetime'   => ['type' => 'string'],
+                'links' => [
+                    'type'     => 'array',
+                    'maxItems' => 10,
+                    'items'    => [
+                        'type'       => 'object',
+                        'required'   => ['url'],
+                        'properties' => [
+                            'url'       => ['type' => 'string', 'maxLength' => 500],
+                            'label'     => ['type' => 'string', 'maxLength' => 100],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                        ],
+                        'additionalProperties' => false,
+                    ],
+                ],
+            ],
+            'additionalProperties' => false,
+        ], [self::class, 'updateRoute']);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -166,6 +214,18 @@ final class RouteTools
         $created = $routeModel->getById((int)$id);
         $distanceMeters = $created ? (int)$created['distance_meters'] : 0;
 
+        if (!empty($p['links'])) {
+            $linkModel = new Link();
+            $links = array_map(function ($l) {
+                return [
+                    'link_type' => $l['link_type'] ?? 'other',
+                    'url'       => $l['url'],
+                    'label'     => $l['label'] ?? null,
+                ];
+            }, $p['links']);
+            $linkModel->replaceForRoute((int)$id, $links);
+        }
+
         McpLogger::info('create_route OK', [
             'id'       => $id,
             'trip_id'  => $tripId,
@@ -181,6 +241,57 @@ final class RouteTools
             'distance_meters' => $distanceMeters,
             'distance_km'     => round($distanceMeters / 1000, 2),
             'waypoints_count' => $waypointsCount,
+        ];
+    }
+
+    public static function updateRoute(array $p): array
+    {
+        $id = (int)$p['id'];
+        $routeModel = new Route();
+        $current = $routeModel->getById($id);
+        if (!$current) {
+            throw new ToolException("Ruta con id={$id} no encontrada", 'ROUTE_NOT_FOUND');
+        }
+
+        // Mezclar campos actuales con los proporcionados; la geometría nunca cambia
+        $data = [
+            'transport_type' => $p['transport_type'] ?? $current['transport_type'],
+            'name'           => array_key_exists('name', $p)           ? $p['name']           : $current['name'],
+            'description'    => array_key_exists('description', $p)    ? $p['description']    : $current['description'],
+            'color'          => $p['color']          ?? $current['color'],
+            'is_round_trip'  => array_key_exists('is_round_trip', $p)  ? (int)(bool)$p['is_round_trip'] : (int)$current['is_round_trip'],
+            'start_datetime' => array_key_exists('start_datetime', $p) ? $p['start_datetime'] : $current['start_datetime'],
+            'end_datetime'   => array_key_exists('end_datetime', $p)   ? $p['end_datetime']   : $current['end_datetime'],
+            'geojson_data'   => $current['geojson_data'],
+            'image_path'     => $current['image_path'],
+        ];
+
+        if (!$routeModel->update($id, $data)) {
+            throw new ToolException('No se pudo actualizar la ruta', 'DB_ERROR');
+        }
+
+        if (array_key_exists('links', $p)) {
+            $linkModel = new Link();
+            $links = array_map(function ($l) {
+                return [
+                    'link_type' => $l['link_type'] ?? 'other',
+                    'url'       => $l['url'],
+                    'label'     => $l['label'] ?? null,
+                ];
+            }, $p['links']);
+            $linkModel->replaceForRoute($id, $links);
+        }
+
+        $updated = $routeModel->getById($id);
+        McpLogger::info('update_route OK', ['id' => $id]);
+
+        return [
+            'id'              => $id,
+            'name'            => $updated['name'],
+            'transport_type'  => $updated['transport_type'],
+            'distance_meters' => (int)$updated['distance_meters'],
+            'distance_km'     => round((int)$updated['distance_meters'] / 1000, 2),
+            'admin_url'       => '/admin/route_form.php?id=' . $id,
         ];
     }
 

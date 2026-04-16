@@ -68,6 +68,40 @@ final class PoiTools
             'additionalProperties' => false,
         ], [self::class, 'createPoi']);
 
+        $d->register('update_poi',
+            'Actualiza los datos de un POI existente. Solo se modifican los campos proporcionados. ' .
+            'Para actualizar los links proporciona el array completo (reemplaza los existentes). ' .
+            'No soporta cambio de foto; para eso crea un nuevo POI.',
+        [
+            'type'       => 'object',
+            'required'   => ['id'],
+            'properties' => [
+                'id'          => ['type' => 'integer', 'minimum' => 1],
+                'title'       => ['type' => 'string', 'maxLength' => 200],
+                'type'        => ['type' => 'string', 'enum' => ['stay', 'visit', 'food', 'waypoint']],
+                'latitude'    => ['type' => 'number', 'minimum' => -90,  'maximum' => 90],
+                'longitude'   => ['type' => 'number', 'minimum' => -180, 'maximum' => 180],
+                'description' => ['type' => 'string', 'maxLength' => 5000],
+                'icon'        => ['type' => 'string', 'maxLength' => 64],
+                'visit_date'  => ['type' => 'string'],
+                'links' => [
+                    'type'     => 'array',
+                    'maxItems' => 10,
+                    'items'    => [
+                        'type'       => 'object',
+                        'required'   => ['url'],
+                        'properties' => [
+                            'url'       => ['type' => 'string', 'maxLength' => 500],
+                            'label'     => ['type' => 'string', 'maxLength' => 100],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                        ],
+                        'additionalProperties' => false,
+                    ],
+                ],
+            ],
+            'additionalProperties' => false,
+        ], [self::class, 'updatePoi']);
+
         $d->register('import_photos_batch',
             'Analiza un lote de fotos JPEG: extrae GPS y fecha del EXIF, interpola coordenadas ' .
             'entre fotos vecinas, y opcionalmente hace reverse geocoding. No crea POIs — ' .
@@ -234,7 +268,7 @@ final class PoiTools
         }
 
         if (!empty($p['links'])) {
-            $linkModel = new PoiLink();
+            $linkModel = new Link();
             $links = array_map(function ($l) {
                 return [
                     'link_type' => $l['link_type'] ?? 'other',
@@ -264,6 +298,56 @@ final class PoiTools
             'auto_filled'     => $autoFilled ?: null,
             'suggested_place' => $suggestedPlace,
             'admin_url'       => '/admin/point_form.php?id=' . $id,
+        ];
+    }
+
+    public static function updatePoi(array $p): array
+    {
+        $id = (int)$p['id'];
+        $pointModel = new Point();
+        $current = $pointModel->getById($id);
+        if (!$current) {
+            throw new ToolException("POI con id={$id} no encontrado", 'POI_NOT_FOUND');
+        }
+
+        $data = [
+            'trip_id'     => (int)$current['trip_id'],
+            'title'       => array_key_exists('title', $p)       ? trim($p['title'])        : $current['title'],
+            'type'        => $p['type']        ?? $current['type'],
+            'latitude'    => isset($p['latitude'])  ? (float)$p['latitude']  : (float)$current['latitude'],
+            'longitude'   => isset($p['longitude']) ? (float)$p['longitude'] : (float)$current['longitude'],
+            'description' => array_key_exists('description', $p) ? $p['description']        : $current['description'],
+            'icon'        => $p['icon']        ?? $current['icon'],
+            'image_path'  => $current['image_path'],
+            'visit_date'  => array_key_exists('visit_date', $p)  ? $p['visit_date']         : $current['visit_date'],
+        ];
+
+        if (!$pointModel->update($id, $data)) {
+            throw new ToolException('No se pudo actualizar el POI', 'DB_ERROR');
+        }
+
+        if (array_key_exists('links', $p)) {
+            $linkModel = new Link();
+            $links = array_map(function ($l) {
+                return [
+                    'link_type' => $l['link_type'] ?? 'other',
+                    'url'       => $l['url'],
+                    'label'     => $l['label'] ?? null,
+                ];
+            }, $p['links']);
+            $linkModel->replaceForPoi($id, $links);
+        }
+
+        $updated = $pointModel->getById($id);
+        McpLogger::info('update_poi OK', ['id' => $id]);
+
+        return [
+            'id'        => $id,
+            'title'     => $updated['title'],
+            'type'      => $updated['type'],
+            'latitude'  => (float)$updated['latitude'],
+            'longitude' => (float)$updated['longitude'],
+            'admin_url' => '/admin/point_form.php?id=' . $id,
         ];
     }
 

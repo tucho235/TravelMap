@@ -41,6 +41,39 @@ final class TripTools
             'additionalProperties' => false,
         ], [self::class, 'getTrip']);
 
+        $d->register('update_trip',
+            'Actualiza los datos de un viaje existente. Solo se modifican los campos proporcionados. ' .
+            'Para tags y links proporciona el array completo (reemplaza los existentes).',
+        [
+            'type'       => 'object',
+            'required'   => ['id'],
+            'properties' => [
+                'id'          => ['type' => 'integer', 'minimum' => 1],
+                'title'       => ['type' => 'string', 'minLength' => 1, 'maxLength' => 200],
+                'description' => ['type' => 'string', 'maxLength' => 5000],
+                'start_date'  => ['type' => 'string'],
+                'end_date'    => ['type' => 'string'],
+                'color_hex'   => ['type' => 'string', 'pattern' => '/^#[0-9A-Fa-f]{6}$/'],
+                'status'      => ['type' => 'string', 'enum' => ['draft', 'published']],
+                'tags'        => ['type' => 'array', 'maxItems' => 20, 'items' => ['type' => 'string', 'maxLength' => 60]],
+                'links' => [
+                    'type'     => 'array',
+                    'maxItems' => 10,
+                    'items'    => [
+                        'type'       => 'object',
+                        'required'   => ['url'],
+                        'properties' => [
+                            'url'       => ['type' => 'string', 'maxLength' => 500],
+                            'label'     => ['type' => 'string', 'maxLength' => 100],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                        ],
+                        'additionalProperties' => false,
+                    ],
+                ],
+            ],
+            'additionalProperties' => false,
+        ], [self::class, 'updateTrip']);
+
         $d->register('create_trip', 'Crea un nuevo viaje. Devuelve el id creado.', [
             'type'       => 'object',
             'required'   => ['title'],
@@ -208,6 +241,64 @@ final class TripTools
             'id'      => (int)$id,
             'title'   => $data['title'],
             'status'  => $data['status'],
+            'admin_url' => '/admin/trip_form.php?id=' . $id,
+        ];
+    }
+
+    public static function updateTrip(array $p): array
+    {
+        $id = (int)$p['id'];
+        $tripModel = new Trip();
+        $trip = $tripModel->getById($id);
+        if (!$trip) {
+            throw new ToolException("Viaje con id={$id} no encontrado", 'TRIP_NOT_FOUND');
+        }
+
+        $updatableFields = ['title', 'description', 'start_date', 'end_date', 'color_hex', 'status'];
+        $data = [];
+        foreach ($updatableFields as $field) {
+            if (array_key_exists($field, $p)) {
+                $data[$field] = $p[$field];
+            }
+        }
+
+        if (!empty($data)) {
+            $errors = $tripModel->validate(array_merge([
+                'title'     => $trip['title'],
+                'color_hex' => $trip['color_hex'],
+                'status'    => $trip['status'],
+            ], $data));
+            if (!empty($errors)) {
+                throw new ToolException('Datos de viaje inválidos', 'INVALID_INPUT', -32602, ['fieldErrors' => $errors]);
+            }
+            if (!$tripModel->update($id, $data)) {
+                throw new ToolException('No se pudo actualizar el viaje', 'DB_ERROR');
+            }
+        }
+
+        if (array_key_exists('tags', $p)) {
+            (new TripTag())->sync($id, $p['tags']);
+        }
+
+        if (array_key_exists('links', $p)) {
+            $linkModel = new Link();
+            $links = array_map(function ($l) {
+                return [
+                    'link_type' => $l['link_type'] ?? 'other',
+                    'url'       => $l['url'],
+                    'label'     => $l['label'] ?? null,
+                ];
+            }, $p['links']);
+            $linkModel->replaceForEntity('trip', $id, $links);
+        }
+
+        $updated = $tripModel->getById($id);
+        McpLogger::info('update_trip OK', ['id' => $id]);
+
+        return [
+            'id'        => $id,
+            'title'     => $updated['title'],
+            'status'    => $updated['status'],
             'admin_url' => '/admin/trip_form.php?id=' . $id,
         ];
     }

@@ -23,6 +23,7 @@ docker-compose.yml
 docker-entrypoint.sh
 README_DOCKER.md
 Dockerfile
+docker/
 
 # ── Logs MCP ──────────────────────────────────────────────────────────────────
 logs/

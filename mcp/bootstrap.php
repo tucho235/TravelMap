@@ -31,7 +31,7 @@ require_once ROOT_PATH . '/src/models/Trip.php';
 require_once ROOT_PATH . '/src/models/Route.php';
 require_once ROOT_PATH . '/src/models/Point.php';
 require_once ROOT_PATH . '/src/models/TripTag.php';
-require_once ROOT_PATH . '/src/models/PoiLink.php';
+require_once ROOT_PATH . '/src/models/Link.php';
 
 // Asegurar carpeta de logs
 $logDir = ROOT_PATH . '/logs';
