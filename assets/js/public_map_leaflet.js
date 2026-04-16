@@ -980,16 +980,13 @@
      * Determina si un viaje es futuro basándose en su fecha de inicio
      */
     function isFutureTrip(trip) {
+        if (trip.status === 'planned') return true;
         if (!trip.start_date) return false;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const tripStart = new Date(trip.start_date + 'T00:00:00');
         return tripStart > today;
     }
-
-    /**
-     * Renderiza una ruta en el mapa
-     */
     function renderRoute(route, trip) {
         if (!route.geojson || !route.geojson.geometry) {
             return;

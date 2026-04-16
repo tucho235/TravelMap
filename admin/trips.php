@@ -231,6 +231,8 @@ if ($tripTagsEnabled) {
                                     <td>
                                         <?php if ($trip['status'] === 'published'): ?>
                                             <span class="badge badge-success"><?= __('trips.published') ?></span>
+                                        <?php elseif ($trip['status'] === 'planned'): ?>
+                                            <span class="badge badge-info"><?= __('forms.planned') ?></span>
                                         <?php else: ?>
                                             <span class="badge badge-secondary"><?= __('trips.draft') ?></span>
                                         <?php endif; ?>

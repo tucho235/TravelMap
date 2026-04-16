@@ -311,11 +311,12 @@ $form_data = $trip ?? [
                                     name="status">
                                 <option value="draft" <?= $form_data['status'] === 'draft' ? 'selected' : '' ?>><?= __('trips.draft') ?></option>
                                 <option value="published" <?= $form_data['status'] === 'published' ? 'selected' : '' ?>><?= __('trips.published') ?></option>
+                                <option value="planned" <?= $form_data['status'] === 'planned' ? 'selected' : '' ?>><?= __('forms.planned') ?></option>
                             </select>
                             <?php if (isset($errors['status'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['status']) ?></div>
                             <?php endif; ?>
-                            <small class="form-text text-muted"><?= __('trips.status_help') ?></small>
+                            <small class="form-text text-muted"><?= __('forms.public_and_planned_shown') ?></small>
                         </div>
                     </div>
 
@@ -402,6 +403,43 @@ $form_data = $trip ?? [
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php if ($is_edit): ?>
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-lightning me-2" viewBox="0 0 16 16">
+                        <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641z"/>
+                    </svg>
+                    <?= __('trips.quick_actions') ?>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="trip_edit_map.php?id=<?= $trip['id'] ?>" class="btn btn-outline-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-map me-2" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+                        </svg>
+                        <?= __('trips.edit_map') ?>
+                    </a>
+                    <a href="points.php?trip_id=<?= $trip['id'] ?>" class="btn btn-outline-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt me-2" viewBox="0 0 16 16">
+                            <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
+                            <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                        </svg>
+                        <?= __('trips.manage_points') ?>
+                    </a>
+                    <a href="import_exif.php?trip_id=<?= $trip['id'] ?>" class="btn btn-outline-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera me-2" viewBox="0 0 16 16">
+                            <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4z"/>
+                            <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0"/>
+                        </svg>
+                        <?= __('trips.import_exif') ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

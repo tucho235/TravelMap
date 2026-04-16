@@ -860,6 +860,7 @@
      * Check if trip is in the future
      */
     function isFutureTrip(trip) {
+        if (trip.status === 'planned') return true;
         if (!trip.start_date) return false;
         const today = new Date();
         today.setHours(0, 0, 0, 0);

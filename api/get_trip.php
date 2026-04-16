@@ -96,6 +96,7 @@ try {
             'start_date' => $trip['start_date'],
             'end_date' => $trip['end_date'],
             'color' => $trip['color_hex'],
+            'status' => $trip['status'],
             'tags' => $tags,
             'total_distance_meters' => $totalDistance,
             'routes' => $processedRoutes,

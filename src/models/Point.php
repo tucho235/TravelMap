@@ -217,8 +217,6 @@ class Point {
             }
             if (!$date) {
                 $errors['visit_date'] = 'La fecha debe estar en formato YYYY-MM-DD o YYYY-MM-DD HH:MM:SS';
-            } elseif ($date->getTimestamp() > time()) {
-                $errors['visit_date'] = 'No se puede usar una fecha futura';
             }
         }
 
