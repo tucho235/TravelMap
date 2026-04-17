@@ -26,13 +26,11 @@ try {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
-
         if (!isset($_SESSION['public_password_trips'])) {
             http_response_code(403);
             echo json_encode(['success' => false, 'error' => 'Access denied']);
             exit;
         }
-
         $allowedTrips = $_SESSION['public_password_trips'];
     }
 
