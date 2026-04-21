@@ -1,5 +1,58 @@
 # Changelog
 
+## [1.0.251] – 2026-04-17
+- Agregar imagen a rutas/trayectos del viaje
+- Endpoint API `upload_route_image.php` para subir imágenes de rutas
+- Editor de rutas: input drag & drop para subir imagen (mismo sistema que POIs)
+- Popup de rutas en mapa público muestra la imagen si existe
+
+## [1.0.250] – 2026-04-16
+### Fase 1: Flujo del usuario en la carga de viajes
+- Nuevo panel "Acciones Rápidas" en el formulario de edición de viaje con acceso directo al editor de mapa, gestión de POI e importador EXIF
+- Botón "Gestionar Puntos" en el editor de rutas del mapa para navegar a los POI del viaje
+- Botón "Editar en Mapa" en la pantalla de puntos de interés cuando se filtra por viaje
+- Preselección automática del viaje en el importador EXIF al pasar `trip_id` por parámetro
+
+### Fase 2: Viajes planificados (Planned)
+- Nuevo estado "Planned" para viajes: permite planificar viajes futuros
+- Migración 022: agrega estado `planned` al ENUM de `trips.status`
+- API `get_all_data.php` y `get_trip.php` incluyen viajes planificados con campo `status`
+- Viajes planificados se muestran en el mapa con visual diferenciado (color gris, líneas punteadas, opacidad reducida)
+- Fecha de visita en POI ya no es obligatoria (basta con estar asociado a un viaje)
+- Se permite la carga de fechas futuras en los puntos de interés
+- Badge "Planificado" en la lista de viajes del admin
+
+### Fase 3: Editor todo en uno
+- Nuevo botón "Agregar POI" en el editor de mapa para modo de marcado de puntos de interés
+- Modo POI: al activarlo, un clic en el mapa abre un modal para crear un POI con título, tipo, coordenadas, fecha y hora opcionales
+- Click sobre un POI existente en el editor muestra popup con botón para eliminarlo
+- Los POI se guardan directamente vía API (`api/save_poi.php`, `api/delete_poi.php`)
+- Alerta de cambios sin guardar: al navegar fuera del editor con cambios pendientes, se muestra un modal con opciones "Guardar y salir" o "Salir sin guardar"
+- Tecla ESC cancela el modo POI
+- i18n: nuevas claves de traducción en `en.json` y `es.json` para todas las funcionalidades
+
+## [1.0.240.1] – 2026-04-16
+- Control de acceso mejorado: protección de contraseña en index.php y trip.php
+- Admin logueado obtiene acceso directo sin ingresar contraseña
+- Nueva función `check_public_access()` en `includes/public_access.php` para verificación unificada de acceso
+- Función `is_trip_accessible()` para validar acceso a viajes específicos
+- Función `show_public_login_page()` para mostrar página de login con estética consistente
+- Interfaz de contraseña mejorada: mismo container/card/logo y fondo que login.php
+- trip.php ahora protegido: no se puede bypassear conociendo el ID si la contraseña es requerida
+- APIs actualizadas: `get_all_data.php` y `get_trip.php` ahora validan acceso con `check_public_access()`
+- Estilos CSS actualizados: form-label, form-group, alert para formularios de login público
+- Fondo de página de login unificado con gradientes oscuros (consistente con admin login)
+- Fix: Admin con sesión activa ahora obtiene acceso directo a las APIs públicas
+
+## [1.0.240] – 2026-04-16
+- Nuevo sistema de restricción de acceso al sitio público con contraseñas compartidas
+- Modelo `PasswordShare` para gestión de enlaces compartidos con expiración y activación
+- Migración 022: tabla `password_shares` para enlaces compartidos
+- Formulario de compartir en admin (`share_form.php`) con generación de enlaces temporales
+- Página de gestión de usuarios actualizada con opciones de compartir
+- Mejora de seguridad: bloquea accesos a sesiones de contraseñas expiradas o desactivadas
+- API `get_all_data.php` actualizada para verificar acceso compartido
+
 ## [1.0.239] – 2026-04-15
 - Refactor: tabla `links` polimórfica reemplaza a `poi_links` y `route_links`
 - Nuevo modelo `Link` con soporte de `entity_type` (`poi`, `route`, `trip`) y `entity_id`

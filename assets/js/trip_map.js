@@ -16,6 +16,8 @@
     let appConfig = null; // Configuración cargada desde el servidor
     let pendingTransportCallback = null; // Callback para el modal de selección de transporte
     let selectedTransportType = null;    // Tipo elegido en el modal
+    let hasUnsavedChanges = false;        // Track unsaved changes
+    let pendingNavigationUrl = null;      // URL to navigate after save/discard
 
     // SVG icons for transport types
     const transportIcons = {
@@ -60,6 +62,28 @@
         orderedTransportTypes.forEach(function (t) {
             t.label = (typeof transportTypes !== 'undefined' && transportTypes[t.type]) || defaults[t.type];
         });
+    }
+
+    function normalizeRouteImageUrl(path) {
+        if (!path) return '';
+
+        const rawPath = String(path).trim();
+        const base = String(BASE_URL || '').replace(/\/+$/, '');
+
+        if (
+            rawPath.startsWith('http://') ||
+            rawPath.startsWith('https://') ||
+            rawPath.startsWith('data:') ||
+            rawPath.startsWith('blob:')
+        ) {
+            return rawPath;
+        }
+
+        if (rawPath.startsWith('/')) {
+            return base + rawPath;
+        }
+
+        return base + '/' + rawPath.replace(/^\.\//, '');
     }
 
     /**
@@ -464,7 +488,7 @@
                 polygon: false,
                 circle: false,
                 circlemarker: false,
-                marker: false,
+                marker: true,
                 rectangle: false
             },
             edit: {
@@ -486,9 +510,16 @@
     }
 
     /**
-     * Maneja la creación de una nueva ruta
+     * Maneja la creación de una nueva ruta o un marcador POI
      */
     function handleRouteCreated(e) {
+        // If a marker was drawn, treat it as POI creation
+        if (e.layerType === 'marker') {
+            const latlng = e.layer.getLatLng();
+            showCreatePoiModal(latlng.lat, latlng.lng);
+            return;
+        }
+
         const layer = e.layer;
         const distanceMeters = calculateLayerDistance(layer);
 
@@ -505,6 +536,7 @@
             layer.isRoundTrip = false;
             layer.distanceMeters = distanceMeters;
 
+            hasUnsavedChanges = true;
             updateRoutesData();
             console.log('Ruta creada:', transportType, layer.toGeoJSON());
         });
@@ -514,6 +546,7 @@
      * Maneja la edición de rutas
      */
     function handleRoutesEdited(e) {
+        hasUnsavedChanges = true;
         updateRoutesData();
         console.log('Rutas editadas');
     }
@@ -522,6 +555,7 @@
      * Maneja la eliminación de rutas
      */
     function handleRoutesDeleted(e) {
+        hasUnsavedChanges = true;
         updateRoutesData();
         console.log('Rutas eliminadas');
     }
@@ -644,6 +678,7 @@
                 geojson: geojson,
                 name: layer.routeName || '',
                 description: layer.routeDescription || '',
+                image_path: layer.routeImagePath || '',
                 start_datetime: layer.startDatetime || '',
                 end_datetime: layer.endDatetime || '',
                 links: layer.routeLinks || [],
@@ -652,6 +687,7 @@
         });
 
         // Actualizar input hidden (sin las referencias a layers)
+        console.log('Updating routes for save, count:', routesData.length);
         const routesDataForSave = routesData.map(route => ({
             transport_type: route.transport_type,
             color: route.color,
@@ -659,10 +695,12 @@
             geojson: route.geojson,
             name: route.name,
             description: route.description,
+            image_path: route.image_path || '',
             start_datetime: route.start_datetime,
             end_datetime: route.end_datetime,
             links: route.links || []
         }));
+        console.log('routesDataForSave[0] image_path:', routesDataForSave[0].image_path);
         document.getElementById('routes_data').value = JSON.stringify(routesDataForSave);
 
         // Update routes list UI
@@ -703,6 +741,7 @@
                 l.distanceMeters = route.distance_meters;
                 l.routeName = route.name || '';
                 l.routeDescription = route.description || '';
+                l.routeImagePath = route.image_path || '';
                 l.startDatetime = route.start_datetime || '';
                 l.endDatetime = route.end_datetime || '';
                 l.routeLinks = route.links || [];
@@ -726,29 +765,85 @@
         }
 
         existingPoints.forEach(function (point) {
-            // Icono personalizado
-            const icon = L.divIcon({
-                className: 'custom-poi-marker',
-                html: `<div style="background-color: #FF4444; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="6" r="4"/><path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16"/><path d="M12 10L12 18"/></svg></div>`,
-                iconSize: [32, 32],
-                iconAnchor: [16, 16]
-            });
-
-            const marker = L.marker([point.latitude, point.longitude], {
-                icon: icon,
-                title: point.title
-            });
-
-            marker.bindPopup(`
-                <strong>${point.title}</strong><br>
-                <small class="text-muted">${point.type}</small><br>
-                <small>Lat: ${point.latitude}, Lng: ${point.longitude}</small>
-            `);
-
-            pointMarkers.addLayer(marker);
+            addPoiMarker(point);
         });
 
         console.log('Puntos cargados:', existingPoints.length);
+    }
+
+    /**
+     * Adds a POI marker to the map with click-to-delete behavior
+     */
+    function addPoiMarker(point) {
+        const icon = L.divIcon({
+            className: 'custom-poi-marker',
+            html: `<div style="background-color: #FF4444; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="6" r="4"/><path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16"/><path d="M12 10L12 18"/></svg></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+
+        const marker = L.marker([point.latitude, point.longitude], {
+            icon: icon,
+            title: point.title
+        });
+
+        marker.poiData = point;
+
+        marker.bindPopup(`
+            <strong>${point.title}</strong><br>
+            <small class="text-muted">${point.type}</small><br>
+            <small>Lat: ${point.latitude}, Lng: ${point.longitude}</small><br>
+            <button class="btn btn-sm btn-outline-danger mt-2 delete-poi-btn" data-poi-id="${point.id}" style="font-size: 11px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                </svg>
+                ${__('common.delete')}
+            </button>
+        `);
+
+        marker.on('popupopen', function () {
+            setTimeout(function () {
+                const btn = document.querySelector('.delete-poi-btn[data-poi-id="' + point.id + '"]');
+                if (btn) {
+                    btn.addEventListener('click', function () {
+                        deletePoi(point.id, marker);
+                    });
+                }
+            }, 100);
+        });
+
+        pointMarkers.addLayer(marker);
+        return marker;
+    }
+
+    /**
+     * Deletes a POI via API and removes its marker
+     */
+    function deletePoi(poiId, marker) {
+        if (!confirm(__('map.poi_delete_confirm'))) return;
+
+        $.ajax({
+            url: BASE_URL + '/api/delete_poi.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ id: poiId }),
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    pointMarkers.removeLayer(marker);
+                    // Remove from existingPoints array
+                    const idx = existingPoints.findIndex(p => p.id === poiId);
+                    if (idx > -1) existingPoints.splice(idx, 1);
+                    console.log('POI deleted:', poiId);
+                } else {
+                    alert(response.error || __('map.poi_error_saving'));
+                }
+            },
+            error: function () {
+                alert(__('map.poi_error_saving'));
+            }
+        });
     }
 
     /**
@@ -970,6 +1065,12 @@
             // Renderizar leyenda con colores configurados
             renderLegend();
 
+            // Inicializar POI mode
+            initPoiMode();
+
+            // Inicializar unsaved changes warning
+            initUnsavedChangesWarning();
+
             // Configurar event handlers
             setupEventHandlers();
         });
@@ -979,9 +1080,6 @@
      * Configuración de event handlers
      */
     function setupEventHandlers() {
-        // Evento para limpiar todas las rutas
-        $('#clearAllRoutes').on('click', clearAllRoutes);
-
         // Evento para el formulario
         $('#routesForm').on('submit', handleFormSubmit);
 
@@ -1007,6 +1105,299 @@
         });
 
         console.log('Trip Map Editor inicializado');
+    }
+
+    // =============================================
+    // POI Creation (via native Leaflet Draw marker)
+    // =============================================
+
+    /**
+     * Initialize POI modal in DOM
+     */
+    function initPoiMode() {
+        // Create the POI modal in DOM
+        initCreatePoiModal();
+    }
+
+    /**
+     * Creates the POI creation modal HTML
+     */
+    function initCreatePoiModal() {
+        if ($('#createPoiModal').length > 0) return;
+
+        // Build POI type options
+        const types = (typeof poiTypes !== 'undefined') ? poiTypes : { visit: 'Visit', stay: 'Stay', food: 'Food' };
+        let typeOptionsHtml = '';
+        Object.keys(types).forEach(function (key) {
+            typeOptionsHtml += `<option value="${key}">${types[key]}</option>`;
+        });
+
+        const modalHtml = `
+        <div class="modal fade" id="createPoiModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-geo-alt me-2" viewBox="0 0 16 16">
+                                <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
+                                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                            </svg>
+                            ${__('map.create_poi')}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="poiTitle" class="form-label">${__('map.poi_title')} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="poiTitle" maxlength="200" placeholder="${__('map.poi_title_placeholder')}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="poiType" class="form-label">${__('map.poi_type')}</label>
+                            <select class="form-select" id="poiType">
+                                ${typeOptionsHtml}
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">${__('points.latitude')}</label>
+                                <input type="text" class="form-control form-control-sm" id="poiLat" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">${__('points.longitude')}</label>
+                                <input type="text" class="form-control form-control-sm" id="poiLng" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="poiDate" class="form-label">${__('map.poi_date')}</label>
+                                <input type="date" class="form-control" id="poiDate">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="poiTime" class="form-label">${__('map.poi_time')}</label>
+                                <input type="time" class="form-control" id="poiTime">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${__('common.cancel')}</button>
+                        <button type="button" class="btn btn-primary" id="savePoiBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg me-1" viewBox="0 0 16 16">
+                                <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                            </svg>
+                            ${__('common.save')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        $('body').append(modalHtml);
+
+        // Save POI button handler
+        $('#savePoiBtn').on('click', function () {
+            savePoiFromModal();
+        });
+
+        // Enter key in title field triggers save
+        $('#poiTitle').on('keypress', function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                savePoiFromModal();
+            }
+        });
+    }
+
+    /**
+     * Opens the POI creation modal with pre-filled coordinates
+     */
+    function showCreatePoiModal(lat, lng) {
+        $('#poiTitle').val('');
+        $('#poiType').val('visit');
+        $('#poiLat').val(lat.toFixed(6));
+        $('#poiLng').val(lng.toFixed(6));
+        $('#poiDate').val('');
+        $('#poiTime').val('');
+
+        const modal = new bootstrap.Modal($('#createPoiModal')[0]);
+        modal.show();
+
+        // Focus title field when modal is shown
+        $('#createPoiModal').one('shown.bs.modal', function () {
+            $('#poiTitle').focus();
+        });
+    }
+
+    /**
+     * Saves a POI from the modal form via API
+     */
+    function savePoiFromModal() {
+        const title = $('#poiTitle').val().trim();
+        if (!title) {
+            $('#poiTitle').addClass('is-invalid');
+            return;
+        }
+        $('#poiTitle').removeClass('is-invalid');
+
+        const data = {
+            trip_id: tripId,
+            title: title,
+            type: $('#poiType').val(),
+            latitude: parseFloat($('#poiLat').val()),
+            longitude: parseFloat($('#poiLng').val()),
+            visit_date: $('#poiDate').val() || null,
+            visit_time: $('#poiTime').val() || null
+        };
+
+        $('#savePoiBtn').prop('disabled', true);
+
+        $.ajax({
+            url: BASE_URL + '/api/save_poi.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            success: function (response) {
+                if (response.success && response.point) {
+                    // Add marker to map
+                    addPoiMarker(response.point);
+                    existingPoints.push(response.point);
+
+                    // Close modal
+                    bootstrap.Modal.getInstance($('#createPoiModal')[0]).hide();
+
+                    console.log('POI saved:', response.point);
+                } else {
+                    const errors = response.errors || {};
+                    const errorMsg = Object.values(errors).join(', ') || response.error || __('map.poi_error_saving');
+                    alert(errorMsg);
+                }
+            },
+            error: function () {
+                alert(__('map.poi_error_saving'));
+            },
+            complete: function () {
+                $('#savePoiBtn').prop('disabled', false);
+            }
+        });
+    }
+
+    // =============================================
+    // Unsaved Changes Warning
+    // =============================================
+
+    /**
+     * Initializes the unsaved changes warning system
+     */
+    function initUnsavedChangesWarning() {
+        // Browser beforeunload event
+        window.addEventListener('beforeunload', function (e) {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Intercept all navigation links on the page
+        $(document).on('click', 'a[href]', function (e) {
+            if (!hasUnsavedChanges) return;
+
+            const href = $(this).attr('href');
+            // Ignore anchors, javascript, and empty hrefs
+            if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+            e.preventDefault();
+            pendingNavigationUrl = href;
+            showUnsavedChangesModal();
+        });
+
+        // Create modal
+        initUnsavedChangesModal();
+
+        // Mark changes as saved after successful form submit
+        $('#routesForm').on('submit', function () {
+            hasUnsavedChanges = false;
+        });
+    }
+
+    /**
+     * Creates the unsaved changes modal
+     */
+    function initUnsavedChangesModal() {
+        if ($('#unsavedChangesModal').length > 0) return;
+
+        const modalHtml = `
+        <div class="modal fade" id="unsavedChangesModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-exclamation-triangle me-2" viewBox="0 0 16 16">
+                                <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
+                                <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                            </svg>
+                            ${__('map.unsaved_changes_title')}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${__('map.unsaved_changes_message')}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" id="leaveWithoutSavingBtn">
+                            ${__('map.leave_without_saving')}
+                        </button>
+                        <button type="button" class="btn btn-primary" id="saveAndLeaveBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg me-1" viewBox="0 0 16 16">
+                                <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                            </svg>
+                            ${__('map.save_and_leave')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        $('body').append(modalHtml);
+
+        // "Leave without saving" button
+        $('#leaveWithoutSavingBtn').on('click', function () {
+            hasUnsavedChanges = false;
+            bootstrap.Modal.getInstance($('#unsavedChangesModal')[0]).hide();
+            if (pendingNavigationUrl) {
+                window.location.href = pendingNavigationUrl;
+            }
+        });
+
+        // "Save & Leave" button — submit the routes form, then navigate
+        $('#saveAndLeaveBtn').on('click', function () {
+            // Update routes data
+            updateRoutesData();
+            hasUnsavedChanges = false;
+
+            // Submit form via AJAX so we can redirect after
+            const formData = new FormData($('#routesForm')[0]);
+
+            $.ajax({
+                url: $('#routesForm').attr('action') || window.location.href,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                complete: function () {
+                    bootstrap.Modal.getInstance($('#unsavedChangesModal')[0]).hide();
+                    if (pendingNavigationUrl) {
+                        window.location.href = pendingNavigationUrl;
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Shows the unsaved changes confirmation modal
+     */
+    function showUnsavedChangesModal() {
+        new bootstrap.Modal($('#unsavedChangesModal')[0]).show();
     }
 
     /**
@@ -1060,6 +1451,19 @@
                             <div class="mb-3">
                                 <label class="form-label">${__('routes.description') || 'Descripción'}</label>
                                 <textarea class="form-control" id="routeDescInput" rows="3" placeholder="${__('routes.description_placeholder') || 'Notas sobre esta ruta...'}"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">${__('routes.image') || 'Imagen'}</label>
+                                <div class="border rounded p-3 text-center" id="routeImageDropArea" style="cursor: pointer;">
+                                    <input type="file" id="routeImageInput" accept="image/jpeg,image/png,image/jpg,image/gif" style="display: none;">
+                                    <img id="routeImagePreview" src="" alt="" class="img-thumbnail mb-2" style="max-width: 100%; max-height: 200px; display: none;">
+                                    <div id="routeImagePlaceholder">
+                                        <p class="mb-1">${__('routes.drag_drop_image') || 'Arrastra una imagen o haz clic para seleccionar'}</p>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="routeSelectImageBtn">${__('routes.select_image') || 'Seleccionar'}</button>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-danger btn-sm mt-2" id="routeRemoveImageBtn" style="display: none;">${__('routes.remove_image') || 'Quitar imagen'}</button>
+                                </div>
+                                <input type="hidden" id="routeImagePath" value="">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">${__('routes.external_links') || 'Links Externos'}</label>
@@ -1143,6 +1547,21 @@
                 });
             }
             
+            // Cargar imagen
+            const routeImagePath = route.image_path || route.imageUrl || '';
+            const routeImagePreviewUrl = normalizeRouteImageUrl(routeImagePath);
+            console.log('Loading route image, path:', routeImagePath, 'route id:', route.id);
+            $('#routeImagePath').val(routeImagePath);
+            if (routeImagePath) {
+                $('#routeImagePreview').attr('src', routeImagePreviewUrl).show();
+                $('#routeImagePlaceholder').hide();
+                $('#routeRemoveImageBtn').show();
+            } else {
+                $('#routeImagePreview').attr('src', '').hide();
+                $('#routeImagePlaceholder').show();
+                $('#routeRemoveImageBtn').hide();
+            }
+            
             const modal = new bootstrap.Modal($('#routeEditModal'));
             modal.show();
         });
@@ -1162,6 +1581,8 @@
                 route.end_datetime   = buildDatetime('#routeEndDateInput',   '#routeEndTimeInput');
                 route.name = $('#routeNameInput').val();
                 route.description = $('#routeDescInput').val();
+                route.image_path = $('#routeImagePath').val();
+                console.log('Saving route image_path:', route.image_path, 'route id:', route.id);
                 
                 // Recolectar links
                 route.links = [];
@@ -1181,6 +1602,7 @@
                 if (route.layer) {
                     route.layer.routeName = route.name;
                     route.layer.routeDescription = route.description;
+                    route.layer.routeImagePath = route.image_path;
                     route.layer.startDatetime = route.start_datetime;
                     route.layer.endDatetime = route.end_datetime;
                     route.layer.routeLinks = route.links;
@@ -1188,6 +1610,129 @@
                 updateRoutesData();
                 bootstrap.Modal.getInstance($('#routeEditModal')).hide();
             }
+        });
+
+        // Route image upload handling via AJAX
+        const handleRouteImage = function(file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                alert('Formato de imagen no válido. Usa JPEG, PNG o GIF.');
+                return;
+            }
+            
+            // Upload via AJAX
+            $('#routeImagePlaceholder').html('<p class="mb-0 text-muted">Subiendo...</p>');
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            console.log('Uploading to:', BASE_URL + '/api/upload_route_image.php');
+            
+            $.ajax({
+                url: BASE_URL + '/api/upload_route_image.php',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('Upload response:', response);
+                    if (response.success) {
+                        $('#routeImagePath').val(response.path);
+                        $('#routeImagePreview').attr('src', normalizeRouteImageUrl(response.url || response.path)).show();
+                        $('#routeImagePlaceholder').hide();
+                        $('#routeRemoveImageBtn').show();
+                    } else {
+                        alert(response.error || 'Error al subir imagen');
+                        resetImagePlaceholder();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Upload error:', xhr.status, status, error);
+                    console.log('Response text:', xhr.responseText);
+                    let errorMsg = 'Error de conexión: ' + status;
+                    if (xhr.status === 401) {
+                        errorMsg = 'No autorizado. Debes iniciar sesión.';
+                    } else if (xhr.status === 400) {
+                        try {
+                            const resp = JSON.parse(xhr.responseText);
+                            console.log('Error response JSON:', resp);
+                            errorMsg = resp.error || errorMsg;
+                        } catch(e) {
+                            console.log('Could not parse response:', xhr.responseText);
+                        }
+                    }
+                    alert(errorMsg);
+                    resetImagePlaceholder();
+                }
+            });
+        };
+        
+        const openRouteImagePicker = function() {
+            const input = document.getElementById('routeImageInput');
+            if (input) {
+                input.click();
+            }
+        };
+
+const resetImagePlaceholder = function() {
+            const dragDropText = 'Arrastra una imagen o haz clic para seleccionar';
+            const selectBtnText = 'Seleccionar';
+            $('#routeImagePlaceholder').html(
+                '<p class="mb-1">' + dragDropText + '</p>' +
+                '<button type="button" class="btn btn-outline-secondary btn-sm" onclick="$(\'#routeImageInput\').click()">' + 
+                selectBtnText + '</button>'
+            );
+        };
+
+        $('#routeImageDropArea').on('dragenter dragover', function(e) {
+            e.preventDefault();
+            $(this).css({'border-color': '#0d6efd', 'background-color': '#f8f9fa'});
+        });
+        
+        $('#routeImageDropArea').on('dragleave drop', function(e) {
+            e.preventDefault();
+            $(this).css({'border-color': '#6c757d', 'background-color': '#fff'});
+        });
+        
+        $('#routeImageDropArea').on('drop', function(e) {
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                handleRouteImage(files[0]);
+            }
+        });
+
+        $(document).on('change', '#routeImageInput', function(e) {
+            const files = e.target && e.target.files ? e.target.files : [];
+            if (files.length > 0) {
+                handleRouteImage(files[0]);
+            }
+        });
+
+        $('#routeImageDropArea').on('click', function(e) {
+            if (
+                $(e.target).is('#routeImageInput') ||
+                $(e.target).closest('#routeImageInput').length ||
+                $(e.target).closest('#routeRemoveImageBtn').length ||
+                $(e.target).closest('#routeImagePreview').length ||
+                $(e.target).closest('#routeSelectImageBtn').length
+            ) {
+                return;
+            }
+
+            openRouteImagePicker();
+        });
+        
+        $(document).on('click', '#routeSelectImageBtn', function(e) {
+            e.stopPropagation();
+            openRouteImagePicker();
+        });
+
+        $('#routeRemoveImageBtn').on('click', function() {
+            $('#routeImageInput').val('');
+            $('#routeImagePath').val('');
+            $('#routeImagePreview').attr('src', '').hide();
+            $('#routeImagePlaceholder').show();
+            $('#routeRemoveImageBtn').hide();
         });
     }
 

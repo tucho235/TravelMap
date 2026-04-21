@@ -2,14 +2,31 @@
 // Cargar configuración para las constantes
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/version.php';
+require_once __DIR__ . '/includes/public_access.php';
 
 // Load settings to get map renderer preference
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/src/models/Settings.php';
+
 $settingsModel = new Settings(getDB());
 $mapRenderer = $settingsModel->get('map_renderer', 'maplibre');
 $showFooterNote = $settingsModel->get('show_footer_note', true);
 $footerNoteText = $settingsModel->get('footer_note_text', '');
+
+// Verificar acceso al sitio público (con contraseña si es requerido)
+$accessInfo = check_public_access();
+$allowedTrips = $accessInfo['trips'];
+
+if (!$accessInfo['access']) {
+    // Mostrar página de login
+    show_public_login_page(SITE_TITLE, $version, $accessInfo['error'] ?? null);
+    exit;
+}
+
+// Admin o acceso con contraseña válido - continuar cargando el sitio
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= current_lang() ?>">

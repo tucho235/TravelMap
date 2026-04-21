@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS trips (
     start_date DATE,
     end_date DATE,
     color_hex VARCHAR(7) DEFAULT '#3388ff',
-    status ENUM('draft', 'published') DEFAULT 'draft',
+    status ENUM('draft', 'published', 'planned') DEFAULT 'draft',
     show_routes_in_timeline TINYINT(1) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -205,6 +205,22 @@ CREATE TABLE IF NOT EXISTS links (
     sort_order  TINYINT UNSIGNED NOT NULL DEFAULT 0,
     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_entity (entity_type, entity_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- Tabla: password_shares
+-- Descripción: Contraseñas temporales para compartir acceso al mapa público
+-- ============================================
+CREATE TABLE IF NOT EXISTS password_shares (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    password    VARCHAR(255) NOT NULL UNIQUE,
+    trips       VARCHAR(1000) NOT NULL COMMENT 'Lista de IDs de viajes separados por coma, o * para todos',
+    description VARCHAR(100) NULL DEFAULT NULL COMMENT 'Descripción opcional de uso de la contraseña',
+    created_at  DATE NOT NULL DEFAULT (CURRENT_DATE),
+    expires_at  DATE NULL DEFAULT NULL,
+    active      BOOLEAN NOT NULL DEFAULT TRUE,
+    INDEX idx_expires_at (expires_at),
+    INDEX idx_active (active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================

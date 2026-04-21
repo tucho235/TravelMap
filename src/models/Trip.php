@@ -299,8 +299,8 @@ class Trip {
         }
 
         // Validar status
-        if (!empty($data['status']) && !in_array($data['status'], ['draft', 'published'])) {
-            $errors['status'] = 'El estado debe ser "draft" o "published"';
+        if (!empty($data['status']) && !in_array($data['status'], ['draft', 'published', 'planned'])) {
+            $errors['status'] = 'El estado debe ser "draft", "published" o "planned"';
         }
 
         return $errors;

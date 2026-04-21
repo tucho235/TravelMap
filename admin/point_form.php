@@ -85,11 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Validar fecha de visita (requerida a nivel de formulario)
-    if (empty($visit_date_date)) {
-        $errors['visit_date'] = __('points.visit_date_required');
-    }
-
     if (empty($errors)) {
         // Preparar links enviados en el formulario
         $submitted_links = [];
@@ -283,15 +278,14 @@ $existing_links = ($is_edit && $point) ? $poiLinkModel->getByPoiId($point['id'])
                             <?php endif; ?>
                         </div>
 
-                        <!-- Fecha de visita (requerida) — Issue #48 -->
+                        <!-- Fecha de visita (opcional) -->
                         <div class="col-md-4 mb-3">
-                            <label for="visit_date_date" class="form-label"><?= __('points.visit_date_date') ?> <span class="text-danger">*</span></label>
+                            <label for="visit_date_date" class="form-label"><?= __('points.visit_date_date') ?></label>
                             <input type="date" 
                                    class="form-control <?= isset($errors['visit_date']) ? 'is-invalid' : '' ?>" 
                                    id="visit_date_date" 
                                    name="visit_date_date" 
-                                   value="<?= !empty($form_data['visit_date']) ? htmlspecialchars(substr($form_data['visit_date'], 0, 10)) : '' ?>"
-                                   required>
+                                   value="<?= !empty($form_data['visit_date']) ? htmlspecialchars(substr($form_data['visit_date'], 0, 10)) : '' ?>">
                             <?php if (isset($errors['visit_date'])): ?>
                                 <div class="invalid-feedback"><?= htmlspecialchars($errors['visit_date']) ?></div>
                             <?php endif; ?>

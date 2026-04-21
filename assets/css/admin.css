@@ -1817,3 +1817,54 @@ html.sidebar-collapsed .sidebar-user-link {
         margin-left: 0 !important;
     }
 }
+
+/* ========== Leaflet Draw Toolbar Enhancements ========== */
+
+/* Enlarge all Leaflet Draw toolbar buttons */
+.leaflet-draw-toolbar a {
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    background-size: 360px 36px;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-polyline {
+    background-position: -2px -2px;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-edit-edit {
+    background-position: -182px -2px;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-edit-remove {
+    background-position: -218px -2px;
+}
+
+/* Replace native marker spritesheet icon with POI SVG icon */
+.leaflet-draw-toolbar .leaflet-draw-draw-marker {
+    background-image: none !important;
+    position: relative;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-marker::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='%23198754' viewBox='0 0 16 16'%3E%3Cpath d='M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10'/%3E%3Cpath d='M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+/* Leaflet Draw action menus - adjust left offset for larger buttons */
+.leaflet-draw-actions {
+    left: 36px;
+}
+
+.leaflet-right .leaflet-draw-actions {
+    right: 36px;
+    left: auto;
+}
