@@ -1,7 +1,7 @@
 <?php
 /**
  * MCP Tools: Routes
- * list_routes, create_route
+ * plan_route, commit_route, create_route, update_route
  */
 
 final class RouteTools
@@ -10,14 +10,38 @@ final class RouteTools
 
     public static function register(Dispatcher $d): void
     {
-        $d->register('list_routes', 'Lista las rutas de un viaje.', [
+        $d->register('plan_route',
+            'Calcula una ruta terrestre entre dos puntos usando BRouter (brouter.de). ' .
+            'Guarda el resultado en un archivo temporal server-side y devuelve SOLO metadata liviana ' .
+            '(distancia, duración, temp_path). Usa commit_route con ese temp_path para guardar la ruta en la BD. ' .
+            'Tipos soportados: car, bike, walk, train, bus. ' .
+            'NO soporta: plane, ship, aerial (trayectos no terrestres).',
+        [
             'type'       => 'object',
-            'required'   => ['trip_id'],
+            'required'   => ['from_lat', 'from_lon', 'to_lat', 'to_lon', 'transport_type'],
             'properties' => [
-                'trip_id' => ['type' => 'integer', 'minimum' => 1],
+                'from_lat'       => ['type' => 'number', 'minimum' => -90,  'maximum' => 90,  'description' => 'Latitud del punto de origen.'],
+                'from_lon'       => ['type' => 'number', 'minimum' => -180, 'maximum' => 180, 'description' => 'Longitud del punto de origen.'],
+                'to_lat'         => ['type' => 'number', 'minimum' => -90,  'maximum' => 90,  'description' => 'Latitud del punto de destino.'],
+                'to_lon'         => ['type' => 'number', 'minimum' => -180, 'maximum' => 180, 'description' => 'Longitud del punto de destino.'],
+                'transport_type' => ['type' => 'string', 'enum' => ['car', 'bike', 'walk', 'train', 'bus']],
+                'via' => [
+                    'type'        => 'array',
+                    'maxItems'    => 8,
+                    'description' => 'Waypoints intermedios por los que debe pasar la ruta (opcional).',
+                    'items' => [
+                        'type'       => 'object',
+                        'required'   => ['lat', 'lon'],
+                        'properties' => [
+                            'lat' => ['type' => 'number', 'minimum' => -90,  'maximum' => 90],
+                            'lon' => ['type' => 'number', 'minimum' => -180, 'maximum' => 180],
+                        ],
+                        'additionalProperties' => false,
+                    ],
+                ],
             ],
             'additionalProperties' => false,
-        ], [self::class, 'listRoutes']);
+        ], [self::class, 'planRoute']);
 
         $d->register('create_route',
             'Crea una ruta para un viaje. Proporciona EXACTAMENTE UNA fuente de geometría: ' .
@@ -32,9 +56,9 @@ final class RouteTools
                 'name'               => ['type' => 'string', 'maxLength' => 200],
                 'description'        => ['type' => 'string', 'maxLength' => 5000],
                 'is_round_trip'      => ['type' => 'boolean'],
-                'color'              => ['type' => 'string', 'pattern' => '/^#[0-9A-Fa-f]{6}$/'],
-                'start_datetime'     => ['type' => 'string'],
-                'end_datetime'       => ['type' => 'string'],
+                'color'              => ['type' => 'string', 'pattern' => '^#[0-9A-Fa-f]{6}$', 'description' => 'Color de la ruta en hexadecimal CSS. Ejemplo: "#e63946". Por defecto "#3388ff".'],
+                'start_datetime'     => ['type' => 'string', 'description' => 'Fecha y hora de inicio. Formato "YYYY-MM-DD HH:MM:SS". También acepta solo fecha "YYYY-MM-DD". Ejemplo: "2024-07-15 09:30:00".'],
+                'end_datetime'       => ['type' => 'string', 'description' => 'Fecha y hora de fin. Formato "YYYY-MM-DD HH:MM:SS". También acepta solo fecha "YYYY-MM-DD". Ejemplo: "2024-07-15 18:00:00".'],
                 'geojson_data'       => ['type' => 'string', 'maxLength' => 5000000],
                 'brouter_csv_text'   => ['type' => 'string', 'maxLength' => 5242880],
                 'brouter_csv_base64' => ['type' => 'string', 'maxLength' => 7340032],
@@ -47,7 +71,7 @@ final class RouteTools
                         'properties' => [
                             'url'       => ['type' => 'string', 'maxLength' => 500],
                             'label'     => ['type' => 'string', 'maxLength' => 100],
-                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Tipo de enlace. Valores: "website", "google_maps", "instagram", "facebook", "twitter", "tripadvisor", "booking", "airbnb", "youtube", "wikipedia", "google_photos", "other" (default).'],
                         ],
                         'additionalProperties' => false,
                     ],
@@ -55,6 +79,42 @@ final class RouteTools
             ],
             'additionalProperties' => false,
         ], [self::class, 'createRoute']);
+
+        $d->register('commit_route',
+            'Guarda en la BD una ruta calculada previamente con plan_route. ' .
+            'Lee el GeoJSON del archivo temporal server-side (temp_path devuelto por plan_route) ' .
+            'y crea la ruta directamente sin pasar las coordenadas por el contexto. ' .
+            'El archivo temporal se elimina automáticamente tras el commit.',
+        [
+            'type'       => 'object',
+            'required'   => ['trip_id', 'temp_path', 'transport_type'],
+            'properties' => [
+                'trip_id'        => ['type' => 'integer', 'minimum' => 1],
+                'temp_path'      => ['type' => 'string', 'description' => 'Valor de temp_path devuelto por plan_route.'],
+                'transport_type' => ['type' => 'string', 'enum' => self::ALLOWED_TRANSPORT],
+                'name'           => ['type' => 'string', 'maxLength' => 200],
+                'description'    => ['type' => 'string', 'maxLength' => 5000],
+                'is_round_trip'  => ['type' => 'boolean'],
+                'color'          => ['type' => 'string', 'pattern' => '^#[0-9A-Fa-f]{6}$', 'description' => 'Color de la ruta en hexadecimal CSS. Ejemplo: "#e63946". Por defecto "#3388ff".'],
+                'start_datetime' => ['type' => 'string', 'description' => 'Fecha y hora de inicio. Formato "YYYY-MM-DD HH:MM:SS". También acepta solo fecha "YYYY-MM-DD". Ejemplo: "2024-07-15 09:30:00".'],
+                'end_datetime'   => ['type' => 'string', 'description' => 'Fecha y hora de fin. Formato "YYYY-MM-DD HH:MM:SS". También acepta solo fecha "YYYY-MM-DD". Ejemplo: "2024-07-15 18:00:00".'],
+                'links' => [
+                    'type'     => 'array',
+                    'maxItems' => 10,
+                    'items'    => [
+                        'type'       => 'object',
+                        'required'   => ['url'],
+                        'properties' => [
+                            'url'       => ['type' => 'string', 'maxLength' => 500],
+                            'label'     => ['type' => 'string', 'maxLength' => 100],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Tipo de enlace. Valores: "website", "google_maps", "instagram", "facebook", "twitter", "tripadvisor", "booking", "airbnb", "youtube", "wikipedia", "google_photos", "other" (default).'],
+                        ],
+                        'additionalProperties' => false,
+                    ],
+                ],
+            ],
+            'additionalProperties' => false,
+        ], [self::class, 'commitRoute']);
 
         $d->register('update_route',
             'Actualiza los metadatos de una ruta existente. Solo se modifican los campos proporcionados. ' .
@@ -68,10 +128,10 @@ final class RouteTools
                 'name'           => ['type' => 'string', 'maxLength' => 200],
                 'description'    => ['type' => 'string', 'maxLength' => 5000],
                 'transport_type' => ['type' => 'string', 'enum' => self::ALLOWED_TRANSPORT],
-                'color'          => ['type' => 'string', 'pattern' => '/^#[0-9A-Fa-f]{6}$/'],
+                'color'          => ['type' => 'string', 'pattern' => '^#[0-9A-Fa-f]{6}$', 'description' => 'Color de la ruta en hexadecimal CSS. Ejemplo: "#e63946". Por defecto "#3388ff".'],
                 'is_round_trip'  => ['type' => 'boolean'],
-                'start_datetime' => ['type' => 'string'],
-                'end_datetime'   => ['type' => 'string'],
+                'start_datetime' => ['type' => 'string', 'description' => 'Fecha y hora de inicio. Formato "YYYY-MM-DD HH:MM:SS". También acepta solo fecha "YYYY-MM-DD". Ejemplo: "2024-07-15 09:30:00".'],
+                'end_datetime'   => ['type' => 'string', 'description' => 'Fecha y hora de fin. Formato "YYYY-MM-DD HH:MM:SS". También acepta solo fecha "YYYY-MM-DD". Ejemplo: "2024-07-15 18:00:00".'],
                 'links' => [
                     'type'     => 'array',
                     'maxItems' => 10,
@@ -81,7 +141,7 @@ final class RouteTools
                         'properties' => [
                             'url'       => ['type' => 'string', 'maxLength' => 500],
                             'label'     => ['type' => 'string', 'maxLength' => 100],
-                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Tipo de enlace. Valores: "website", "google_maps", "instagram", "facebook", "twitter", "tripadvisor", "booking", "airbnb", "youtube", "wikipedia", "google_photos", "other" (default).'],
                         ],
                         'additionalProperties' => false,
                     ],
@@ -92,33 +152,6 @@ final class RouteTools
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-
-    public static function listRoutes(array $p): array
-    {
-        $tripId = (int)$p['trip_id'];
-        self::assertTripExists($tripId);
-
-        $routeModel = new Route();
-        $rows       = $routeModel->getByTripId($tripId);
-
-        $routes = [];
-        foreach ($rows as $r) {
-            $routes[] = [
-                'id'              => (int)$r['id'],
-                'name'            => $r['name'],
-                'transport_type'  => $r['transport_type'],
-                'distance_meters' => (int)$r['distance_meters'],
-                'distance_km'     => round((int)$r['distance_meters'] / 1000, 2),
-                'is_round_trip'   => (bool)$r['is_round_trip'],
-                'start_datetime'  => $r['start_datetime'] ?? null,
-                'end_datetime'    => $r['end_datetime']   ?? null,
-                'color'           => $r['color'],
-                'description'     => $r['description'],
-            ];
-        }
-
-        return ['routes' => $routes, 'count' => count($routes)];
-    }
 
     public static function createRoute(array $p): array
     {
@@ -283,6 +316,7 @@ final class RouteTools
         }
 
         $updated = $routeModel->getById($id);
+        $updLinks = (new Link())->getByEntity('route', $id);
         McpLogger::info('update_route OK', ['id' => $id]);
 
         return [
@@ -291,6 +325,133 @@ final class RouteTools
             'transport_type'  => $updated['transport_type'],
             'distance_meters' => (int)$updated['distance_meters'],
             'distance_km'     => round((int)$updated['distance_meters'] / 1000, 2),
+            'links'           => array_map(fn($l) => ['url' => $l['url'], 'label' => $l['label'], 'link_type' => $l['link_type']], $updLinks),
+            'admin_url'       => '/admin/route_form.php?id=' . $id,
+        ];
+    }
+
+    public static function planRoute(array $p): array
+    {
+        $via = [];
+        foreach ($p['via'] ?? [] as $wp) {
+            $via[] = ['lat' => (float)$wp['lat'], 'lon' => (float)$wp['lon']];
+        }
+
+        $result = BRouterClient::planRoute(
+            fromLat:       (float)$p['from_lat'],
+            fromLon:       (float)$p['from_lon'],
+            toLat:         (float)$p['to_lat'],
+            toLon:         (float)$p['to_lon'],
+            via:           $via,
+            transportType: $p['transport_type']
+        );
+
+        if (!$result['success']) {
+            throw new ToolException($result['error'], 'BROUTER_ERROR');
+        }
+
+        // Guardar GeoJSON en disco — no pasa por el contexto de Claude
+        $tempDir = ROOT_PATH . '/uploads/mcp_temp';
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0750, true);
+        }
+        $tempFilename = 'route_' . uniqid('', true) . '.geojson';
+        $tempAbsPath  = $tempDir . '/' . $tempFilename;
+        $tempRelPath  = 'uploads/mcp_temp/' . $tempFilename;
+
+        if (file_put_contents($tempAbsPath, $result['geojson_data']) === false) {
+            throw new ToolException('No se pudo guardar el archivo temporal de ruta', 'SERVER_ERROR');
+        }
+
+        McpLogger::info('plan_route OK', [
+            'transport' => $p['transport_type'],
+            'profile'   => $result['profile'],
+            'dist_km'   => $result['distance_km'],
+            'duration'  => $result['duration_min'],
+            'waypoints' => $result['waypoints_count'],
+            'temp'      => $tempRelPath,
+        ]);
+
+        return [
+            'temp_path'       => $tempRelPath,
+            'distance_km'     => $result['distance_km'],
+            'distance_meters' => $result['distance_meters'],
+            'duration_min'    => $result['duration_min'],
+            'waypoints_count' => $result['waypoints_count'],
+            'profile'         => $result['profile'],
+            'transport_type'  => $p['transport_type'],
+            'start'           => $result['start'],
+            'end'             => $result['end'],
+            'bbox'            => $result['bbox'],
+            'hint'            => 'Usa commit_route con trip_id y temp_path para guardar la ruta en la BD.',
+        ];
+    }
+
+    public static function commitRoute(array $p): array
+    {
+        $tripId      = (int)$p['trip_id'];
+        $tempRelPath = $p['temp_path'];
+
+        // Validar que temp_path esté dentro de mcp_temp (evitar path traversal)
+        $tempDir  = realpath(ROOT_PATH . '/uploads/mcp_temp');
+        $absPath  = realpath(ROOT_PATH . '/' . $tempRelPath);
+        if ($absPath === false || $tempDir === false || !str_starts_with($absPath, $tempDir . '/')) {
+            throw new ToolException('temp_path inválido o fuera del directorio permitido', 'INVALID_PATH', -32602);
+        }
+        if (!file_exists($absPath)) {
+            throw new ToolException('El archivo temporal no existe. Vuelve a ejecutar plan_route.', 'TEMP_NOT_FOUND');
+        }
+
+        $geojsonData = file_get_contents($absPath);
+        if ($geojsonData === false) {
+            throw new ToolException('No se pudo leer el archivo temporal', 'READ_ERROR');
+        }
+
+        self::assertTripExists($tripId);
+
+        $data = [
+            'trip_id'        => $tripId,
+            'transport_type' => $p['transport_type'],
+            'geojson_data'   => $geojsonData,
+            'is_round_trip'  => isset($p['is_round_trip']) ? (int)(bool)$p['is_round_trip'] : 0,
+            'name'           => $p['name']           ?? null,
+            'description'    => $p['description']    ?? null,
+            'color'          => $p['color']          ?? null,
+            'start_datetime' => $p['start_datetime'] ?? null,
+            'end_datetime'   => $p['end_datetime']   ?? null,
+        ];
+
+        $routeModel = new Route();
+        $id = $routeModel->create($data);
+
+        @unlink($absPath);
+
+        if (!$id) {
+            throw new ToolException('No se pudo crear la ruta en la base de datos', 'DB_ERROR');
+        }
+
+        if (!empty($p['links'])) {
+            $linkModel = new Link();
+            $links = array_map(fn($l) => [
+                'link_type' => $l['link_type'] ?? 'other',
+                'url'       => $l['url'],
+                'label'     => $l['label'] ?? null,
+            ], $p['links']);
+            $linkModel->replaceForRoute((int)$id, $links);
+        }
+
+        $created = $routeModel->getById((int)$id);
+        $distanceMeters = $created ? (int)$created['distance_meters'] : 0;
+
+        McpLogger::info('commit_route OK', ['id' => $id, 'trip_id' => $tripId, 'dist_m' => $distanceMeters]);
+
+        return [
+            'id'              => (int)$id,
+            'trip_id'         => $tripId,
+            'name'            => $created['name'] ?? null,
+            'transport_type'  => $data['transport_type'],
+            'distance_meters' => $distanceMeters,
+            'distance_km'     => round($distanceMeters / 1000, 2),
             'admin_url'       => '/admin/route_form.php?id=' . $id,
         ];
     }

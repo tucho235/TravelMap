@@ -21,9 +21,9 @@ class Trip {
      */
     public function getAll($order_by = 'created_at DESC', $status = null) {
         try {
-            $sql = "SELECT 
-                        id, title, description, start_date, end_date, 
-                        color_hex, status, created_at, updated_at
+            $sql = "SELECT
+                        id, title, description, start_date, end_date,
+                        color_hex, status, show_routes_in_timeline, created_at, updated_at
                     FROM trips";
             
             // Agregar filtro de status si se especifica
@@ -239,7 +239,7 @@ class Trip {
         try {
             $sql = '
                 SELECT DISTINCT t.id, t.title, t.description, t.start_date, t.end_date,
-                                t.status, t.color_hex, t.created_at
+                                t.status, t.color_hex, t.show_routes_in_timeline, t.created_at
                 FROM trips t
                 LEFT JOIN trip_tags tt ON tt.trip_id = t.id
                 WHERE (:q IS NULL OR t.title LIKE :q_like OR t.description LIKE :q_like)

@@ -36,11 +36,18 @@ final class Schema
             // No retornamos aquí: seguimos validando el resto del schema
         }
 
-        // type
+        // type — puede ser string o array de strings (union types, ej: ["boolean","null"])
         if (isset($schema['type'])) {
-            $typeErr = self::checkType($schema['type'], $data, $path);
-            if ($typeErr) {
-                $errors[$path ?: 'root'] = $typeErr;
+            $types = is_array($schema['type']) ? $schema['type'] : [$schema['type']];
+            $typeMatch = false;
+            foreach ($types as $t) {
+                if (self::checkType($t, $data, $path) === null) {
+                    $typeMatch = true;
+                    break;
+                }
+            }
+            if (!$typeMatch) {
+                $errors[$path ?: 'root'] = 'Se esperaba uno de los tipos: ' . implode(', ', $types);
                 return $errors; // No tiene sentido continuar si el tipo ya falla
             }
         }
@@ -108,8 +115,16 @@ final class Schema
                 $opts = implode(', ', $schema['enum']);
                 $errors[$path ?: 'root'] = "Valor inválido. Opciones: {$opts}";
             }
-            if (isset($schema['pattern']) && !preg_match($schema['pattern'], $data)) {
-                $errors[$path ?: 'root'] = "El valor no cumple el patrón requerido";
+            if (isset($schema['pattern'])) {
+                // Soporta patrones con o sin delimitadores PHP.
+                // JSON Schema usa regex puro (sin delimitadores), así que los agregamos.
+                $pat = $schema['pattern'];
+                if ($pat === '' || $pat[0] !== '/') {
+                    $pat = '/' . str_replace('/', '\\/', $pat) . '/u';
+                }
+                if (!preg_match($pat, $data)) {
+                    $errors[$path ?: 'root'] = "El valor no cumple el patrón requerido";
+                }
             }
         }
 
@@ -128,7 +143,7 @@ final class Schema
 
     // ──────────────────────────────────────────────────────────────────────────
 
-    private static function checkType(string $type, $data, string $path): ?string
+    private static function checkType($type, $data, string $path): ?string
     {
         switch ($type) {
             case 'object':
@@ -159,6 +174,11 @@ final class Schema
             case 'boolean':
                 if (!is_bool($data)) {
                     return 'Se esperaba un booleano';
+                }
+                break;
+            case 'null':
+                if ($data !== null) {
+                    return 'Se esperaba null';
                 }
                 break;
         }

@@ -1,24 +1,13 @@
 <?php
 /**
  * MCP Tools: POIs
- * list_pois, search_pois, create_poi, import_photos_batch, cleanup_temp_batch
+ * search_pois, create_poi, update_poi
  */
 
 final class PoiTools
 {
-    private const MCP_TEMP_DIR = 'uploads/mcp_temp';
-
     public static function register(Dispatcher $d): void
     {
-        $d->register('list_pois', 'Lista los puntos de interés (POIs) de un viaje.', [
-            'type'       => 'object',
-            'required'   => ['trip_id'],
-            'properties' => [
-                'trip_id' => ['type' => 'integer', 'minimum' => 1],
-            ],
-            'additionalProperties' => false,
-        ], [self::class, 'listPois']);
-
         $d->register('search_pois', 'Busca POIs por texto libre, viaje o tipo.', [
             'type' => 'object',
             'properties' => [
@@ -33,23 +22,21 @@ final class PoiTools
         $d->register('create_poi',
             'Crea un punto de interés. Si adjuntas una foto con GPS EXIF, las coordenadas y ' .
             'fecha se auto-rellenan si no las proporcionas. El output incluye suggested_place ' .
-            '(ciudad sugerida por Nominatim) para que puedas decidir el título. ' .
-            'Puedes pasar photo_base64 + photo_filename, o temp_photo_path de import_photos_batch.',
+            '(ciudad sugerida por Nominatim) para que puedas decidir el título.',
         [
             'type'       => 'object',
             'required'   => ['trip_id', 'type'],
             'properties' => [
                 'trip_id'         => ['type' => 'integer', 'minimum' => 1],
                 'title'           => ['type' => 'string', 'maxLength' => 200],
-                'type'            => ['type' => 'string', 'enum' => ['stay', 'visit', 'food', 'waypoint']],
+                'type'            => ['type' => 'string', 'enum' => ['stay', 'visit', 'food', 'waypoint'], 'description' => '"stay": alojamiento (hotel, hostel). "visit": lugar turístico o atracción. "food": restaurante, bar, café. "waypoint": punto de paso o referencia genérico.'],
                 'latitude'        => ['type' => 'number', 'minimum' => -90,  'maximum' => 90],
                 'longitude'       => ['type' => 'number', 'minimum' => -180, 'maximum' => 180],
                 'description'     => ['type' => 'string', 'maxLength' => 5000],
-                'icon'            => ['type' => 'string', 'maxLength' => 64],
-                'visit_date'      => ['type' => 'string'],
+                'icon'            => ['type' => 'string', 'maxLength' => 64, 'description' => 'Nombre del icono. Si se omite se usa "default". Valores sugeridos según type: stay→"hotel", visit→"camera", food→"restaurant".'],
+                'visit_date'      => ['type' => 'string', 'description' => 'Fecha y hora de la visita. Formatos aceptados: "YYYY-MM-DD HH:MM:SS", "YYYY-MM-DD HH:MM", "YYYY-MM-DDTHH:MM", "YYYY-MM-DD". Incluir la hora si se conoce.'],
                 'photo_base64'    => ['type' => 'string', 'maxLength' => 14000000],
                 'photo_filename'  => ['type' => 'string', 'maxLength' => 255],
-                'temp_photo_path' => ['type' => 'string', 'maxLength' => 500],
                 'links' => [
                     'type' => 'array',
                     'maxItems' => 10,
@@ -59,7 +46,7 @@ final class PoiTools
                         'properties' => [
                             'url'       => ['type' => 'string', 'maxLength' => 500],
                             'label'     => ['type' => 'string', 'maxLength' => 100],
-                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Tipo de enlace. Valores: "website", "google_maps", "instagram", "facebook", "twitter", "tripadvisor", "booking", "airbnb", "youtube", "wikipedia", "google_photos", "other" (default).'],
                         ],
                         'additionalProperties' => false,
                     ],
@@ -78,12 +65,12 @@ final class PoiTools
             'properties' => [
                 'id'          => ['type' => 'integer', 'minimum' => 1],
                 'title'       => ['type' => 'string', 'maxLength' => 200],
-                'type'        => ['type' => 'string', 'enum' => ['stay', 'visit', 'food', 'waypoint']],
+                'type'        => ['type' => 'string', 'enum' => ['stay', 'visit', 'food', 'waypoint'], 'description' => '"stay": alojamiento (hotel, hostel). "visit": lugar turístico o atracción. "food": restaurante, bar, café. "waypoint": punto de paso o referencia genérico.'],
                 'latitude'    => ['type' => 'number', 'minimum' => -90,  'maximum' => 90],
                 'longitude'   => ['type' => 'number', 'minimum' => -180, 'maximum' => 180],
                 'description' => ['type' => 'string', 'maxLength' => 5000],
-                'icon'        => ['type' => 'string', 'maxLength' => 64],
-                'visit_date'  => ['type' => 'string'],
+                'icon'        => ['type' => 'string', 'maxLength' => 64, 'description' => 'Nombre del icono. Si se omite se usa "default". Valores sugeridos según type: stay→"hotel", visit→"camera", food→"restaurant".'],
+                'visit_date'  => ['type' => 'string', 'description' => 'Fecha y hora de la visita. Formatos aceptados: "YYYY-MM-DD HH:MM:SS", "YYYY-MM-DD HH:MM", "YYYY-MM-DDTHH:MM", "YYYY-MM-DD". Incluir la hora si se conoce.'],
                 'links' => [
                     'type'     => 'array',
                     'maxItems' => 10,
@@ -93,7 +80,7 @@ final class PoiTools
                         'properties' => [
                             'url'       => ['type' => 'string', 'maxLength' => 500],
                             'label'     => ['type' => 'string', 'maxLength' => 100],
-                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Tipo de enlace. Valores: "website", "google_maps", "instagram", "facebook", "twitter", "tripadvisor", "booking", "airbnb", "youtube", "wikipedia", "google_photos", "other" (default).'],
                         ],
                         'additionalProperties' => false,
                     ],
@@ -102,55 +89,9 @@ final class PoiTools
             'additionalProperties' => false,
         ], [self::class, 'updatePoi']);
 
-        $d->register('import_photos_batch',
-            'Analiza un lote de fotos JPEG: extrae GPS y fecha del EXIF, interpola coordenadas ' .
-            'entre fotos vecinas, y opcionalmente hace reverse geocoding. No crea POIs — ' .
-            'devuelve metadata para que decidas cuáles crear con create_poi usando temp_photo_path.',
-        [
-            'type'       => 'object',
-            'required'   => ['photos'],
-            'properties' => [
-                'photos' => [
-                    'type'     => 'array',
-                    'minItems' => 1,
-                    'maxItems' => 50,
-                    'items'    => [
-                        'type'       => 'object',
-                        'required'   => ['photo_base64', 'filename'],
-                        'properties' => [
-                            'photo_base64' => ['type' => 'string', 'maxLength' => 14000000],
-                            'filename'     => ['type' => 'string', 'maxLength' => 255],
-                        ],
-                        'additionalProperties' => false,
-                    ],
-                ],
-                'reverse_geocode' => ['type' => 'boolean'],
-            ],
-            'additionalProperties' => false,
-        ], [self::class, 'importPhotosBatch']);
-
-        $d->register('cleanup_temp_batch', 'Elimina una carpeta temporal de import_photos_batch.', [
-            'type'       => 'object',
-            'required'   => ['token'],
-            'properties' => [
-                'token' => ['type' => 'string', 'maxLength' => 100],
-            ],
-            'additionalProperties' => false,
-        ], [self::class, 'cleanupTempBatch']);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-
-    public static function listPois(array $p): array
-    {
-        $tripId = (int)$p['trip_id'];
-        self::assertTripExists($tripId);
-
-        $pointModel = new Point();
-        $rows       = $pointModel->getAll($tripId);
-
-        return ['pois' => array_map([self::class, 'poiSummary'], $rows), 'count' => count($rows)];
-    }
 
     public static function searchPois(array $p): array
     {
@@ -199,12 +140,6 @@ final class PoiTools
                 'size_kb' => round(strlen($p['photo_base64']) * 0.75 / 1024),
             ]);
 
-        } elseif (!empty($p['temp_photo_path'])) {
-            // Mover desde mcp_temp/
-            $movedResult = self::moveTempPhoto($p['temp_photo_path']);
-            $imagePath     = $movedResult['path'];
-            $thumbnailPath = $movedResult['thumbnail_path'];
-            $exifData      = $movedResult['exif'];
         }
 
         // ── Auto-fill desde EXIF ───────────────────────────────────────────────
@@ -253,7 +188,7 @@ final class PoiTools
             'description'=> $p['description'] ?? null,
             'icon'       => $p['icon']        ?? 'default',
             'image_path' => $imagePath,
-            'visit_date' => $visitDate,
+            'visit_date' => self::normalizeVisitDate($visitDate),
         ];
 
         $pointModel = new Point();
@@ -319,7 +254,7 @@ final class PoiTools
             'description' => array_key_exists('description', $p) ? $p['description']        : $current['description'],
             'icon'        => $p['icon']        ?? $current['icon'],
             'image_path'  => $current['image_path'],
-            'visit_date'  => array_key_exists('visit_date', $p)  ? $p['visit_date']         : $current['visit_date'],
+            'visit_date'  => array_key_exists('visit_date', $p)  ? self::normalizeVisitDate($p['visit_date']) : $current['visit_date'],
         ];
 
         if (!$pointModel->update($id, $data)) {
@@ -338,7 +273,8 @@ final class PoiTools
             $linkModel->replaceForPoi($id, $links);
         }
 
-        $updated = $pointModel->getById($id);
+        $updated  = $pointModel->getById($id);
+        $updLinks = (new Link())->getByEntity('poi', $id);
         McpLogger::info('update_poi OK', ['id' => $id]);
 
         return [
@@ -347,247 +283,24 @@ final class PoiTools
             'type'      => $updated['type'],
             'latitude'  => (float)$updated['latitude'],
             'longitude' => (float)$updated['longitude'],
+            'links'     => array_map(fn($l) => ['url' => $l['url'], 'label' => $l['label'], 'link_type' => $l['link_type']], $updLinks),
             'admin_url' => '/admin/point_form.php?id=' . $id,
         ];
     }
 
-    public static function importPhotosBatch(array $p): array
-    {
-        $doGeocode = (bool)($p['reverse_geocode'] ?? true);
-
-        // Generar token de sesión para carpeta temporal
-        $token   = 'mcp_' . preg_replace('/[^a-zA-Z0-9_]/', '_', uniqid('', true));
-        $tempDir = ROOT_PATH . '/' . self::MCP_TEMP_DIR . '/' . $token;
-
-        if (!is_dir(ROOT_PATH . '/' . self::MCP_TEMP_DIR)) {
-            mkdir(ROOT_PATH . '/' . self::MCP_TEMP_DIR, 0750, true);
-            // .htaccess anti-PHP
-            file_put_contents(
-                ROOT_PATH . '/' . self::MCP_TEMP_DIR . '/.htaccess',
-                "Options -ExecCGI\nAddHandler cgi-script .php\n<FilesMatch \"\\.php$\">\n  Deny from all\n</FilesMatch>\n"
-            );
-        }
-
-        mkdir($tempDir, 0750, true);
-
-        $images = [];
-        $errors = [];
-
-        foreach ($p['photos'] as $i => $photoInput) {
-            $filename = basename($photoInput['filename']);
-            if ($filename === '' || strpbrk($filename, "\0\r\n") !== false) {
-                $errors[] = "Foto #{$i}: nombre de archivo inválido";
-                continue;
-            }
-
-            $raw64 = $photoInput['photo_base64'];
-            if (strlen($raw64) > 14_000_000) {
-                $errors[] = "Foto '{$filename}': supera el límite de tamaño";
-                continue;
-            }
-
-            // Strip data-URL
-            if (preg_match('/^data:image\/[^;]+;base64,/i', $raw64)) {
-                $raw64 = preg_replace('/^data:image\/[^;]+;base64,/i', '', $raw64);
-            }
-
-            $bytes = base64_decode($raw64, true);
-            if ($bytes === false) {
-                $errors[] = "Foto '{$filename}': base64 inválido";
-                continue;
-            }
-
-            // MIME
-            $tmpCheck = tempnam(sys_get_temp_dir(), 'mcp_chk_');
-            file_put_contents($tmpCheck, $bytes);
-            $finfo    = finfo_open(FILEINFO_MIME_TYPE);
-            $mimeReal = finfo_file($finfo, $tmpCheck);
-            finfo_close($finfo);
-            @unlink($tmpCheck);
-
-            $allowedMime = ['image/jpeg', 'image/jpg', 'image/png'];
-            if (!in_array($mimeReal, $allowedMime, true)) {
-                $errors[] = "Foto '{$filename}': tipo MIME no permitido ({$mimeReal})";
-                continue;
-            }
-
-            // Guardar en temp
-            $ext      = strtolower(pathinfo($filename, PATHINFO_EXTENSION)) ?: 'jpg';
-            $tmpName  = preg_replace('/[^a-zA-Z0-9_]/', '_', uniqid('tmp_', true)) . '.' . $ext;
-            $tmpPath  = $tempDir . '/' . $tmpName;
-            file_put_contents($tmpPath, $bytes);
-            chmod($tmpPath, 0644);
-
-            $exif = ExifExtractor::readFromFile($tmpPath, $filename);
-
-            $images[] = [
-                'original_filename' => $filename,
-                'temp_filename'     => $tmpName,
-                'temp_path'         => self::MCP_TEMP_DIR . '/' . $token . '/' . $tmpName,
-                'has_gps'           => $exif['has_gps'],
-                'has_date'          => $exif['has_date'],
-                'latitude'          => $exif['latitude'],
-                'longitude'         => $exif['longitude'],
-                'gps_source'        => $exif['has_gps'] ? 'exif' : null,
-                'date'              => $exif['date'],
-                'date_source'       => $exif['date_source'],
-                'timestamp'         => $exif['timestamp'],
-                'gps_estimated'     => false,
-                'suggested_place'   => null,
-            ];
-        }
-
-        // Ordenar por timestamp
-        usort($images, function ($a, $b) {
-            $ta = $a['timestamp'] ?? PHP_INT_MAX;
-            $tb = $b['timestamp'] ?? PHP_INT_MAX;
-            return $ta <=> $tb;
-        });
-
-        // Interpolar GPS
-        ExifExtractor::interpolateMissingGps($images);
-
-        // Reverse geocoding opcional
-        if ($doGeocode) {
-            foreach ($images as &$img) {
-                if ($img['has_gps'] && $img['latitude'] !== null) {
-                    try {
-                        $img['suggested_place'] = Geocoder::reverseLookup(
-                            (float)$img['latitude'],
-                            (float)$img['longitude']
-                        );
-                    } catch (Exception $e) {
-                        // silencioso
-                    }
-                }
-            }
-            unset($img);
-        }
-
-        // Limpiar campos internos del output
-        $output = [];
-        foreach ($images as $img) {
-            $out = $img;
-            unset($out['timestamp'], $out['temp_filename'], $out['has_date'], $out['has_gps']);
-            $output[] = $out;
-        }
-
-        $expiresAt = date('Y-m-d H:i:s', time() + 86400); // 24h
-
-        McpLogger::info('import_photos_batch OK', [
-            'token'        => $token,
-            'photos_total' => count($p['photos']),
-            'photos_ok'    => count($images),
-            'errors'       => count($errors),
-        ]);
-
-        return [
-            'token'      => $token,
-            'expires_at' => $expiresAt,
-            'photos'     => $output,
-            'errors'     => $errors,
-            'tip'        => 'Usa create_poi con temp_photo_path para crear POIs desde estas fotos',
-        ];
-    }
-
-    public static function cleanupTempBatch(array $p): array
-    {
-        $token = $p['token'];
-
-        // Validar token: solo alfanumérico + _
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $token)) {
-            throw new ToolException('Token inválido', 'INVALID_INPUT', -32602);
-        }
-
-        $dir = ROOT_PATH . '/' . self::MCP_TEMP_DIR . '/' . $token;
-
-        // Verificar que el directorio esté dentro de mcp_temp (realpath check)
-        $baseReal = realpath(ROOT_PATH . '/' . self::MCP_TEMP_DIR);
-        $dirReal  = realpath($dir);
-
-        if ($dirReal === false || $baseReal === false || strpos($dirReal, $baseReal . '/') !== 0) {
-            throw new ToolException('Ruta de token no válida', 'INVALID_INPUT', -32602);
-        }
-
-        if (!is_dir($dirReal)) {
-            return ['deleted' => false, 'message' => 'El directorio temporal no existe o ya fue eliminado'];
-        }
-
-        $files = glob($dirReal . '/*');
-        $count = 0;
-        foreach ($files ?: [] as $f) {
-            if (is_file($f)) {
-                @unlink($f);
-                $count++;
-            }
-        }
-        @rmdir($dirReal);
-
-        McpLogger::info('cleanup_temp_batch OK', ['token' => $token, 'files_deleted' => $count]);
-
-        return ['deleted' => true, 'files_deleted' => $count, 'token' => $token];
-    }
-
     // ──────────────────────────────────────────────────────────────────────────
 
-    private static function moveTempPhoto(string $tempRelPath): array
+    private static function normalizeVisitDate(?string $date): ?string
     {
-        // Validar que está dentro de mcp_temp/ (realpath check)
-        $baseReal = realpath(ROOT_PATH . '/' . self::MCP_TEMP_DIR);
-        if ($baseReal === false) {
-            throw new ToolException('Directorio temporal MCP no existe', 'SERVER_ERROR');
+        if ($date === null || $date === '') return null;
+        $formats = ['Y-m-d H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d H:i', 'Y-m-d\TH:i', 'Y-m-d'];
+        foreach ($formats as $fmt) {
+            $dt = DateTime::createFromFormat($fmt, $date);
+            if ($dt !== false) {
+                return $dt->format('Y-m-d H:i:s');
+            }
         }
-
-        // Descomponer el path: solo el nombre de archivo, sin traversal
-        $safeName = basename($tempRelPath);
-        // Intentar reconstruir la ruta desde el token en el path
-        $parts = explode('/', ltrim($tempRelPath, '/'));
-        // Esperamos: uploads/mcp_temp/<token>/<filename>
-        if (count($parts) < 4) {
-            throw new ToolException('temp_photo_path inválido', 'INVALID_INPUT', -32602);
-        }
-        $token   = $parts[2]; // mcp_temp/<token>
-        $fname   = $parts[3];
-
-        // Validar token
-        if (!preg_match('/^[a-zA-Z0-9_]+$/', $token)) {
-            throw new ToolException('Token en temp_photo_path inválido', 'INVALID_INPUT', -32602);
-        }
-
-        $fullPath = $baseReal . '/' . $token . '/' . basename($fname);
-        $realFull = realpath($fullPath);
-
-        if ($realFull === false || strpos($realFull, $baseReal . '/') !== 0) {
-            throw new ToolException('temp_photo_path fuera del directorio permitido', 'INVALID_INPUT', -32602);
-        }
-
-        if (!is_file($realFull)) {
-            throw new ToolException('temp_photo_path no existe o no es un archivo', 'INVALID_INPUT', -32602);
-        }
-
-        // Leer bytes, validar MIME y mover a uploads/points/
-        $bytes = file_get_contents($realFull);
-        $ext   = strtolower(pathinfo($fname, PATHINFO_EXTENSION)) ?: 'jpg';
-
-        $result = FileHelper::saveImageFromBase64(
-            base64_encode($bytes),
-            'temp_photo.' . $ext
-        );
-
-        if (!$result['success']) {
-            throw new ToolException($result['error'] ?? 'Error al procesar foto temporal', 'UPLOAD_FAILED');
-        }
-
-        // Extraer EXIF antes de borrar el temp
-        $exif = ExifExtractor::readFromFile($realFull, $fname);
-
-        @unlink($realFull);
-
-        return [
-            'path'          => $result['path'],
-            'thumbnail_path'=> $result['thumbnail_path'],
-            'exif'          => $exif,
-        ];
+        return $date;
     }
 
     private static function assertTripExists(int $tripId): void
@@ -598,9 +311,9 @@ final class PoiTools
         }
     }
 
-    private static function poiSummary(array $poi): array
+    private static function poiSummary(array $poi, array $links = []): array
     {
-        return [
+        $out = [
             'id'         => (int)$poi['id'],
             'trip_id'    => (int)$poi['trip_id'],
             'title'      => $poi['title'],
@@ -610,5 +323,9 @@ final class PoiTools
             'visit_date' => $poi['visit_date'],
             'image_path' => $poi['image_path'],
         ];
+        if (!empty($links)) {
+            $out['links'] = array_map(fn($l) => ['url' => $l['url'], 'label' => $l['label'], 'link_type' => $l['link_type']], $links);
+        }
+        return $out;
     }
 }

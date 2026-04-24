@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "travelmap": {
+      "command": "php",
+      "args": ["mcp/server.php"],
+      "env": {
+        "DB_HOST": "127.0.0.1",
+        "DB_PORT": "32306"
+      }
+    }
+  }
+}

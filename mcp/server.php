@@ -23,7 +23,7 @@ require_once __DIR__ . '/Dispatcher.php';
 require_once __DIR__ . '/tools/TripTools.php';
 require_once __DIR__ . '/tools/RouteTools.php';
 require_once __DIR__ . '/tools/PoiTools.php';
-require_once __DIR__ . '/tools/StatsTools.php';
+require_once __DIR__ . '/tools/LocationTools.php';
 
 McpLogger::init();
 
@@ -53,7 +53,14 @@ $dispatcher = new Dispatcher();
 TripTools::register($dispatcher);
 RouteTools::register($dispatcher);
 PoiTools::register($dispatcher);
-StatsTools::register($dispatcher);
+LocationTools::register($dispatcher);
+
+// ── Configurar streams ────────────────────────────────────────────────────────
+// Forzar modo bloqueante y sin timeout en stdin/stdout para que el proceso
+// no muera por idle mientras espera mensajes del cliente MCP.
+stream_set_blocking(STDIN, true);
+stream_set_blocking(STDOUT, true);
+stream_set_timeout(STDIN, 0);  // Sin timeout de stream (0 = infinito)
 
 // ── Bucle principal ───────────────────────────────────────────────────────────
 fwrite(STDERR, "[TravelMap MCP] Servidor listo. Esperando mensajes en stdin...\n");

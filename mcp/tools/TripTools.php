@@ -11,9 +11,9 @@ final class TripTools
         $d->register('list_trips', 'Lista viajes almacenados. Usa search_trips para búsqueda por texto.', [
             'type' => 'object',
             'properties' => [
-                'status' => ['type' => 'string', 'enum' => ['draft', 'published']],
+                'status' => ['type' => 'string', 'enum' => ['draft', 'published', 'planned'], 'description' => '"draft": borrador no visible al público. "published": publicado y visible. "planned": futuro planificado.'],
                 'limit'  => ['type' => 'integer', 'minimum' => 1, 'maximum' => 200],
-                'order'  => ['type' => 'string', 'enum' => ['recent', 'oldest', 'start_date_desc', 'start_date_asc', 'title']],
+                'order'  => ['type' => 'string', 'enum' => ['recent', 'oldest', 'start_date_desc', 'start_date_asc', 'title'], 'description' => '"recent"/"oldest": por fecha de creación. "start_date_desc"/"start_date_asc": por fecha de inicio del viaje. "title": orden alfabético.'],
             ],
             'additionalProperties' => false,
         ], [self::class, 'listTrips']);
@@ -23,9 +23,9 @@ final class TripTools
             'properties' => [
                 'query'     => ['type' => 'string', 'maxLength' => 200],
                 'tag'       => ['type' => 'string', 'maxLength' => 60],
-                'date_from' => ['type' => 'string'],
-                'date_to'   => ['type' => 'string'],
-                'status'    => ['type' => 'string', 'enum' => ['draft', 'published']],
+                'date_from' => ['type' => 'string', 'description' => 'Fecha mínima en formato YYYY-MM-DD. Filtra viajes que terminan en o después de esta fecha.'],
+                'date_to'   => ['type' => 'string', 'description' => 'Fecha máxima en formato YYYY-MM-DD. Filtra viajes que comienzan en o antes de esta fecha.'],
+                'status'    => ['type' => 'string', 'enum' => ['draft', 'published', 'planned'], 'description' => '"draft": borrador. "published": publicado. "planned": planificado.'],
                 'limit'     => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100],
             ],
             'additionalProperties' => false,
@@ -51,10 +51,11 @@ final class TripTools
                 'id'          => ['type' => 'integer', 'minimum' => 1],
                 'title'       => ['type' => 'string', 'minLength' => 1, 'maxLength' => 200],
                 'description' => ['type' => 'string', 'maxLength' => 5000],
-                'start_date'  => ['type' => 'string'],
-                'end_date'    => ['type' => 'string'],
-                'color_hex'   => ['type' => 'string', 'pattern' => '/^#[0-9A-Fa-f]{6}$/'],
-                'status'      => ['type' => 'string', 'enum' => ['draft', 'published']],
+                'start_date'  => ['type' => 'string', 'description' => 'Fecha de inicio en formato YYYY-MM-DD. Ejemplo: "2024-07-15".'],
+                'end_date'    => ['type' => 'string', 'description' => 'Fecha de fin en formato YYYY-MM-DD. Ejemplo: "2024-08-03".'],
+                'color_hex'   => ['type' => 'string', 'pattern' => '^#[0-9A-Fa-f]{6}$', 'description' => 'Color del viaje en hexadecimal CSS. Ejemplo: "#3388ff".'],
+                'status'      => ['type' => 'string', 'enum' => ['draft', 'published', 'planned'], 'description' => '"draft": borrador no visible. "published": publicado y visible. "planned": futuro planificado.'],
+                'show_routes_in_timeline' => ['type' => ['boolean', 'null'], 'description' => 'Si las rutas se muestran en la línea de tiempo del viaje. null = hereda la configuración global del sitio.'],
                 'tags'        => ['type' => 'array', 'maxItems' => 20, 'items' => ['type' => 'string', 'maxLength' => 60]],
                 'links' => [
                     'type'     => 'array',
@@ -65,7 +66,7 @@ final class TripTools
                         'properties' => [
                             'url'       => ['type' => 'string', 'maxLength' => 500],
                             'label'     => ['type' => 'string', 'maxLength' => 100],
-                            'link_type' => ['type' => 'string', 'maxLength' => 40],
+                            'link_type' => ['type' => 'string', 'maxLength' => 40, 'description' => 'Tipo de enlace. Valores: "website", "google_maps", "instagram", "facebook", "twitter", "tripadvisor", "booking", "airbnb", "youtube", "wikipedia", "google_photos", "other" (default).'],
                         ],
                         'additionalProperties' => false,
                     ],
@@ -80,10 +81,11 @@ final class TripTools
             'properties' => [
                 'title'       => ['type' => 'string', 'minLength' => 1, 'maxLength' => 200],
                 'description' => ['type' => 'string', 'maxLength' => 5000],
-                'start_date'  => ['type' => 'string'],
-                'end_date'    => ['type' => 'string'],
-                'color_hex'   => ['type' => 'string', 'pattern' => '/^#[0-9A-Fa-f]{6}$/'],
-                'status'      => ['type' => 'string', 'enum' => ['draft', 'published']],
+                'start_date'  => ['type' => 'string', 'description' => 'Fecha de inicio en formato YYYY-MM-DD. Ejemplo: "2024-07-15".'],
+                'end_date'    => ['type' => 'string', 'description' => 'Fecha de fin en formato YYYY-MM-DD. Ejemplo: "2024-08-03".'],
+                'color_hex'   => ['type' => 'string', 'pattern' => '^#[0-9A-Fa-f]{6}$', 'description' => 'Color del viaje en hexadecimal CSS. Ejemplo: "#3388ff". Por defecto "#3388ff".'],
+                'status'      => ['type' => 'string', 'enum' => ['draft', 'published', 'planned'], 'description' => '"draft": borrador no visible. "published": publicado y visible. "planned": futuro planificado.'],
+                'show_routes_in_timeline' => ['type' => ['boolean', 'null'], 'description' => 'Si las rutas se muestran en la línea de tiempo del viaje. null = hereda la configuración global del sitio.'],
                 'tags'        => ['type' => 'array', 'maxItems' => 20, 'items' => ['type' => 'string', 'maxLength' => 60]],
             ],
             'additionalProperties' => false,
@@ -149,15 +151,18 @@ final class TripTools
         $routeModel = new Route();
         $pointModel = new Point();
         $tagModel   = new TripTag();
+        $linkModel  = new Link();
 
         $routes = $routeModel->getByTripId($trip['id']);
         $pois   = $pointModel->getAll($trip['id']);
         $tags   = $tagModel->getByTripId($trip['id']);
+        $links  = $linkModel->getByEntity('trip', (int)$trip['id']);
 
         $includeGeojson = (bool)($p['include_geojson'] ?? false);
 
         $routesOut = [];
         foreach ($routes as $r) {
+            $routeLinks = $linkModel->getByEntity('route', (int)$r['id']);
             $out = [
                 'id'             => (int)$r['id'],
                 'name'           => $r['name'],
@@ -169,6 +174,7 @@ final class TripTools
                 'end_datetime'   => $r['end_datetime'] ?? null,
                 'color'          => $r['color'],
                 'description'    => $r['description'],
+                'links'          => self::formatLinks($routeLinks),
             ];
             if ($includeGeojson) {
                 $out['geojson_data'] = $r['geojson_data'];
@@ -178,6 +184,7 @@ final class TripTools
 
         $poisOut = [];
         foreach ($pois as $poi) {
+            $poiLinks = $linkModel->getByEntity('poi', (int)$poi['id']);
             $poisOut[] = [
                 'id'         => (int)$poi['id'],
                 'title'      => $poi['title'],
@@ -187,21 +194,26 @@ final class TripTools
                 'visit_date' => $poi['visit_date'],
                 'image_path' => $poi['image_path'],
                 'description'=> $poi['description'],
+                'links'      => self::formatLinks($poiLinks),
             ];
         }
 
         return [
             'trip' => [
-                'id'          => (int)$trip['id'],
-                'title'       => $trip['title'],
-                'description' => $trip['description'],
-                'start_date'  => $trip['start_date'],
-                'end_date'    => $trip['end_date'],
-                'status'      => $trip['status'],
-                'color_hex'   => $trip['color_hex'],
-                'tags'        => $tags,
-                'routes'      => $routesOut,
-                'pois'        => $poisOut,
+                'id'                      => (int)$trip['id'],
+                'title'                   => $trip['title'],
+                'description'             => $trip['description'],
+                'start_date'              => $trip['start_date'],
+                'end_date'                => $trip['end_date'],
+                'status'                  => $trip['status'],
+                'color_hex'               => $trip['color_hex'],
+                'show_routes_in_timeline' => isset($trip['show_routes_in_timeline'])
+                    ? (is_null($trip['show_routes_in_timeline']) ? null : (bool)$trip['show_routes_in_timeline'])
+                    : null,
+                'tags'                    => $tags,
+                'links'                   => self::formatLinks($links),
+                'routes'                  => $routesOut,
+                'pois'                    => $poisOut,
             ],
         ];
     }
@@ -210,13 +222,18 @@ final class TripTools
     {
         $tripModel = new Trip();
 
+        $showRoutes = array_key_exists('show_routes_in_timeline', $p)
+            ? (is_null($p['show_routes_in_timeline']) ? null : (int)(bool)$p['show_routes_in_timeline'])
+            : null;
+
         $data = [
-            'title'       => trim($p['title']),
-            'description' => isset($p['description']) ? trim($p['description']) : null,
-            'start_date'  => $p['start_date']  ?? null,
-            'end_date'    => $p['end_date']    ?? null,
-            'color_hex'   => $p['color_hex']   ?? '#3388ff',
-            'status'      => $p['status']      ?? 'draft',
+            'title'                   => trim($p['title']),
+            'description'             => isset($p['description']) ? trim($p['description']) : null,
+            'start_date'              => $p['start_date']  ?? null,
+            'end_date'                => $p['end_date']    ?? null,
+            'color_hex'               => $p['color_hex']   ?? '#3388ff',
+            'status'                  => $p['status']      ?? 'draft',
+            'show_routes_in_timeline' => $showRoutes,
         ];
 
         $errors = $tripModel->validate($data);
@@ -254,10 +271,15 @@ final class TripTools
             throw new ToolException("Viaje con id={$id} no encontrado", 'TRIP_NOT_FOUND');
         }
 
-        $updatableFields = ['title', 'description', 'start_date', 'end_date', 'color_hex', 'status'];
+        $updatableFields = ['title', 'description', 'start_date', 'end_date', 'color_hex', 'status', 'show_routes_in_timeline'];
         $data = [];
         foreach ($updatableFields as $field) {
-            if (array_key_exists($field, $p)) {
+            if (!array_key_exists($field, $p)) {
+                continue;
+            }
+            if ($field === 'show_routes_in_timeline') {
+                $data[$field] = is_null($p[$field]) ? null : (int)(bool)$p[$field];
+            } else {
                 $data[$field] = $p[$field];
             }
         }
@@ -305,19 +327,33 @@ final class TripTools
 
     // ──────────────────────────────────────────────────────────────────────────
 
+    private static function formatLinks(array $rows): array
+    {
+        return array_map(function ($r) {
+            return [
+                'url'        => $r['url'],
+                'label'      => $r['label'],
+                'link_type'  => $r['link_type'],
+            ];
+        }, $rows);
+    }
+
     private static function tripSummary(array $row, Trip $tripModel): array
     {
         $id = (int)$row['id'];
         return [
-            'id'          => $id,
-            'title'       => $row['title'],
-            'description' => $row['description'],
-            'start_date'  => $row['start_date'],
-            'end_date'    => $row['end_date'],
-            'status'      => $row['status'],
-            'color_hex'   => $row['color_hex'],
-            'route_count' => $tripModel->countRoutes($id),
-            'poi_count'   => $tripModel->countPoints($id),
+            'id'                      => $id,
+            'title'                   => $row['title'],
+            'description'             => $row['description'],
+            'start_date'              => $row['start_date'],
+            'end_date'                => $row['end_date'],
+            'status'                  => $row['status'],
+            'color_hex'               => $row['color_hex'],
+            'show_routes_in_timeline' => isset($row['show_routes_in_timeline'])
+                ? (is_null($row['show_routes_in_timeline']) ? null : (bool)$row['show_routes_in_timeline'])
+                : null,
+            'route_count'             => $tripModel->countRoutes($id),
+            'poi_count'               => $tripModel->countPoints($id),
         ];
     }
 }

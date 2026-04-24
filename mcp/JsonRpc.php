@@ -13,23 +13,25 @@ final class JsonRpc
     /** Lee un mensaje del cliente desde stdin. Bloquea hasta recibir una línea. */
     public static function read(): ?array
     {
-        $line = fgets(STDIN);
-        if ($line === false) {
-            return null; // EOF — cliente cerró la conexión
-        }
-        $line = trim($line);
-        if ($line === '') {
-            return self::read(); // ignorar líneas vacías
-        }
+        while (true) {
+            $line = fgets(STDIN);
+            if ($line === false) {
+                return null; // EOF — cliente cerró la conexión
+            }
+            $line = trim($line);
+            if ($line === '') {
+                continue; // ignorar líneas vacías
+            }
 
-        $msg = json_decode($line, true);
-        if ($msg === null) {
-            // JSON inválido: enviar error y continuar
-            self::sendError(null, -32700, 'Parse error: JSON inválido');
-            return self::read();
-        }
+            $msg = json_decode($line, true);
+            if ($msg === null) {
+                // JSON inválido: enviar error y continuar leyendo
+                self::sendError(null, -32700, 'Parse error: JSON inválido');
+                continue;
+            }
 
-        return $msg;
+            return $msg;
+        }
     }
 
     /** Envía una respuesta de éxito al cliente. */

@@ -263,10 +263,10 @@ class Point {
 
         // Validar fecha y hora si se proporciona
         if (!empty($data['visit_date'])) {
-            // Aceptar formato YYYY-MM-DD HH:MM:SS o YYYY-MM-DD
-            $date = DateTime::createFromFormat('Y-m-d H:i:s', $data['visit_date']);
-            if (!$date) {
-                $date = DateTime::createFromFormat('Y-m-d', $data['visit_date']);
+            $date = false;
+            foreach (['Y-m-d H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d H:i', 'Y-m-d\TH:i', 'Y-m-d'] as $fmt) {
+                $date = DateTime::createFromFormat($fmt, $data['visit_date']);
+                if ($date !== false) break;
             }
             if (!$date) {
                 $errors['visit_date'] = 'La fecha debe estar en formato YYYY-MM-DD o YYYY-MM-DD HH:MM:SS';

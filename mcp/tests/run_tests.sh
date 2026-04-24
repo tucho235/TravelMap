@@ -68,7 +68,7 @@ assert_field "serverInfo.name" "${RESP}" '.result.serverInfo.name'
 info "\n=== 2. tools/list ==="
 RESP=$(rpc '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}')
 assert_no_error "tools/list no error" "${RESP}"
-for TOOL in list_trips search_trips get_trip create_trip list_routes create_route list_pois search_pois create_poi import_photos_batch get_stats; do
+for TOOL in list_trips search_trips get_trip create_trip update_trip create_route update_route plan_route commit_route search_pois create_poi update_poi search_location; do
     COUNT=$(echo "${RESP}" | jq "[.result.tools[].name] | map(select(. == \"${TOOL}\")) | length" 2>/dev/null || echo "0")
     if [[ "${COUNT}" == "1" ]]; then
         green "  PASS: tool '${TOOL}' presente"
@@ -85,12 +85,7 @@ RESP=$(rpc '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"list
 assert_no_error "list_trips no error" "${RESP}"
 
 # ─────────────────────────────────────────────────────────────────────────────
-info "\n=== 4. get_stats ==="
-RESP=$(rpc '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"get_stats","arguments":{"unit":"km"}}}')
-assert_no_error "get_stats no error" "${RESP}"
-
-# ─────────────────────────────────────────────────────────────────────────────
-info "\n=== 5. create_trip ==="
+info "\n=== 4. create_trip ==="
 RESP=$(rpc '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"create_trip","arguments":{"title":"TEST_MCP_TRIP","start_date":"2024-01-01","end_date":"2024-01-10","status":"draft","tags":["test","mcp"]}}}')
 assert_no_error "create_trip no error" "${RESP}"
 CONTENT=$(echo "${RESP}" | jq -r '.result.content[0].text' 2>/dev/null || echo "{}")
@@ -104,7 +99,7 @@ else
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-info "\n=== 6. get_trip (round-trip) ==="
+info "\n=== 5. get_trip (round-trip) ==="
 if [[ -n "${CREATED_TRIP_ID}" ]]; then
     RESP=$(rpc "{\"jsonrpc\":\"2.0\",\"id\":6,\"method\":\"tools/call\",\"params\":{\"name\":\"get_trip\",\"arguments\":{\"id\":${CREATED_TRIP_ID}}}}")
     assert_no_error "get_trip no error" "${RESP}"
@@ -120,7 +115,7 @@ if [[ -n "${CREATED_TRIP_ID}" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-info "\n=== 7. create_route (BRouter CSV) ==="
+info "\n=== 6. create_route (BRouter CSV) ==="
 if [[ -n "${CREATED_TRIP_ID}" ]]; then
     CSV_B64=$(base64 -w0 "${SCRIPT_DIR}/fixtures/sample.brouter.csv")
     RESP=$(rpc "{\"jsonrpc\":\"2.0\",\"id\":7,\"method\":\"tools/call\",\"params\":{\"name\":\"create_route\",\"arguments\":{\"trip_id\":${CREATED_TRIP_ID},\"transport_type\":\"bike\",\"brouter_csv_base64\":\"${CSV_B64}\"}}}")
@@ -139,7 +134,7 @@ if [[ -n "${CREATED_TRIP_ID}" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-info "\n=== 8. create_poi (foto base64) ==="
+info "\n=== 7. create_poi (foto base64) ==="
 if [[ -n "${CREATED_TRIP_ID}" ]]; then
     PHOTO_B64=$(cat "${SCRIPT_DIR}/fixtures/tiny.jpg.b64" | tr -d '\n')
     RESP=$(rpc "{\"jsonrpc\":\"2.0\",\"id\":8,\"method\":\"tools/call\",\"params\":{\"name\":\"create_poi\",\"arguments\":{\"trip_id\":${CREATED_TRIP_ID},\"title\":\"TEST POI\",\"type\":\"visit\",\"latitude\":41.3851,\"longitude\":2.1734,\"photo_base64\":\"${PHOTO_B64}\",\"photo_filename\":\"tiny.jpg\"}}}")
@@ -165,7 +160,7 @@ if [[ -n "${CREATED_TRIP_ID}" ]]; then
 fi
 
 # ─────────────────────────────────────────────────────────────────────────────
-info "\n=== 9. Tests de seguridad ==="
+info "\n=== 8. Tests de seguridad ==="
 
 # Path traversal en photo_filename
 PHOTO_B64=$(cat "${SCRIPT_DIR}/fixtures/tiny.jpg.b64" | tr -d '\n')
