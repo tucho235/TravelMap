@@ -102,6 +102,7 @@ require_once __DIR__ . '/Dispatcher.php';
 require_once __DIR__ . '/tools/TripTools.php';
 require_once __DIR__ . '/tools/RouteTools.php';
 require_once __DIR__ . '/tools/PoiTools.php';
+require_once __DIR__ . '/tools/LocationTools.php';
 
 // ── Parsear body JSON-RPC ─────────────────────────────────────────────────────
 $raw = file_get_contents('php://input');
@@ -122,6 +123,7 @@ $dispatcher = new Dispatcher();
 TripTools::register($dispatcher);
 RouteTools::register($dispatcher);
 PoiTools::register($dispatcher);
+LocationTools::register($dispatcher);
 
 McpLogger::info("HTTP ← {$method}", ['id' => $id]);
 
