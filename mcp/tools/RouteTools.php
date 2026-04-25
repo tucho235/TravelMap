@@ -46,7 +46,10 @@ final class RouteTools
         $d->register('create_route',
             'Crea una ruta para un viaje. Proporciona EXACTAMENTE UNA fuente de geometría: ' .
             'geojson_data (GeoJSON como string), brouter_csv_text (contenido CSV de BRouter) ' .
-            'o brouter_csv_base64 (CSV de BRouter codificado en base64).',
+            'o brouter_csv_base64 (CSV de BRouter codificado en base64). ' .
+            'Para rutas de tipo "plane", "ship" o "aerial" NO uses plan_route (BRouter no cubre trayectos no terrestres): ' .
+            'construye un GeoJSON LineString con solo dos coordenadas (origen y destino) y pásalo en geojson_data. ' .
+            'Ejemplo mínimo: {"type":"Feature","geometry":{"type":"LineString","coordinates":[[lon_origen,lat_origen],[lon_destino,lat_destino]]},"properties":{}}',
         [
             'type'       => 'object',
             'required'   => ['trip_id', 'transport_type'],
