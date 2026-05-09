@@ -635,7 +635,15 @@
     "trip_poi_fly_speed_slow": "Lenta",
     "trip_poi_fly_speed_normal": "Normal",
     "trip_poi_fly_speed_fast": "Rápida",
-    "preview": "Vista previa"
+    "preview": "Vista previa",
+    "appearance": "Apariencia",
+    "appearance_title": "Tema del Sitio Público",
+    "appearance_description": "Elegí el estilo visual del mapa público y las páginas de viajes. El cambio tiene efecto inmediatamente al guardar.",
+    "theme_active": "Activo",
+    "theme_classic_name": "Clásico",
+    "theme_classic_desc": "Interfaz clara, limpia y minimalista",
+    "theme_aurora_name": "Aurora",
+    "theme_aurora_desc": "Tema oscuro espacial con gradientes violeta y cian — edición 2026"
   },
   "original_settings": {
     "title": "Configuración del Sistema",

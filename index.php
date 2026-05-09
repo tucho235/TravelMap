@@ -54,6 +54,9 @@ if (session_status() === PHP_SESSION_NONE) {
     <!-- Custom MapLibre CSS -->
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?v=<?php echo $version; ?>">
     <?php endif; ?>
+    <?php $uiTheme = $settingsModel->get('ui_theme', 'classic'); if ($uiTheme !== 'classic'): ?>
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/themes/<?= htmlspecialchars($uiTheme) ?>.css?v=<?php echo $version; ?>">
+    <?php endif; ?>
     
     <?php 
     // Insertar código de analytics u otros scripts personalizados

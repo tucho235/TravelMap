@@ -209,6 +209,9 @@ $statsIcons = [
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/public_map.css?v=<?php echo $version; ?>">
     <!-- Trip Page Styles -->
     <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/trip.css?v=<?php echo $version; ?>">
+    <?php $uiTheme = $_settingsModel->get('ui_theme', 'classic'); if ($uiTheme !== 'classic'): ?>
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/themes/<?= htmlspecialchars($uiTheme) ?>.css?v=<?php echo $version; ?>">
+    <?php endif; ?>
 
     <style>
         :root {

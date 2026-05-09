@@ -40,7 +40,7 @@ $user_id = get_current_user_id();
     
     <!-- Admin CSS -->
     <link href="<?= ASSETS_URL ?>/css/admin.css?v=<?= $version ?>" rel="stylesheet">
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?= ASSETS_URL ?>/favicon.ico">
     

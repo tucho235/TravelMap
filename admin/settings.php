@@ -100,6 +100,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             'type' => 'boolean'
         ];
 
+        // UI Theme
+        $allowedThemes = ['classic', 'aurora'];
+        if (isset($_POST['ui_theme']) && in_array($_POST['ui_theme'], $allowedThemes)) {
+            $updates['ui_theme'] = [
+                'value' => $_POST['ui_theme'],
+                'type' => 'string'
+            ];
+        }
+
         // Colores de transporte
         $transportTypes = ['plane', 'ship', 'car', 'bike', 'train', 'walk', 'bus', 'aerial'];
         foreach ($transportTypes as $type) {
@@ -375,6 +384,17 @@ require_once __DIR__ . '/../includes/header.php';
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
             <?= __('settings.site') ?? 'Site' ?>
+        </button>
+    </li>
+    <li class="tab-item">
+        <button class="tab-link" data-tab="appearance">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2a10 10 0 0 1 0 20"></path>
+                <path d="M2 12h10"></path>
+                <path d="M12 2v10"></path>
+            </svg>
+            <?= __('settings.appearance') ?? 'Appearance' ?>
         </button>
     </li>
     <li class="tab-item">
@@ -1083,6 +1103,90 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
     
+    <!-- Appearance Tab -->
+    <div class="tab-content" id="tab-appearance">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a10 10 0 0 1 0 20"></path>
+                        <path d="M2 12h10"></path>
+                        <path d="M12 2v10"></path>
+                    </svg>
+                    <?= __('settings.appearance_title') ?? 'Public Site Theme' ?>
+                </h3>
+            </div>
+            <div class="admin-card-body">
+                <p style="font-size: 13px; color: var(--admin-text-muted); margin-bottom: 20px;">
+                    <?= __('settings.appearance_description') ?? 'Choose the visual style for the admin panel. The change takes effect immediately after saving.' ?>
+                </p>
+
+                <?php
+                $themes = [
+                    'classic' => [
+                        'name'        => __('settings.theme_classic_name') ?? 'Classic',
+                        'description' => __('settings.theme_classic_desc') ?? 'Clean and minimal light interface',
+                        'colors'      => ['#ffffff', '#f8fafc', '#1e293b', '#3b82f6'],
+                    ],
+                    'aurora' => [
+                        'name'        => __('settings.theme_aurora_name') ?? 'Aurora',
+                        'description' => __('settings.theme_aurora_desc') ?? 'Dark space theme with violet & cyan gradients — 2026 edition',
+                        'colors'      => ['#070b14', '#111827', '#7c3aed', '#06b6d4'],
+                    ],
+                ];
+                $currentTheme = $currentSettings['ui_theme'] ?? 'classic';
+                ?>
+
+                <input type="hidden" id="ui_theme" name="ui_theme" value="<?= htmlspecialchars($currentTheme) ?>">
+
+                <div class="theme-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <?php foreach ($themes as $themeKey => $themeInfo):
+                        $isActive = $themeKey === $currentTheme;
+                    ?>
+                    <label class="theme-card <?= $isActive ? 'active' : '' ?>"
+                           data-theme="<?= $themeKey ?>"
+                           style="cursor: pointer; border: 2px solid <?= $isActive ? 'var(--admin-primary-light, #475569)' : 'var(--admin-border)' ?>; border-radius: var(--radius-lg); padding: 16px; transition: all 0.2s; display: flex; flex-direction: column; gap: 12px;">
+
+                        <!-- Color swatch preview -->
+                        <div style="display: flex; gap: 6px; height: 56px; border-radius: calc(var(--radius-lg) - 4px); overflow: hidden;">
+                            <?php foreach ($themeInfo['colors'] as $i => $color): ?>
+                            <div style="flex: <?= $i === 0 ? '2' : '1' ?>; background: <?= $color ?>; border-radius: 4px;"></div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span style="font-size: 14px; font-weight: 600; color: var(--admin-text);">
+                                    <?= htmlspecialchars($themeInfo['name']) ?>
+                                </span>
+                                <?php if ($isActive): ?>
+                                <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: var(--admin-primary); color: white; white-space: nowrap;">
+                                    <?= __('settings.theme_active') ?? 'Active' ?>
+                                </span>
+                                <?php endif; ?>
+                            </div>
+                            <p style="font-size: 12px; color: var(--admin-text-muted); margin: 0; line-height: 1.4;">
+                                <?= htmlspecialchars($themeInfo['description']) ?>
+                            </p>
+                        </div>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
+
+                <style>
+                    .theme-card:hover {
+                        border-color: var(--admin-primary-light, #475569) !important;
+                        background: var(--admin-bg-alt);
+                    }
+                    .theme-card.active {
+                        box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.2);
+                    }
+                </style>
+            </div>
+        </div>
+    </div>
+
     <!-- Server Tab -->
     <div class="tab-content" id="tab-server">
         <?php
@@ -1463,6 +1567,20 @@ document.getElementById('session_lifetime').addEventListener('change', function(
 // Initialize values
 document.getElementById('max_upload_size').dispatchEvent(new Event('change'));
 document.getElementById('session_lifetime').dispatchEvent(new Event('change'));
+
+// Theme card selection
+document.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', function() {
+        const theme = this.dataset.theme;
+        document.getElementById('ui_theme').value = theme;
+        document.querySelectorAll('.theme-card').forEach(c => {
+            c.classList.remove('active');
+            c.style.borderColor = 'var(--admin-border)';
+        });
+        this.classList.add('active');
+        this.style.borderColor = 'var(--admin-primary-light, #475569)';
+    });
+});
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

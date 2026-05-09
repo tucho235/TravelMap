@@ -1,0 +1,664 @@
+/**
+ * Aurora — TravelMap Public Theme 2026
+ *
+ * Tendencias 2026: dark mode, gradientes violeta-índigo-cian,
+ * glassmorphism, glow borders, border-radius generoso.
+ *
+ * Este archivo solo sobreescribe selectores del sitio público
+ * (public_map.css, trip.css). El admin panel no se toca.
+ */
+
+/* ────────────────────────────────────────────────────────
+   VARIABLES GLOBALES
+   ──────────────────────────────────────────────────────── */
+:root {
+    --au-bg:          #070b14;
+    --au-bg-panel:    #0d1220;
+    --au-bg-card:     rgba(17, 24, 39, 0.92);
+    --au-bg-item:     rgba(15, 22, 36, 0.85);
+    --au-bg-hover:    rgba(124, 58, 237, 0.1);
+    --au-border:      rgba(139, 92, 246, 0.2);
+    --au-border-dark: rgba(139, 92, 246, 0.35);
+    --au-text:        #e2e8f0;
+    --au-text-muted:  #94a3b8;
+    --au-violet:      #7c3aed;
+    --au-blue:        #2563eb;
+    --au-gradient:    linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+}
+
+/* ────────────────────────────────────────────────────────
+   BASE BODY
+   ──────────────────────────────────────────────────────── */
+body {
+    background: var(--au-bg);
+}
+
+body.trip-page {
+    background: var(--au-bg) !important;
+    color: var(--au-text) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   FORM CONTROLS GLOBALES
+   ──────────────────────────────────────────────────────── */
+.form-control {
+    background-color: rgba(13, 20, 39, 0.8) !important;
+    border-color: var(--au-border) !important;
+    color: var(--au-text) !important;
+}
+
+.form-control:focus {
+    background-color: rgba(13, 20, 39, 0.95) !important;
+    border-color: rgba(124, 58, 237, 0.5) !important;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.15) !important;
+    color: var(--au-text) !important;
+}
+
+.form-control::placeholder {
+    color: rgba(148, 163, 184, 0.5) !important;
+}
+
+.form-check-label {
+    color: #cbd5e1 !important;
+}
+
+.form-check-input {
+    background-color: rgba(13, 20, 39, 0.7) !important;
+    border-color: var(--au-border) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--au-violet) !important;
+    border-color: var(--au-violet) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   CARDS Y LIST GROUPS GLOBALES
+   ──────────────────────────────────────────────────────── */
+.card {
+    background: var(--au-bg-card) !important;
+    border-color: var(--au-border) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.list-group-item {
+    background-color: var(--au-bg-item) !important;
+    border-color: var(--au-border) !important;
+    color: var(--au-text) !important;
+}
+
+.list-group-item:hover {
+    background-color: var(--au-bg-hover) !important;
+    color: #f1f5f9 !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   BOTONES GLOBALES
+   ──────────────────────────────────────────────────────── */
+.btn-primary {
+    background: var(--au-gradient) !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3) !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #1d4ed8 100%) !important;
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45) !important;
+}
+
+.btn-check:checked + .btn-outline-secondary {
+    background: var(--au-gradient) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   BOTÓN FLOTANTE PRINCIPAL
+   ──────────────────────────────────────────────────────── */
+.floating-menu-toggle {
+    background: var(--au-gradient) !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4) !important;
+    border-radius: 10px !important;
+}
+
+.floating-menu-toggle:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #1d4ed8 100%) !important;
+    box-shadow: 0 6px 24px rgba(124, 58, 237, 0.55) !important;
+    transform: translateY(-1px);
+}
+
+/* ────────────────────────────────────────────────────────
+   PANEL FLOTANTE DE CONTROLES
+   ──────────────────────────────────────────────────────── */
+.floating-controls {
+    background: rgba(13, 18, 36, 0.94) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid var(--au-border) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(139,92,246,0.08) !important;
+    border-radius: 12px !important;
+}
+
+/* Performance mode: mantener fondo oscuro */
+body.performance-mode .floating-controls,
+body.performance-mode .legend-card {
+    background: rgba(13, 18, 36, 0.97) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.performance-mode .offcanvas {
+    background: var(--au-bg-panel) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   OFFCANVAS — PANEL LATERAL
+   ──────────────────────────────────────────────────────── */
+.offcanvas {
+    background-color: var(--au-bg-panel) !important;
+    border-right: 1px solid var(--au-border) !important;
+}
+
+.offcanvas-header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #1a3050 100%) !important;
+    border-bottom: 1px solid var(--au-border-dark) !important;
+    color: #f1f5f9 !important;
+}
+
+.offcanvas-title {
+    color: #f1f5f9 !important;
+}
+
+.offcanvas-body {
+    background: transparent !important;
+    color: var(--au-text) !important;
+}
+
+/* Separadores dentro del offcanvas */
+.offcanvas hr {
+    border-color: var(--au-border) !important;
+}
+
+/* Toggles dentro del offcanvas */
+.offcanvas .form-check-input:checked {
+    background-color: var(--au-violet) !important;
+    border-color: var(--au-violet) !important;
+}
+
+.offcanvas .form-switch .form-check-input:checked {
+    background-color: var(--au-violet) !important;
+}
+
+.offcanvas .form-check-input:focus {
+    border-color: rgba(124, 58, 237, 0.5) !important;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.2) !important;
+}
+
+/* Botones dentro del offcanvas */
+.offcanvas .btn-outline-primary {
+    color: #a78bfa !important;
+    border-color: var(--au-border-dark) !important;
+}
+
+.offcanvas .btn-outline-primary:hover {
+    background: var(--au-gradient) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+.offcanvas .btn-outline-secondary {
+    color: var(--au-text-muted) !important;
+    border-color: var(--au-border) !important;
+}
+
+.offcanvas .btn-outline-secondary:hover {
+    background: var(--au-bg-hover) !important;
+    color: #c4b5fd !important;
+    border-color: var(--au-border-dark) !important;
+}
+
+/* Form controls dentro del offcanvas */
+.offcanvas .form-control,
+.offcanvas .form-select {
+    background: rgba(13, 20, 39, 0.8) !important;
+    border-color: var(--au-border) !important;
+    color: var(--au-text) !important;
+}
+
+.offcanvas .form-control:focus,
+.offcanvas .form-select:focus {
+    border-color: rgba(124, 58, 237, 0.5) !important;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.15) !important;
+    background: rgba(13, 20, 39, 0.95) !important;
+}
+
+.offcanvas .input-group-text {
+    background: rgba(13, 20, 39, 0.7) !important;
+    border-color: var(--au-border) !important;
+    color: var(--au-text-muted) !important;
+}
+
+/* Badges dentro del offcanvas */
+.offcanvas .badge.bg-secondary {
+    background: rgba(139, 92, 246, 0.2) !important;
+    color: #c4b5fd !important;
+}
+
+.offcanvas .badge.bg-light {
+    background: rgba(139, 92, 246, 0.15) !important;
+    color: #a78bfa !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   GRUPOS DE AÑO
+   ──────────────────────────────────────────────────────── */
+.year-group {
+    background: transparent !important;
+}
+
+.year-group.year-future {
+    background: rgba(10, 16, 30, 0.5) !important;
+    border-left-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.year-header {
+    background: rgba(20, 30, 55, 0.9) !important;
+    border-bottom-color: var(--au-border) !important;
+}
+
+.year-future .year-header {
+    background: rgba(15, 23, 42, 0.9) !important;
+}
+
+.year-toggle-btn {
+    color: #e2e8f0 !important;
+}
+
+.year-toggle-btn:hover {
+    background: var(--au-bg-hover) !important;
+}
+
+.year-chevron {
+    color: #a78bfa !important;
+}
+
+.year-label svg {
+    color: #a78bfa !important;
+}
+
+.year-count {
+    background: rgba(124, 58, 237, 0.6) !important;
+    color: white !important;
+}
+
+.year-future .year-count {
+    background: rgba(100, 116, 139, 0.5) !important;
+}
+
+.year-stats {
+    color: var(--au-text-muted) !important;
+}
+
+.year-header .year-checkbox:checked {
+    background-color: var(--au-violet) !important;
+    border-color: var(--au-violet) !important;
+}
+
+.year-header .year-checkbox:indeterminate {
+    background-color: rgba(124, 58, 237, 0.5) !important;
+    border-color: rgba(124, 58, 237, 0.5) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   TRIP FILTER ITEMS
+   ──────────────────────────────────────────────────────── */
+.trip-filter-item {
+    background: transparent !important;
+    border-bottom-color: var(--au-border) !important;
+}
+
+.trip-filter-item:hover {
+    background: var(--au-bg-hover) !important;
+}
+
+.trip-filter-item.trip-future {
+    background: rgba(10, 16, 30, 0.4) !important;
+}
+
+.trip-filter-item.trip-future:hover {
+    background: var(--au-bg-hover) !important;
+}
+
+.trip-title {
+    color: #e2e8f0 !important;
+}
+
+.trip-counts {
+    color: var(--au-text-muted) !important;
+}
+
+.trip-page-link {
+    color: var(--au-text-muted) !important;
+}
+
+.trip-page-link:hover {
+    color: #a78bfa !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   BOTONES DE FILTRO Y AGRUPACIÓN
+   ──────────────────────────────────────────────────────── */
+.filter-btn {
+    background: rgba(13, 20, 39, 0.7) !important;
+    border-color: var(--au-border) !important;
+    color: var(--au-text-muted) !important;
+}
+
+.filter-btn:hover {
+    background: var(--au-bg-hover) !important;
+    color: #c4b5fd !important;
+    border-color: var(--au-border-dark) !important;
+}
+
+.filter-btn.active {
+    background: var(--au-gradient) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+.group-by-selector .btn-group .btn {
+    background: transparent !important;
+    border-color: var(--au-border) !important;
+    color: var(--au-text-muted) !important;
+}
+
+.group-by-selector .btn-group .btn:hover {
+    background: var(--au-bg-hover) !important;
+    color: #c4b5fd !important;
+}
+
+.group-by-selector .btn-check:checked + .btn {
+    background: rgba(124, 58, 237, 0.6) !important;
+    border-color: var(--au-violet) !important;
+    color: white !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   LEGEND CARD
+   ──────────────────────────────────────────────────────── */
+.legend-card {
+    background: rgba(13, 18, 36, 0.94) !important;
+    border-color: var(--au-border) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.legend-future-separator {
+    border-top-color: var(--au-border) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   MAP FOOTER
+   ──────────────────────────────────────────────────────── */
+.map-footer {
+    background: rgba(7, 11, 20, 0.94) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-top-color: var(--au-border) !important;
+    color: var(--au-text-muted) !important;
+}
+
+.map-footer .github-link {
+    color: var(--au-text-muted) !important;
+}
+
+.map-footer .github-link:hover {
+    color: #a78bfa !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   MAP POPUPS
+   ──────────────────────────────────────────────────────── */
+.maplibregl-popup-content {
+    background: rgba(13, 18, 36, 0.97) !important;
+    color: var(--au-text) !important;
+    border: 1px solid var(--au-border) !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+}
+
+.maplibregl-popup-tip {
+    border-top-color: rgba(13, 18, 36, 0.97) !important;
+    border-bottom-color: rgba(13, 18, 36, 0.97) !important;
+}
+
+.maplibregl-popup-close-button {
+    color: var(--au-text-muted) !important;
+}
+
+.maplibregl-popup-close-button:hover {
+    background: var(--au-bg-hover) !important;
+    color: #c4b5fd !important;
+}
+
+/* Popup content text */
+.popup-title {
+    color: #f1f5f9 !important;
+}
+
+.popup-link-btn {
+    background: rgba(139, 92, 246, 0.12) !important;
+}
+
+.popup-link-btn:hover {
+    background: rgba(124, 58, 237, 0.25) !important;
+}
+
+/* Leaflet popups */
+.leaflet-container .custom-popup .leaflet-popup-content-wrapper {
+    background: rgba(13, 18, 36, 0.97) !important;
+    border: 1px solid var(--au-border) !important;
+    color: var(--au-text) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   MAPLIBRE GL CONTROLS
+   ──────────────────────────────────────────────────────── */
+.maplibregl-ctrl-group {
+    background: rgba(13, 18, 36, 0.9) !important;
+    border: 1px solid var(--au-border) !important;
+    backdrop-filter: blur(8px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+}
+
+.maplibregl-ctrl-group button {
+    background: transparent !important;
+    border-bottom: 1px solid var(--au-border) !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+    background: var(--au-bg-hover) !important;
+}
+
+.maplibregl-ctrl-group button:active {
+    background: rgba(124, 58, 237, 0.2) !important;
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: brightness(0) invert(1) opacity(0.7) !important;
+}
+
+.maplibregl-ctrl-group button:hover .maplibregl-ctrl-icon {
+    filter: brightness(0) invert(1) opacity(1) !important;
+}
+
+.maplibregl-ctrl-attrib {
+    background: rgba(7, 11, 20, 0.85) !important;
+    color: var(--au-text-muted) !important;
+}
+
+.maplibregl-ctrl-attrib a {
+    color: #a78bfa !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   SEARCH RESULTS
+   ──────────────────────────────────────────────────────── */
+#publicSearchResults {
+    background: rgba(13, 18, 36, 0.98) !important;
+    border-color: var(--au-border) !important;
+}
+
+#publicSearchResults .list-group-item:hover {
+    background: var(--au-bg-hover) !important;
+}
+
+#publicPlaceSearch:focus {
+    border-color: rgba(124, 58, 237, 0.5) !important;
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.15) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   LOGIN PAGE (acceso con contraseña)
+   ──────────────────────────────────────────────────────── */
+.login-card {
+    background: var(--au-bg-card) !important;
+    border-color: var(--au-border) !important;
+    color: var(--au-text) !important;
+}
+
+.login-header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #1a3050 100%) !important;
+    border-bottom-color: var(--au-border-dark) !important;
+}
+
+.login-footer {
+    background: rgba(13, 20, 39, 0.6) !important;
+    border-top-color: var(--au-border) !important;
+    color: var(--au-text-muted) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   TRIP PAGE — SIDEBAR
+   ──────────────────────────────────────────────────────── */
+.trip-details {
+    background: var(--au-bg-panel) !important;
+    border-right: 1px solid var(--au-border) !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4) !important;
+}
+
+.trip-header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%) !important;
+    border-bottom: 1px solid var(--au-border-dark) !important;
+}
+
+.trip-resizer {
+    background: rgba(139, 92, 246, 0.15) !important;
+}
+
+.trip-resizer:hover,
+.trip-resizer.is-resizing {
+    background: rgba(139, 92, 246, 0.35) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   TRIP PAGE — CONTENIDO (body, descripción, timeline)
+   ──────────────────────────────────────────────────────── */
+.trip-description {
+    color: #b0bec5 !important;
+    scrollbar-color: rgba(139, 92, 246, 0.3) transparent !important;
+}
+
+.trip-description::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Routes en timeline */
+.timeline-route-item {
+    background: rgba(15, 22, 36, 0.8) !important;
+    border-color: var(--au-border) !important;
+}
+
+.route-color-dot {
+    box-shadow: 0 0 0 2px rgba(13, 18, 36, 1), 0 1px 3px rgba(0,0,0,0.4) !important;
+}
+
+.route-name {
+    color: #e2e8f0 !important;
+}
+
+.route-datetime,
+.route-description {
+    color: var(--au-text-muted) !important;
+}
+
+/* Timeline points */
+.timeline-point:hover {
+    background-color: var(--au-bg-hover) !important;
+}
+
+.timeline-point.active {
+    background-color: color-mix(in srgb, var(--trip-color, #7c3aed) 15%, rgba(13,18,36,0.9)) !important;
+    border-color: color-mix(in srgb, var(--trip-color, #7c3aed) 40%, transparent) !important;
+}
+
+.timeline-point.timeline-route {
+    background: rgba(20, 28, 50, 0.8) !important;
+    border-color: var(--au-border) !important;
+}
+
+.point-title {
+    color: #e2e8f0 !important;
+}
+
+/* Point link buttons */
+.point-link-btn {
+    background: rgba(139, 92, 246, 0.12) !important;
+}
+
+.point-link-btn:hover {
+    background: rgba(124, 58, 237, 0.25) !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   TRIP PAGE — MEDIA CAROUSEL
+   ──────────────────────────────────────────────────────── */
+.trip-media {
+    background: rgba(10, 15, 28, 0.95) !important;
+    border-top-color: var(--au-border) !important;
+}
+
+.carousel-nav {
+    background: rgba(13, 18, 36, 0.9) !important;
+    border-color: var(--au-border) !important;
+    color: #e2e8f0 !important;
+}
+
+.carousel-nav:hover {
+    background: rgba(124, 58, 237, 0.3) !important;
+    border-color: var(--au-border-dark) !important;
+    color: white !important;
+}
+
+/* ────────────────────────────────────────────────────────
+   SCROLLBAR GLOBAL
+   ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--au-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(139, 92, 246, 0.55);
+}

@@ -660,7 +660,15 @@
     "trip_poi_fly_speed_slow": "Slow",
     "trip_poi_fly_speed_normal": "Normal",
     "trip_poi_fly_speed_fast": "Fast",
-    "preview": "Preview"
+    "preview": "Preview",
+    "appearance": "Appearance",
+    "appearance_title": "Public Site Theme",
+    "appearance_description": "Choose the visual style for the public map and trip pages. The change takes effect immediately after saving.",
+    "theme_active": "Active",
+    "theme_classic_name": "Classic",
+    "theme_classic_desc": "Clean and minimal light interface",
+    "theme_aurora_name": "Aurora",
+    "theme_aurora_desc": "Dark space theme with violet & cyan gradients — 2026 edition"
   },
   "auth": {
     "login": "Login",
